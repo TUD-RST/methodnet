@@ -1,0 +1,53 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html><head lang="en">
+
+<!-- this template was orignially based on https://github.com/fsfw-dresden/ldap-dingens -->
+
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no" />
+    <link type="text/css" rel="stylesheet" href="{% static 'ackbas_core/bootstrap.css' %}">
+    <link type="text/css" rel="stylesheet" href="{% static 'ackbas_core/style.css' %}">
+
+    <link rel="icon" type="image/png"       href="{% static 'ackbas_core/img/favicon.png' %}">
+
+    {# assume that the http status code is available in the context_data (there is a middleware for this) #}
+    {{ http_status_code|json_script:"http_status_code" }}
+
+    <!-- utc_template_name={{template_name}}-->
+
+    <title>Automatic Control Knowledge Repository</title>
+</head>
+<body>
+<script>0</script> <!--prevent flash of unstyled content-->
+<div class="container">
+    <div class="row">
+        <div class="col-md-8 col-md-offset-2">
+        <h1><a href="/">Automatic Control Knowledge Based Assistance System</a></h1>
+
+<!-- block content-->
+{% block content %}
+{% endblock  %}
+<!-- /block content-->
+        </div>
+    </div>
+</div>
+
+
+
+<footer>
+
+<div class="container">
+<div class="row">
+    <div class="col-md-8 col-md-offset-2">
+<!-- include footer-->
+       {% include "ackbas_core/footer.html"%}
+<!-- / include footer-->
+    </div>
+</div>
+</div>
+</footer>
+
+</body></html>

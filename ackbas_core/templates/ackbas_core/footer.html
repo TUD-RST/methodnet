@@ -1,0 +1,21 @@
+{% load i18n %}
+{% load extra_filters %}
+
+<hr class="hr_style_gradient opacity30">
+<div class="box_base box_footer">
+
+    <div class="box_footer_text modest_links">
+    This web site is powered by the free software
+    <a href="/">ackbas_core</a> in version {{"foobar"|get_version}}.
+    <br>
+    Last deployment was on {{"foobar"|get_last_deployment}}.
+    </div>
+
+    <div class="footer_link_menu">
+        <!-- !!hcl_de -->
+    <a href="{% url 'imprint-page' %}">{% trans "Legal Notice" %}</a> |
+    <a href="{% url 'privacy-page' %}">{% trans "Privacy" %}</a> |
+    <a href="{% url 'contact-page' %}">{% trans "Contact" %}</a>
+    </div>
+</div>
+<br>

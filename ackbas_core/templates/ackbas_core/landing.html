@@ -1,0 +1,14 @@
+{% extends "ackbas_core/base.html" %}
+
+{% block content %}
+
+{# for unit and integration testing: write the actual number of entities into the html code #}
+{{ nr_of_entities|json_script:"nr_of_entities" }}
+
+<h3>General Information</h3>
+<p>
+    This page is a very early prototype of the <b>ackbas-webservice</b> which is currently under construction.
+</p>
+
+
+{% endblock  %}
