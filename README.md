@@ -11,4 +11,6 @@ Disclaimer: This software is still in early stage of development and not yet off
 
 ## Development
 
-
+- uses NPM for management of Javascript libraries
+- Webpack builds bundle that is finally served as `/static/ackbas_core/main.js`
+- run `npx webpack` after changing `ackbas_core/js/index.js`

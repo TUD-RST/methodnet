@@ -11,3 +11,10 @@ class LandingPageView(View):
         context = {"title": "Landing Page"}
 
         return TemplateResponse(request, "ackbas_core/landing.html", context)
+
+
+class TestGraphView(View):
+    def get(self, request):
+        context = {}
+
+        return TemplateResponse(request, "ackbas_core/testgraph.html", context)

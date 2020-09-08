@@ -1,0 +1,28 @@
+{
+  "name": "ackbas_web",
+  "version": "1.0.0",
+  "description": "This repository contains software which aims to support problem solving in the field of automatic control by providing suitable access to domain specific knowledge, e.g. in form of a method-network.",
+  "private": true,
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@gitlab.hrz.tu-chemnitz.de:tud-rst/knowledge-representation/ackbas_web.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@egjs/hammerjs": "^2.0.17",
+    "keycharm": "^0.3.1",
+    "timsort": "^0.3.0",
+    "uuid": "^8.3.0",
+    "vis-data": "^7.0.0",
+    "vis-network": "^8.3.2",
+    "vis-util": "^4.3.4"
+  },
+  "devDependencies": {
+    "webpack": "^4.44.1",
+    "webpack-cli": "^3.3.12"
+  }
+}

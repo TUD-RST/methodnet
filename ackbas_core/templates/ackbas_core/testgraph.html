@@ -1,0 +1,18 @@
+{% extends "ackbas_core/base.html" %}
+{% load static %}
+
+{% block content %}
+
+<style type="text/css">
+    #mynetwork {
+      width: 600px;
+      height: 400px;
+      border: 1px solid lightgray;
+    }
+</style>
+
+<div id="mynetwork"></div>
+
+<script type="text/javascript" src="{% static 'ackbas_core/main.js' %}"></script>
+
+{% endblock  %}
