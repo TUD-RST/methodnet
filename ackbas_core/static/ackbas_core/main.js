@@ -98,16 +98,6 @@ var ackbas =
 
 Object.defineProperty(exports, "__esModule", { value: true });
 var vis = __webpack_require__(/*! vis-network/standalone */ "./node_modules/vis-network/standalone/index.js");
-var NodeSpec = /** @class */ (function () {
-    function NodeSpec() {
-    }
-    return NodeSpec;
-}());
-var EdgeSpec = /** @class */ (function () {
-    function EdgeSpec() {
-    }
-    return EdgeSpec;
-}());
 function initGraph(graphData) {
     var labelToId = new Map();
     // create an array with nodes
@@ -118,7 +108,11 @@ function initGraph(graphData) {
         var newNode = {
             id: id,
             label: type,
-            shape: "ellipse"
+            shape: "ellipse",
+            color: {
+                border: '#61ff74',
+                background: '#bef7c5'
+            }
         };
         nodes.push(newNode);
         labelToId.set(type, id);
@@ -144,7 +138,8 @@ function initGraph(graphData) {
         var newEdge = {
             from: id1,
             to: id2,
-            arrows: 'to'
+            arrows: 'to',
+            color: '#2B7CE9'
         };
         edges.push(newEdge);
     }
@@ -156,7 +151,8 @@ function initGraph(graphData) {
             from: id1,
             to: id2,
             arrows: 'to',
-            dashes: true
+            dashes: true,
+            color: '#2B7CE9'
         };
         edges.push(newEdge);
     }
@@ -166,7 +162,15 @@ function initGraph(graphData) {
         nodes: nodes,
         edges: edges
     };
-    var options = {};
+    var options = {
+        physics: {
+            barnesHut: {
+                avoidOverlap: 0.1,
+                springConstant: 0.02,
+                springLength: 150 // default 95
+            }
+        }
+    };
     var network = new vis.Network(container, data, options);
 }
 // make function globally available

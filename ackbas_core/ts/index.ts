@@ -8,17 +8,22 @@ interface GraphData {
     deriveEdges: [string, string][]
 }
 
-class NodeSpec {
+interface NodeSpec {
     id: number
     label: string
-    shape: 'ellipse' | 'box'
+    shape?: 'ellipse' | 'box'
+    color?: {
+        border: string
+        background: string
+    }
 }
 
-class EdgeSpec {
+interface EdgeSpec {
     from: number
     to: number
     arrows: string
     dashes?: boolean
+    color?: string
 }
 
 function initGraph(graphData: GraphData) {
@@ -33,7 +38,11 @@ function initGraph(graphData: GraphData) {
         let newNode: NodeSpec = {
             id: id,
             label: type,
-            shape: "ellipse"
+            shape: "ellipse",
+            color: {
+                border: '#61ff74',
+                background: '#bef7c5'
+            }
         }
         nodes.push(newNode)
         labelToId.set(type, id)
@@ -61,7 +70,8 @@ function initGraph(graphData: GraphData) {
         let newEdge: EdgeSpec = {
             from: id1,
             to: id2,
-            arrows: 'to'
+            arrows: 'to',
+            color: '#2B7CE9'
         }
 
         edges.push(newEdge)
@@ -75,7 +85,8 @@ function initGraph(graphData: GraphData) {
             from: id1,
             to: id2,
             arrows: 'to',
-            dashes: true
+            dashes: true,
+            color: '#2B7CE9'
         }
 
         edges.push(newEdge)
@@ -87,7 +98,15 @@ function initGraph(graphData: GraphData) {
         nodes: nodes,
         edges: edges
     }
-    let options = {}
+    let options: vis.Options = {
+        physics: {
+            barnesHut: {
+                avoidOverlap: 0.1, // default 0
+                springConstant: 0.02,  // default 0.04
+                springLength: 150 // default 95
+            }
+        }
+    }
     let network = new vis.Network(container, data, options)
 }
 
