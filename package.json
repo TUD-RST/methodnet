@@ -4,7 +4,8 @@
   "description": "This repository contains software which aims to support problem solving in the field of automatic control by providing suitable access to domain specific knowledge, e.g. in form of a method-network.",
   "private": true,
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "npx webpack",
+    "start:dev": "npx webpack-dev-server --open"
   },
   "repository": {
     "type": "git",
@@ -22,7 +23,11 @@
     "vis-util": "^4.3.4"
   },
   "devDependencies": {
+    "awesome-typescript-loader": "^5.2.1",
+    "source-map-loader": "^1.1.0",
+    "typescript": "^4.0.2",
     "webpack": "^4.44.1",
-    "webpack-cli": "^3.3.12"
+    "webpack-cli": "^3.3.12",
+    "webpack-dev-server": "^3.11.0"
   }
 }
