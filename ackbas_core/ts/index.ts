@@ -1,32 +1,94 @@
-import { Network, DataSet } from "vis-network/standalone";
+import * as vis from "vis-network/standalone";
+import { Edge } from "vis-network/standalone";
 
-function initGraph() {
+interface GraphData {
+    types: string[],
+    methods: string[],
+    flowEdges: [string, string][]
+    deriveEdges: [string, string][]
+}
+
+class NodeSpec {
+    id: number
+    label: string
+    shape: 'ellipse' | 'box'
+}
+
+class EdgeSpec {
+    from: number
+    to: number
+    arrows: string
+    dashes?: boolean
+}
+
+function initGraph(graphData: GraphData) {
+    let labelToId: Map<string, number> = new Map()
+
     // create an array with nodes
-    let nodes = new DataSet([
-        {id: 1, label: 'Node 1'},
-        {id: 2, label: 'Node 2'},
-        {id: 3, label: 'Node 3'},
-        {id: 4, label: 'Node 4'},
-        {id: 5, label: 'Node 5'}
-    ]);
+    let nodes: NodeSpec[] = []
+
+    let id = 1
+
+    for (let type of graphData.types) {
+        let newNode: NodeSpec = {
+            id: id,
+            label: type,
+            shape: "ellipse"
+        }
+        nodes.push(newNode)
+        labelToId.set(type, id)
+        id++
+    }
+
+    for (let method of graphData.methods) {
+        let newNode: NodeSpec = {
+            id: id,
+            label: method,
+            shape: "box"
+        }
+        nodes.push(newNode)
+        labelToId.set(method, id)
+        id++
+    }
 
     // create an array with edges
-    let edges = new DataSet([
-        {id: 1, from: 1, to: 3},
-        {id: 2, from: 1, to: 2},
-        {id: 3, from: 2, to: 4},
-        {id: 4, from: 2, to: 5},
-        {id: 5, from: 3, to: 3}
-    ]);
+    let edges: EdgeSpec[] = []
+
+    for (let labels of graphData.flowEdges) {
+        let id1 = labelToId.get(labels[0])
+        let id2 = labelToId.get(labels[1])
+
+        let newEdge: EdgeSpec = {
+            from: id1,
+            to: id2,
+            arrows: 'to'
+        }
+
+        edges.push(newEdge)
+    }
+
+    for (let labels of graphData.deriveEdges) {
+        let id1 = labelToId.get(labels[0])
+        let id2 = labelToId.get(labels[1])
+
+        let newEdge: EdgeSpec = {
+            from: id1,
+            to: id2,
+            arrows: 'to',
+            dashes: true
+        }
+
+        edges.push(newEdge)
+    }
 
     // create a network
-    let container = document.getElementById('mynetwork');
+    let container = document.getElementById('mynetwork')
     let data = {
         nodes: nodes,
         edges: edges
-    };
-    let options = {};
-    let network = new Network(container, data, options);
+    }
+    let options = {}
+    let network = new vis.Network(container, data, options)
 }
 
 // make function globally available

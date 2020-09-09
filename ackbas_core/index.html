@@ -17,8 +17,19 @@
 <body>
 
 <script type="text/javascript">
+    graphData = {
+        methods: ['M1', 'M2'],
+        types: ['T1', 'T2', 'T3', 'T4', 'T5'],
+        flowEdges: [['T1', 'M1'],
+                ['M1', 'T3'],
+                ['T3', 'M2'],
+                ['T2', 'M2'],
+                ['M2', 'T4']],
+        deriveEdges: [['T5', 'T3']]
+    };
+
     window.onload = function() {
-        initGraph();
+        initGraph(graphData);
     }
 </script>
 

@@ -5,14 +5,22 @@
 
 <style type="text/css">
     #mynetwork {
-      width: 600px;
-      height: 400px;
+      width: 800px;
+      height: 600px;
       border: 1px solid lightgray;
     }
 </style>
 
-<div id="mynetwork"></div>
-
 <script type="text/javascript" src="{% static 'ackbas_core/main.js' %}"></script>
+
+<script type="text/javascript">
+  graphData = {{ graph_data }}
+
+  window.onload = function() {
+      initGraph(graphData);
+  }
+</script>
+
+<div id="mynetwork"></div>
 
 {% endblock  %}
