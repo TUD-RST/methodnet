@@ -29,8 +29,8 @@ function initGraph(graphData: GraphData) {
     for (let type of graphData.types) {
         let newNode: vis.Node = {
             id: id,
-            label: type + "\n",
-            shape: "dot",
+            label: "     " + type + "     ",
+            shape: "ellipse",
             color: {
                 border: '#61ff74',
                 background: '#bef7c5'
