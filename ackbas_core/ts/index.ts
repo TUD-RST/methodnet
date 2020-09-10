@@ -26,6 +26,8 @@ interface EdgeSpec {
     color?: string
 }
 
+let network: vis.Network
+
 function initGraph(graphData: GraphData) {
     let labelToId: Map<string, number> = new Map()
 
@@ -107,9 +109,27 @@ function initGraph(graphData: GraphData) {
             }
         }
     }
-    let network = new vis.Network(container, data, options)
+    network = new vis.Network(container, data, options)
+}
+
+function stopPhysics() {
+    network.setOptions({
+        physics: {
+            enabled: false
+        }
+    })
+}
+
+function startPhysics() {
+    network.setOptions({
+        physics: {
+            enabled: true
+        }
+    })
 }
 
 // make function globally available
 // https://stackoverflow.com/questions/12709074/how-do-you-explicitly-set-a-new-property-on-window-in-typescript
-(<any>window).initGraph = initGraph
+(<any>window).initGraph = initGraph;
+(<any>window).stopPhysics = stopPhysics;
+(<any>window).startPhysics = startPhysics;

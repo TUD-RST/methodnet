@@ -98,6 +98,7 @@ var ackbas =
 
 Object.defineProperty(exports, "__esModule", { value: true });
 var vis = __webpack_require__(/*! vis-network/standalone */ "./node_modules/vis-network/standalone/index.js");
+var network;
 function initGraph(graphData) {
     var labelToId = new Map();
     // create an array with nodes
@@ -171,11 +172,27 @@ function initGraph(graphData) {
             }
         }
     };
-    var network = new vis.Network(container, data, options);
+    network = new vis.Network(container, data, options);
+}
+function stopPhysics() {
+    network.setOptions({
+        physics: {
+            enabled: false
+        }
+    });
+}
+function startPhysics() {
+    network.setOptions({
+        physics: {
+            enabled: true
+        }
+    });
 }
 // make function globally available
 // https://stackoverflow.com/questions/12709074/how-do-you-explicitly-set-a-new-property-on-window-in-typescript
 window.initGraph = initGraph;
+window.stopPhysics = stopPhysics;
+window.startPhysics = startPhysics;
 
 
 /***/ }),
