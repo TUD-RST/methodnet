@@ -8,16 +8,6 @@ interface GraphData {
     deriveEdges: [string, string][]
 }
 
-interface NodeSpec {
-    id: number
-    label: string
-    shape?: 'ellipse' | 'box'
-    color?: {
-        border: string
-        background: string
-    }
-}
-
 interface EdgeSpec {
     from: number
     to: number
@@ -32,19 +22,20 @@ function initGraph(graphData: GraphData) {
     let labelToId: Map<string, number> = new Map()
 
     // create an array with nodes
-    let nodes: NodeSpec[] = []
+    let nodes: vis.Node[] = []
 
     let id = 1
 
     for (let type of graphData.types) {
-        let newNode: NodeSpec = {
+        let newNode: vis.Node = {
             id: id,
-            label: type,
-            shape: "ellipse",
+            label: type + "\n",
+            shape: "dot",
             color: {
                 border: '#61ff74',
                 background: '#bef7c5'
-            }
+            },
+            size: 15
         }
         nodes.push(newNode)
         labelToId.set(type, id)
@@ -52,10 +43,13 @@ function initGraph(graphData: GraphData) {
     }
 
     for (let method of graphData.methods) {
-        let newNode: NodeSpec = {
+        let newNode: vis.Node = {
             id: id,
             label: method,
-            shape: "box"
+            shape: "box",
+            color: {
+                background: '#e6f0ff'
+            }
         }
         nodes.push(newNode)
         labelToId.set(method, id)
