@@ -26,13 +26,13 @@ class TestGraphView(View):
             'methods': [],
             'concreteTypes': [],
             'abstractTypes': [],
+            'demuxes': [],
             'edges': []
         }
 
         included_type_bindings: List[kg.RTTypeBinding] = []
 
         rtgraph = kg.RTGraph('new_types.yml')
-        edge_id = 1
         for method in rtgraph.methods.values():
             graph_data['methods'].append({
                 'id': method.id,
@@ -56,21 +56,35 @@ class TestGraphView(View):
 
             for type_binding in method.inputs:
                 graph_data['edges'].append({
-                    'id': edge_id,
                     'fromId': type_binding.id,
                     'toId': method.id
                 })
-                edge_id += 1
 
             for output_option in method.outputs:
-                assert len(output_option) == 1, 'Output options with multiple types not supported yet'
-                type_binding = output_option[0]
-                graph_data['edges'].append({
-                    'id': edge_id,
-                    'fromId': method.id,
-                    'toId': type_binding.id
-                })
-                edge_id += 1
+                if len(output_option) > 1:
+                    # we need a demux
+                    demux_id = rtgraph.node_id
+                    graph_data['demuxes'].append({
+                        'id': demux_id
+                    })
+                    rtgraph.node_id += 1
+
+                    graph_data['edges'].append({
+                        'fromId': method.id,
+                        'toId': demux_id
+                    })
+
+                    for type_binding in output_option:
+                        graph_data['edges'].append({
+                            'fromId': demux_id,
+                            'toId': type_binding.id
+                        })
+                else:
+                    type_binding = output_option[0]
+                    graph_data['edges'].append({
+                        'fromId': method.id,
+                        'toId': type_binding.id
+                    })
 
         # !!!! this is O(n^2) !!!!
         for type_binding in included_type_bindings:
@@ -80,11 +94,9 @@ class TestGraphView(View):
 
                 if type_binding.is_subsumed_by(other_type_binding):
                     graph_data['edges'].append({
-                        'id': edge_id,
                         'fromId': type_binding.id,
                         'toId': other_type_binding.id
                     })
-                    edge_id += 1
 
         graph_data_json = json.dumps(graph_data)
 

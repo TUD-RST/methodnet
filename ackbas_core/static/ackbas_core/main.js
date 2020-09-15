@@ -143,10 +143,23 @@ function initGraph(graphData) {
         };
         nodes.push(newNode);
     }
+    for (var _f = 0, _g = graphData.demuxes; _f < _g.length; _f++) {
+        var demux = _g[_f];
+        var newNode = {
+            id: demux.id,
+            shape: "square",
+            color: {
+                background: "black",
+                border: "black"
+            },
+            size: 10
+        };
+        nodes.push(newNode);
+    }
     // create an array with edges
     var edges = [];
-    for (var _f = 0, _g = graphData.edges; _f < _g.length; _f++) {
-        var edge = _g[_f];
+    for (var _h = 0, _j = graphData.edges; _h < _j.length; _h++) {
+        var edge = _j[_h];
         var newEdge = {
             //id: edge.id,
             from: edge.fromId,

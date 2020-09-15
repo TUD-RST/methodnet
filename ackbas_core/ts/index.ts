@@ -16,8 +16,10 @@ interface GraphData {
         name: string
         description: string
     }[]
-    edges: {
+    demuxes: {
         id: number
+    }[]
+    edges: {
         fromId: number
         toId: number
     }[]
@@ -65,6 +67,19 @@ function initGraph(graphData: GraphData) {
             color: {
                 background: '#e6f0ff'
             }
+        }
+        nodes.push(newNode)
+    }
+
+    for (let demux of graphData.demuxes) {
+        let newNode: vis.Node = {
+            id: demux.id,
+            shape: "square",
+            color: {
+                background: "black",
+                border: "black"
+            },
+            size: 10
         }
         nodes.push(newNode)
     }

@@ -71,18 +71,18 @@ class RTGraph:
 
             self.types[type_name] = RTTypeDefinition(type_name, description, type_params)
 
-        node_id = 1
+        self.node_id = 1
         concrete_type_bindings: List[RTTypeBinding] = []
 
         def get_type_binding_instance(type_name: str, param_values: List[str]):
-            nonlocal node_id
             type_def = self.types[type_name]
-            new_binding_instance = RTTypeBinding(node_id, type_def, param_values)
-            node_id += 1
+            new_binding_instance = RTTypeBinding(self.node_id, type_def, param_values)
+            self.node_id += 1
 
             if new_binding_instance.is_concrete:
                 for binding in concrete_type_bindings:
-                    if binding == new_binding_instance:
+                    if binding.type_def == new_binding_instance.type_def and all(b_val == nb_val for b_val, nb_val in zip(binding.param_values, new_binding_instance.param_values)):
+                        self.node_id -= 1  # reset node id to not have gaps
                         return binding
                 else:
                     concrete_type_bindings.append(new_binding_instance)
@@ -97,8 +97,8 @@ class RTGraph:
             outputs = [[get_type_binding_instance(output_type_name, param_values) for output_type_name, param_values in
                       output_option_dict.items()] for output_option_dict in method_yaml['outputs']]
 
-            self.methods[method_name] = RTMethod(node_id, method_name, description, inputs, outputs)
-            node_id += 1
+            self.methods[method_name] = RTMethod(self.node_id, method_name, description, inputs, outputs)
+            self.node_id += 1
 
 
 if __name__ == '__main__':

@@ -19,6 +19,18 @@ types:
   Beobachter:
     description: ''
     params: []
+  Matrix:
+    description: ''
+    params: []
+  Eigenwerte:
+    description: ''
+    params: []
+  Eigenvektoren:
+    description: ''
+    params: []
+  MatrixNichtQuadratischFehler:
+    description: 'Matrix ist nicht quadratisch'
+    params: []
 
 methods:
   Linearisieren:
@@ -53,3 +65,17 @@ methods:
       LTISS: [sb, Beobachtbar]
     outputs:
       - Beobachter: []
+  SystemMatrix:
+    description: 'Extrahiert die Systemmatrix'
+    inputs:
+      LTISS: [sb, bb]
+    outputs:
+      - Matrix: []
+  EigenwerteBerechnen:
+    description: ''
+    inputs:
+      Matrix: []
+    outputs:
+      - Eigenwerte: []
+        Eigenvektoren: []
+      - MatrixNichtQuadratischFehler: []
