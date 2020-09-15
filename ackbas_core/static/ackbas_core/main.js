@@ -100,60 +100,59 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var vis = __webpack_require__(/*! vis-network/standalone */ "./node_modules/vis-network/standalone/index.js");
 var network;
 function initGraph(graphData) {
-    var labelToId = new Map();
     // create an array with nodes
     var nodes = [];
-    var id = 1;
-    for (var _i = 0, _a = graphData.types; _i < _a.length; _i++) {
+    for (var _i = 0, _a = graphData.concreteTypes; _i < _a.length; _i++) {
         var type = _a[_i];
         var newNode = {
-            id: id,
-            label: type,
+            id: type.id,
+            label: "     " + type.name + "     ",
+            title: type.description.length ? type.description : undefined,
             shape: "ellipse",
             color: {
-                border: '#61ff74',
+                border: '#42cb52',
                 background: '#bef7c5'
             }
         };
         nodes.push(newNode);
-        labelToId.set(type, id);
-        id++;
     }
-    for (var _b = 0, _c = graphData.methods; _b < _c.length; _b++) {
-        var method = _c[_b];
+    for (var _b = 0, _c = graphData.abstractTypes; _b < _c.length; _b++) {
+        var type = _c[_b];
         var newNode = {
-            id: id,
-            label: method,
-            shape: "box"
+            id: type.id,
+            label: "     " + type.name + "     ",
+            title: type.description.length ? type.description : undefined,
+            shape: "ellipse",
+            color: {
+                border: '#c8db4c',
+                background: '#e8ffa2'
+            }
         };
         nodes.push(newNode);
-        labelToId.set(method, id);
-        id++;
+    }
+    for (var _d = 0, _e = graphData.methods; _d < _e.length; _d++) {
+        var method = _e[_d];
+        var newNode = {
+            id: method.id,
+            label: method.name,
+            title: method.description.length ? method.description : undefined,
+            shape: "box",
+            color: {
+                background: '#e6f0ff'
+            }
+        };
+        nodes.push(newNode);
     }
     // create an array with edges
     var edges = [];
-    for (var _d = 0, _e = graphData.flowEdges; _d < _e.length; _d++) {
-        var labels = _e[_d];
-        var id1 = labelToId.get(labels[0]);
-        var id2 = labelToId.get(labels[1]);
+    for (var _f = 0, _g = graphData.edges; _f < _g.length; _f++) {
+        var edge = _g[_f];
         var newEdge = {
-            from: id1,
-            to: id2,
-            arrows: 'to',
-            color: '#2B7CE9'
-        };
-        edges.push(newEdge);
-    }
-    for (var _f = 0, _g = graphData.deriveEdges; _f < _g.length; _f++) {
-        var labels = _g[_f];
-        var id1 = labelToId.get(labels[0]);
-        var id2 = labelToId.get(labels[1]);
-        var newEdge = {
-            from: id1,
-            to: id2,
-            arrows: 'to',
-            dashes: true,
-            color: '#2B7CE9'
+            //id: edge.id,
+            from: edge.fromId,
+            to: edge.toId,
+            color: 'black',
+            arrows: 'to'
         };
         edges.push(newEdge);
     }

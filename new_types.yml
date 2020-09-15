@@ -1,0 +1,55 @@
+enums:
+  Steuerbarkeit: [Steuerbar, NichtSteuerbar, Unbekannt]
+  Beobachtbarkeit: [Beobachtbar, NichtBeobachtbar, Unbekannt]
+
+types:
+  NonlinearSS:
+    description: 'Nichtlineares Zustandsraummodell'
+    params: []
+  LTISS:
+    description: 'Lineares, zeit-invariantes Zustandsraummodell'
+    params:
+      - name: SB
+        enum: Steuerbarkeit
+      - name: BB
+        enum: Beobachtbarkeit
+  Zustandsrückführung:
+    description: ''
+    params: []
+  Beobachter:
+    description: ''
+    params: []
+
+methods:
+  Linearisieren:
+    description: 'Bilde Taylor-Approximation 1. Ordnung des nichtlinearen Modells '
+    inputs:
+      NonlinearSS: []
+    outputs:
+      - LTISS: [Unbekannt, Unbekannt]
+  SteuerbarkeitPrüfen:
+    description: ''
+    inputs:
+      LTISS: [Unbekannt, bb]
+    outputs:
+      - LTISS: [Steuerbar, bb]
+      - LTISS: [NichtSteuerbar, bb]
+  BeobachtbarkeitPrüfen:
+    description: ''
+    inputs:
+      LTISS: [ sb, Unbekannt ]
+    outputs:
+      - LTISS: [ sb, Beobachtbar ]
+      - LTISS: [ sb, NichtBeobachtbar ]
+  ZustandsrückführungEntwerfen:
+    description: ''
+    inputs:
+      LTISS: [Steuerbar, bb]
+    outputs:
+      - Zustandsrückführung: []
+  LuenbergerBeobachterEntwerfen:
+    description: ''
+    inputs:
+      LTISS: [sb, Beobachtbar]
+    outputs:
+      - Beobachter: []

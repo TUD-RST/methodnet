@@ -1,90 +1,85 @@
 import * as vis from "vis-network/standalone";
-import { Edge } from "vis-network/standalone";
 
 interface GraphData {
-    types: string[],
-    methods: string[],
-    flowEdges: [string, string][]
-    deriveEdges: [string, string][]
-}
-
-interface EdgeSpec {
-    from: number
-    to: number
-    arrows: string
-    dashes?: boolean
-    color?: string
+    methods: {
+        id: number
+        name: string
+        description: string
+    }[]
+    concreteTypes: {
+        id: number
+        name: string
+        description: string
+    }[]
+    abstractTypes: {
+        id: number
+        name: string
+        description: string
+    }[]
+    edges: {
+        id: number
+        fromId: number
+        toId: number
+    }[]
 }
 
 let network: vis.Network
 
 function initGraph(graphData: GraphData) {
-    let labelToId: Map<string, number> = new Map()
-
     // create an array with nodes
     let nodes: vis.Node[] = []
 
-    let id = 1
-
-    for (let type of graphData.types) {
+    for (let type of graphData.concreteTypes) {
         let newNode: vis.Node = {
-            id: id,
-            label: "     " + type + "     ",
+            id: type.id,
+            label: "     " + type.name + "     ",
+            title: type.description.length ? type.description : undefined,
             shape: "ellipse",
             color: {
-                border: '#61ff74',
+                border: '#42cb52',
                 background: '#bef7c5'
-            },
-            size: 15
+            }
         }
         nodes.push(newNode)
-        labelToId.set(type, id)
-        id++
+    }
+    for (let type of graphData.abstractTypes) {
+        let newNode: vis.Node = {
+            id: type.id,
+            label: "     " + type.name + "     ",
+            title: type.description.length ? type.description : undefined,
+            shape: "ellipse",
+            color: {
+                border: '#c8db4c',
+                background: '#e8ffa2'
+            }
+        }
+        nodes.push(newNode)
     }
 
     for (let method of graphData.methods) {
         let newNode: vis.Node = {
-            id: id,
-            label: method,
+            id: method.id,
+            label: method.name,
+            title: method.description.length ? method.description : undefined,
             shape: "box",
             color: {
                 background: '#e6f0ff'
             }
         }
         nodes.push(newNode)
-        labelToId.set(method, id)
-        id++
     }
 
     // create an array with edges
-    let edges: EdgeSpec[] = []
+    let edges: vis.Edge[] = []
 
-    for (let labels of graphData.flowEdges) {
-        let id1 = labelToId.get(labels[0])
-        let id2 = labelToId.get(labels[1])
-
-        let newEdge: EdgeSpec = {
-            from: id1,
-            to: id2,
-            arrows: 'to',
-            color: '#2B7CE9'
+    for (let edge of graphData.edges) {
+        let newEdge: vis.Edge = {
+            //id: edge.id,
+            from: edge.fromId,
+            to: edge.toId,
+            color: 'black',
+            arrows: 'to'
         }
-
-        edges.push(newEdge)
-    }
-
-    for (let labels of graphData.deriveEdges) {
-        let id1 = labelToId.get(labels[0])
-        let id2 = labelToId.get(labels[1])
-
-        let newEdge: EdgeSpec = {
-            from: id1,
-            to: id2,
-            arrows: 'to',
-            dashes: true,
-            color: '#2B7CE9'
-        }
-
         edges.push(newEdge)
     }
 

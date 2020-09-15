@@ -1,161 +1,105 @@
+from __future__ import annotations
+
 import yaml
-from typing import List
+from typing import List, Dict
+from dataclasses import dataclass
 
 
-class RTType:
-    def __init__(self, name, description=""):
-        self.name = name
-        self.description = description
-        self.supertypes: List[RTType] = []
 
-    def isa(self, other_type):
-        if self.name == other_type.name:
-            return True
-        elif not self.supertypes:
+@dataclass
+class RTEnum:
+    name: str
+    values: List[str]
+
+
+@dataclass
+class RTParamDefinition:
+    name: str
+    enum: RTEnum
+
+
+@dataclass
+class RTTypeDefinition:
+    name: str
+    description: str
+    params: List[RTParamDefinition]
+
+
+@dataclass
+class RTTypeBinding:
+    id: int
+    type_def: RTTypeDefinition
+    param_values: List[str]
+
+    @property
+    def is_concrete(self):
+        return all(val[0].isupper() for val in self.param_values)
+
+    def is_subsumed_by(self, other: RTTypeBinding):
+        if self.type_def != other.type_def:
             return False
-        else:
-            return any(my_super.isa(other_type) for my_super in self.supertypes)
+
+        for my_val, other_val in zip(self.param_values, other.param_values):
+            if other_val[0].isupper() and my_val != other_val:
+                return False
+
+        return True
 
 
+@dataclass
 class RTMethod:
-    def __init__(self, name, inputs, outputs, nr, description=""):
-        self.name: str = name
-        self.description = description
-        self.input_ports = [RTPort(self, input, i) for i, input in enumerate(inputs)]
-        self.output_ports = [RTPort(self, output, i) for i, output in enumerate(outputs)]
-        self.nr: int = nr
-        self.search_relevant = False
-        self.is_origin = False
-        self.is_target = False
+    id: int
+    name: str
+    description: str
+    inputs: List[RTTypeBinding]
+    outputs: List[List[RTTypeBinding]]
 
 
-class RTPort:
-    def __init__(self, method, type, nr):
-        self.method: RTMethod = method
-        self.type: RTType = type
-        self.nr: int = nr
-        self.connections: List[RTConnection] = []
+class RTGraph:
+    def __init__(self, yml_path):
+        with open(yml_path, 'r', encoding='utf8') as f:
+            yaml_content = yaml.load(f, Loader=yaml.SafeLoader)
 
+        self.enums: Dict[str, RTEnum] = {}
+        for enum_name, enum_items in yaml_content['enums'].items():
+            self.enums[enum_name] = RTEnum(enum_name, enum_items)
 
-class RTConnection:
-    def __init__(self, output_port, input_port):
-        self.output_port: RTPort = output_port
-        self.input_port: RTPort = input_port
-        self.search_relevant = False
+        self.types: Dict[str, RTTypeDefinition] = {}
+        for type_name, type_yaml in yaml_content['types'].items():
+            description = type_yaml['description']
+            type_params = [RTParamDefinition(param_yaml['name'], self.enums[param_yaml['enum']]) for param_yaml in type_yaml['params']]
 
+            self.types[type_name] = RTTypeDefinition(type_name, description, type_params)
 
-def load_yaml(yml_path):
-    methods = {}
-    types = {}
+        node_id = 1
+        concrete_type_bindings: List[RTTypeBinding] = []
 
-    with open(yml_path, 'r', encoding='utf8') as f:
-        yaml_content = yaml.load(f, Loader=yaml.BaseLoader)
+        def get_type_binding_instance(type_name: str, param_values: List[str]):
+            nonlocal node_id
+            type_def = self.types[type_name]
+            new_binding_instance = RTTypeBinding(node_id, type_def, param_values)
+            node_id += 1
 
-    # --- Load types ---
-    for type_name, type_yaml in yaml_content['types'].items():
-        types[type_name] = RTType(type_name, description=type_yaml['description'])
-
-    for type_name, type_instance in types.items():
-        for super_type_name in yaml_content['types'][type_name]['super']:
-            type_instance.supertypes.append(types[super_type_name])
-
-    # --- Load methods ---
-    for method_name in yaml_content['methods'].keys():
-        method_yaml = yaml_content['methods'][method_name]
-        input_types = [types[input_name] for input_name in method_yaml['inputs']]
-        output_types = [types[output_name] for output_name in method_yaml['outputs']]
-        new_method = RTMethod(method_name, input_types, output_types, len(methods), description=method_yaml['description'])
-        methods[method_name] = new_method
-
-    # --- Connect methods ---
-    for _, m1 in methods.items():
-        for output in m1.output_ports:
-            for _, m2 in methods.items():
-                for input in m2.input_ports:
-                    if output.type.isa(input.type):
-                        con = RTConnection(output, input)
-                        output.connections.append(con)
-                        input.connections.append(con)
-
-    return methods, types
-
-
-def color_graph(methods, types, origin_type_name, target_type_name):
-    uncolor_graph(methods)
-
-    # --- Search ---
-    origin_type = types[origin_type_name]
-    target_type = types[target_type_name]
-
-    to_be_visited = []
-    visited_and_judged = []
-    visited_and_not_judged = []
-
-    for _, m in methods.items():
-        if any(origin_type.isa(input.type) for input in m.input_ports):
-            m.is_origin = True
-            to_be_visited.append(m)
-
-        if any(output.type.isa(target_type) for output in m.output_ports):
-            m.is_target = True
-
-    some_movement = True
-    while some_movement:
-        some_movement = False
-
-        while to_be_visited:
-            n = to_be_visited.pop()
-
-            next_methods = []
-            for out in n.output_ports:
-                for con in out.connections:
-                    m = con.input_port.method
-                    if m not in next_methods:
-                        next_methods.append(m)
-
-            if n.is_target:
-                n.search_relevant = True
-                visited_and_judged.append(n)
-            elif not next_methods:
-                n.search_relevant = False
-                visited_and_judged.append(n)
+            if new_binding_instance.is_concrete:
+                for binding in concrete_type_bindings:
+                    if binding == new_binding_instance:
+                        return binding
+                else:
+                    concrete_type_bindings.append(new_binding_instance)
+                    return new_binding_instance
             else:
-                visited_and_not_judged.append(n)
+                return new_binding_instance
 
-            for m in next_methods:
-                if m not in to_be_visited and m not in visited_and_judged and m not in visited_and_not_judged:
-                    to_be_visited.append(m)
+        self.methods: Dict[str, RTMethod] = {}
+        for method_name, method_yaml in yaml_content['methods'].items():
+            description = method_yaml['description']
+            inputs = [get_type_binding_instance(input_type_name, param_values) for input_type_name, param_values in method_yaml['inputs'].items()]
+            outputs = [[get_type_binding_instance(output_type_name, param_values) for output_type_name, param_values in
+                      output_option_dict.items()] for output_option_dict in method_yaml['outputs']]
 
-            some_movement = True
-
-        for n in visited_and_not_judged:
-            for out in n.output_ports:
-                for c in out.connections:
-                    m = c.input_port.method
-                    if m.search_relevant and m in visited_and_judged:
-                        n.search_relevant = True
-                        visited_and_not_judged.remove(n)
-                        visited_and_judged.append(n)
-                        some_movement = True
-                        break
-                else:  # Weird construct to break out of outer loop if inner loop is broken
-                    continue
-                break
-
-    for _, m in methods.items():
-        for o in m.output_ports:
-            for c in o.connections:
-                if c.input_port.method.search_relevant and c.output_port.method.search_relevant:
-                    c.search_relevant = True
+            self.methods[method_name] = RTMethod(node_id, method_name, description, inputs, outputs)
+            node_id += 1
 
 
-def uncolor_graph(methods):
-    # --- Reset methods and connections ---
-    for m in methods.values():
-        m.is_origin = False
-        m.is_target = False
-        m.search_relevant = False
-
-        for port in m.input_ports + m.output_ports:
-            for c in port.connections:
-                c.search_relevant = False
+if __name__ == '__main__':
+    graph = RTGraph('../new_types.yml')
