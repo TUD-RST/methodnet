@@ -79,15 +79,12 @@ class RTGraph:
             new_binding_instance = RTTypeBinding(self.node_id, type_def, param_values)
             self.node_id += 1
 
-            if new_binding_instance.is_concrete:
-                for binding in concrete_type_bindings:
-                    if binding.type_def == new_binding_instance.type_def and all(b_val == nb_val for b_val, nb_val in zip(binding.param_values, new_binding_instance.param_values)):
-                        self.node_id -= 1  # reset node id to not have gaps
-                        return binding
-                else:
-                    concrete_type_bindings.append(new_binding_instance)
-                    return new_binding_instance
+            for binding in concrete_type_bindings:
+                if binding.type_def == new_binding_instance.type_def and all(b_val == nb_val for b_val, nb_val in zip(binding.param_values, new_binding_instance.param_values)):
+                    self.node_id -= 1  # reset node id to not have gaps
+                    return binding
             else:
+                concrete_type_bindings.append(new_binding_instance)
                 return new_binding_instance
 
         self.methods: Dict[str, RTMethod] = {}
