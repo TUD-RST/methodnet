@@ -32,11 +32,20 @@ class TestGraphView(View):
 
         concrete_param_value_string = ", ".join(f"{param_def.name}={param_value}" for param_def, param_value in type_binding.param_values.items() if param_value[0].isupper())
 
+        tooltip_lines = []
+        for param_def, param_value in type_binding.param_values.items():
+            line_str = f"{param_def.longname}: {param_value}"
+
+            if param_value[0].isupper():
+                line_str = "<b>" + line_str + "</b>"
+
+            tooltip_lines.append(line_str)
+
         return {
             'fromId': from_id,
             'toId': to_id,
             'label': concrete_param_value_string,
-            'tooltip': "<br>".join(f"{param_def.longname}: {param_value}" for param_def, param_value in type_binding.param_values.items())
+            'tooltip': "<br>".join(tooltip_lines)
         }
 
     def get(self, request):
