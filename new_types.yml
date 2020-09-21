@@ -5,77 +5,97 @@ enums:
 types:
   NonlinearSS:
     description: 'Nichtlineares Zustandsraummodell'
-    params: []
+    params: {}
   LTISS:
     description: 'Lineares, zeit-invariantes Zustandsraummodell'
     params:
-      - name: SB
+      SB:
         enum: Steuerbarkeit
-      - name: BB
+      BB:
         enum: Beobachtbarkeit
   Zustandsrückführung:
     description: ''
-    params: []
+    params: {}
   Beobachter:
     description: ''
-    params: []
+    params: {}
   Matrix:
     description: ''
-    params: []
+    params: {}
   Eigenwerte:
     description: ''
-    params: []
+    params: {}
   Eigenvektoren:
     description: ''
-    params: []
+    params: {}
   MatrixNichtQuadratischFehler:
     description: 'Matrix ist nicht quadratisch'
-    params: []
+    params: {}
 
 methods:
   Linearisieren:
     description: 'Bilde Taylor-Approximation 1. Ordnung des nichtlinearen Modells '
     inputs:
-      NonlinearSS: []
+      NonlinearSS: {}
     outputs:
-      - LTISS: [Unbekannt, Unbekannt]
+      - LTISS:
+          SB: Unbekannt
+          BB: Unbekannt
   SteuerbarkeitPrüfen:
     description: ''
     inputs:
-      LTISS: [Unbekannt, bb]
+      LTISS:
+        SB: Unbekannt
+        BB: bb
     outputs:
-      - LTISS: [Steuerbar, bb]
-      - LTISS: [NichtSteuerbar, bb]
+      - LTISS:
+          SB: Steuerbar
+          BB: bb
+      - LTISS:
+          SB: NichtSteuerbar
+          BB: bb
   BeobachtbarkeitPrüfen:
     description: ''
     inputs:
-      LTISS: [ sb, Unbekannt ]
+      LTISS:
+        SB: sb
+        BB: Unbekannt
     outputs:
-      - LTISS: [ sb, Beobachtbar ]
-      - LTISS: [ sb, NichtBeobachtbar ]
+      - LTISS:
+          SB: sb
+          BB: Beobachtbar
+      - LTISS:
+          SB: sb
+          BB: NichtBeobachtbar
   ZustandsrückführungEntwerfen:
     description: ''
     inputs:
-      LTISS: [Steuerbar, bb]
+      LTISS:
+        SB: Steuerbar
+        BB: bb
     outputs:
-      - Zustandsrückführung: []
+      - Zustandsrückführung: {}
   LuenbergerBeobachterEntwerfen:
     description: ''
     inputs:
-      LTISS: [sb, Beobachtbar]
+      LTISS:
+        SB: sb
+        BB: Beobachtbar
     outputs:
-      - Beobachter: []
+      - Beobachter: {}
   SystemMatrix:
     description: 'Extrahiert die Systemmatrix'
     inputs:
-      LTISS: [sb, bb]
+      LTISS:
+        SB: sb
+        BB: bb
     outputs:
-      - Matrix: []
+      - Matrix: {}
   EigenwerteBerechnen:
     description: ''
     inputs:
-      Matrix: []
+      Matrix: {}
     outputs:
-      - Eigenwerte: []
-        Eigenvektoren: []
-      - MatrixNichtQuadratischFehler: []
+      - Eigenwerte: {}
+        Eigenvektoren: {}
+      - MatrixNichtQuadratischFehler: {}

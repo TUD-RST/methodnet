@@ -7,7 +7,7 @@ import ackbas_core.knowledge_graph as kg
 
 import json
 
-from typing import List
+from typing import List, Literal, Union
 
 
 class LandingPageView(View):
@@ -21,18 +21,41 @@ class LandingPageView(View):
 
 
 class TestGraphView(View):
+    @staticmethod
+    def edge_dict(method: kg.RTMethod, type_binding: kg.RTTypeBinding, direction: Literal['input', 'output']):
+        if direction == 'input':
+            from_id = type_binding.type_def.id
+            to_id = method.id
+        else:
+            from_id = method.id
+            to_id = type_binding.type_def.id
+
+        concrete_param_value_string = ", ".join(f"{param_name}={param_value}" for param_name, param_value in type_binding.param_values.items() if param_value[0].isupper())
+
+        return {
+            'fromId': from_id,
+            'toId': to_id,
+            'label': concrete_param_value_string,
+            'tooltip': ''
+        }
+
     def get(self, request):
         graph_data = {
             'methods': [],
-            'concreteTypes': [],
-            'abstractTypes': [],
+            'types': [],
             'demuxes': [],
             'edges': []
         }
 
-        included_type_bindings: List[kg.RTTypeBinding] = []
-
         rtgraph = kg.RTGraph('new_types.yml')
+
+        for type in rtgraph.types.values():
+            graph_data['types'].append({
+                'id': type.id,
+                'name': type.name,
+                'description': type.description
+            })
+
         for method in rtgraph.methods.values():
             graph_data['methods'].append({
                 'id': method.id,
@@ -40,63 +63,34 @@ class TestGraphView(View):
                 'description': method.description
             })
 
-            all_connected_bindings = method.inputs + sum(method.outputs, [])
-            for type_binding in all_connected_bindings:
-                if type_binding not in included_type_bindings:
-                    type_yaml = {
-                        'id': type_binding.id,
-                        'name': type_binding.type_def.name + ("[" + ", ".join(type_binding.param_values) + "]" if type_binding.param_values else ""),
-                        'description': type_binding.type_def.description
-                    }
-                    included_type_bindings.append(type_binding)
-                    if type_binding.is_concrete:
-                        graph_data['concreteTypes'].append(type_yaml)
-                    else:
-                        graph_data['abstractTypes'].append(type_yaml)
-
             for type_binding in method.inputs:
-                graph_data['edges'].append({
-                    'fromId': type_binding.id,
-                    'toId': method.id
-                })
+                graph_data['edges'].append(self.edge_dict(method, type_binding, 'input'))
 
             for output_option in method.outputs:
                 if len(output_option) > 1:
                     # we need a demux
-                    demux_id = rtgraph.node_id
+                    demux_id = rtgraph.next_id()
                     graph_data['demuxes'].append({
                         'id': demux_id
                     })
-                    rtgraph.node_id += 1
 
                     graph_data['edges'].append({
                         'fromId': method.id,
-                        'toId': demux_id
+                        'toId': demux_id,
+                        'label': '',
+                        'tooltip': ''
                     })
 
                     for type_binding in output_option:
                         graph_data['edges'].append({
                             'fromId': demux_id,
-                            'toId': type_binding.id
+                            'toId': type_binding.type_def.id,
+                            'label': '',
+                            'tooltip': ''
                         })
                 else:
                     type_binding = output_option[0]
-                    graph_data['edges'].append({
-                        'fromId': method.id,
-                        'toId': type_binding.id
-                    })
-
-        # !!!! this is O(n^2) !!!!
-        for type_binding in included_type_bindings:
-            for other_type_binding in included_type_bindings:
-                if type_binding is other_type_binding:
-                    continue
-
-                if type_binding.is_subsumed_by(other_type_binding):
-                    graph_data['edges'].append({
-                        'fromId': type_binding.id,
-                        'toId': other_type_binding.id
-                    })
+                    graph_data['edges'].append(self.edge_dict(method, type_binding, 'output'))
 
         graph_data_json = json.dumps(graph_data)
 

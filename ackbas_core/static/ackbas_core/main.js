@@ -102,7 +102,7 @@ var network;
 function initGraph(graphData) {
     // create an array with nodes
     var nodes = [];
-    for (var _i = 0, _a = graphData.concreteTypes; _i < _a.length; _i++) {
+    for (var _i = 0, _a = graphData.types; _i < _a.length; _i++) {
         var type = _a[_i];
         var newNode = {
             id: type.id,
@@ -116,22 +116,8 @@ function initGraph(graphData) {
         };
         nodes.push(newNode);
     }
-    for (var _b = 0, _c = graphData.abstractTypes; _b < _c.length; _b++) {
-        var type = _c[_b];
-        var newNode = {
-            id: type.id,
-            label: "     " + type.name + "     ",
-            title: type.description.length ? type.description : undefined,
-            shape: "ellipse",
-            color: {
-                border: '#c8db4c',
-                background: '#e8ffa2'
-            }
-        };
-        nodes.push(newNode);
-    }
-    for (var _d = 0, _e = graphData.methods; _d < _e.length; _d++) {
-        var method = _e[_d];
+    for (var _b = 0, _c = graphData.methods; _b < _c.length; _b++) {
+        var method = _c[_b];
         var newNode = {
             id: method.id,
             label: method.name,
@@ -143,8 +129,8 @@ function initGraph(graphData) {
         };
         nodes.push(newNode);
     }
-    for (var _f = 0, _g = graphData.demuxes; _f < _g.length; _f++) {
-        var demux = _g[_f];
+    for (var _d = 0, _e = graphData.demuxes; _d < _e.length; _d++) {
+        var demux = _e[_d];
         var newNode = {
             id: demux.id,
             shape: "square",
@@ -158,12 +144,14 @@ function initGraph(graphData) {
     }
     // create an array with edges
     var edges = [];
-    for (var _h = 0, _j = graphData.edges; _h < _j.length; _h++) {
-        var edge = _j[_h];
+    for (var _f = 0, _g = graphData.edges; _f < _g.length; _f++) {
+        var edge = _g[_f];
         var newEdge = {
             //id: edge.id,
             from: edge.fromId,
             to: edge.toId,
+            label: edge.label,
+            title: edge.tooltip.length ? edge.tooltip : undefined,
             color: 'black',
             arrows: 'to'
         };

@@ -6,12 +6,7 @@ interface GraphData {
         name: string
         description: string
     }[]
-    concreteTypes: {
-        id: number
-        name: string
-        description: string
-    }[]
-    abstractTypes: {
+    types: {
         id: number
         name: string
         description: string
@@ -22,6 +17,8 @@ interface GraphData {
     edges: {
         fromId: number
         toId: number
+        label: string
+        tooltip: string
     }[]
 }
 
@@ -31,7 +28,7 @@ function initGraph(graphData: GraphData) {
     // create an array with nodes
     let nodes: vis.Node[] = []
 
-    for (let type of graphData.concreteTypes) {
+    for (let type of graphData.types) {
         let newNode: vis.Node = {
             id: type.id,
             label: "     " + type.name + "     ",
@@ -40,19 +37,6 @@ function initGraph(graphData: GraphData) {
             color: {
                 border: '#42cb52',
                 background: '#bef7c5'
-            }
-        }
-        nodes.push(newNode)
-    }
-    for (let type of graphData.abstractTypes) {
-        let newNode: vis.Node = {
-            id: type.id,
-            label: "     " + type.name + "     ",
-            title: type.description.length ? type.description : undefined,
-            shape: "ellipse",
-            color: {
-                border: '#c8db4c',
-                background: '#e8ffa2'
             }
         }
         nodes.push(newNode)
@@ -92,6 +76,8 @@ function initGraph(graphData: GraphData) {
             //id: edge.id,
             from: edge.fromId,
             to: edge.toId,
+            label: edge.label,
+            title: edge.tooltip.length ? edge.tooltip : undefined,
             color: 'black',
             arrows: 'to'
         }
