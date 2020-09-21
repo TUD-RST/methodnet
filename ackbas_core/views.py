@@ -30,13 +30,13 @@ class TestGraphView(View):
             from_id = method.id
             to_id = type_binding.type_def.id
 
-        concrete_param_value_string = ", ".join(f"{param_name}={param_value}" for param_name, param_value in type_binding.param_values.items() if param_value[0].isupper())
+        concrete_param_value_string = ", ".join(f"{param_def.name}={param_value}" for param_def, param_value in type_binding.param_values.items() if param_value[0].isupper())
 
         return {
             'fromId': from_id,
             'toId': to_id,
             'label': concrete_param_value_string,
-            'tooltip': ''
+            'tooltip': "<br>".join(f"{param_def.longname}: {param_value}" for param_def, param_value in type_binding.param_values.items())
         }
 
     def get(self, request):
@@ -50,10 +50,15 @@ class TestGraphView(View):
         rtgraph = kg.RTGraph('new_types.yml')
 
         for type in rtgraph.types.values():
+            expanded_description = type.description
+
+            if len(type.params) > 0:
+                expanded_description += "<br><br>Parameter: " + ", ".join(param_def.longname for param_def in type.params.values())
+
             graph_data['types'].append({
                 'id': type.id,
                 'name': type.name,
-                'description': type.description
+                'description': expanded_description
             })
 
         for method in rtgraph.methods.values():

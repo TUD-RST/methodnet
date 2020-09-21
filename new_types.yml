@@ -10,8 +10,10 @@ types:
     description: 'Lineares, zeit-invariantes Zustandsraummodell'
     params:
       SB:
+        longname: Steuerbarkeit
         enum: Steuerbarkeit
       BB:
+        longname: Beobachtbarkeit
         enum: Beobachtbarkeit
   Zustandsrückführung:
     description: ''

@@ -2,28 +2,35 @@ from __future__ import annotations
 
 import yaml
 from typing import List, Dict
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 
-@dataclass
+@dataclass(frozen=True)
 class RTEnum:
     name: str
-    values: List[str]
+    values: List[str] = field(compare=False)
 
 
-@dataclass
+@dataclass(frozen=True)
+class RTParamDefinition:
+    name: str
+    longname: str
+    enum: RTEnum
+
+
+@dataclass(frozen=True)
 class RTTypeDefinition:
     id: int
     name: str
     description: str
-    params: Dict[str, RTEnum]
+    params: Dict[str, RTParamDefinition] = field(compare=False)
 
 
-@dataclass
+@dataclass(frozen=True)
 class RTTypeBinding:
     id: int
     type_def: RTTypeDefinition
-    param_values: Dict[str, str]
+    param_values: Dict[RTParamDefinition, str]
 
     @property
     def is_concrete(self):
@@ -66,13 +73,17 @@ class RTGraph:
         self.types: Dict[str, RTTypeDefinition] = {}
         for type_name, type_yaml in yaml_content['types'].items():
             description = type_yaml['description']
-            type_params = {param_name: self.enums[param_yaml['enum']] for param_name, param_yaml in type_yaml['params'].items()}
+            type_params = {param_name: RTParamDefinition(param_name,
+                                                         param_yaml['longname'],
+                                                         self.enums[param_yaml['enum']])
+                           for param_name, param_yaml in type_yaml['params'].items()}
 
             self.types[type_name] = RTTypeDefinition(self.next_id(), type_name, description, type_params)
 
         def get_type_binding_instance(type_name: str, param_yaml: Dict[str, str]):
             type_def = self.types[type_name]
-            binding = RTTypeBinding(self.next_id(), type_def, param_yaml)
+            param_values = {type_def.params[param_name]: param_value for param_name, param_value in param_yaml.items()}
+            binding = RTTypeBinding(self.next_id(), type_def, param_values)
             return binding
 
         self.methods: Dict[str, RTMethod] = {}
