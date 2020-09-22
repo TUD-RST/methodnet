@@ -2,7 +2,10 @@ from __future__ import annotations
 
 import yaml
 from typing import List, Dict
+import os
 from dataclasses import dataclass, field
+import jsonschema
+import json
 
 
 @dataclass(frozen=True)
@@ -65,6 +68,13 @@ class RTGraph:
 
         with open(yml_path, 'r', encoding='utf8') as f:
             yaml_content = yaml.load(f, Loader=yaml.SafeLoader)
+
+        schema_path = os.path.join(os.path.dirname(__file__), 'knowledge_graph.schema.json')
+
+        with open(schema_path, 'r', encoding='utf8') as f:
+            schema = json.load(f)
+
+        jsonschema.validate(yaml_content, schema)
 
         self.enums: Dict[str, RTEnum] = {}
         for enum_name, enum_items in yaml_content['enums'].items():

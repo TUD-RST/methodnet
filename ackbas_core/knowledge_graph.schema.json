@@ -1,0 +1,105 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "enum": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "array",
+        "items": {
+          "$ref":"#/definitions/identifier"
+        },
+        "propertyNames": {
+          "$ref": "#/definitions/identifier"
+        }
+      }
+    },
+    "types": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "properties": {
+          "description": {
+            "type": "string"
+          },
+          "params": {
+            "type": "object",
+            "propertyNames": {
+              "$ref": "#/definitions/identifier"
+            },
+            "additionalProperties": {
+              "type": "object",
+              "properties": {
+                "longname": {
+                  "type": "string"
+                },
+                "enum": {
+                  "type": "string"
+                }
+              },
+              "required": ["longname", "enum"]
+            }
+          }
+        },
+        "required": ["description", "params"]
+      },
+      "propertyNames": {
+        "$ref": "#/definitions/identifier"
+      }
+    },
+    "methods": {
+      "type": "object",
+      "propertyNames": {
+        "$ref": "#/definitions/identifier"
+      },
+      "additionalProperties": {
+        "type": "object",
+        "properties": {
+          "description": {
+            "type": "string"
+          },
+          "inputs": {
+            "$ref": "#/definitions/parameter_bindings"
+          },
+          "outputs": {
+            "type": "array",
+            "items": {
+              "$ref": "#/definitions/parameter_bindings"
+            }
+          }
+        },
+        "required": ["description", "inputs", "outputs"]
+      }
+    }
+  },
+  "required": ["enums", "types", "methods"],
+  "definitions": {
+    "parameter_bindings": {
+      "type": "object",
+      "propertyNames": {
+        "$ref": "#/definitions/identifier"
+      },
+      "additionalProperties": {
+        "type": "object",
+        "propertyNames": {
+          "$ref": "#/definitions/identifier"
+        },
+        "additionalProperties": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/identifier"
+            },
+            {
+              "type": "string",
+              "pattern": "^[a-zäöüA-ZÄÖÜ]+$"
+            }
+          ]
+        }
+      }
+    },
+    "identifier": {
+      "type": "string",
+      "pattern": "^[A-ZÄÖÜ][a-zäöüA-ZÄÖÜ]*$"
+    }
+  }
+}
