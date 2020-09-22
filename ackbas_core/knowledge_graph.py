@@ -8,6 +8,10 @@ import jsonschema
 import json
 
 
+class RTLoadError(Exception):
+    pass
+
+
 @dataclass(frozen=True)
 class RTEnum:
     name: str
@@ -83,16 +87,38 @@ class RTGraph:
         self.types: Dict[str, RTTypeDefinition] = {}
         for type_name, type_yaml in yaml_content['types'].items():
             description = type_yaml['description']
-            type_params = {param_name: RTParamDefinition(param_name,
-                                                         param_yaml['longname'],
-                                                         self.enums[param_yaml['enum']])
-                           for param_name, param_yaml in type_yaml['params'].items()}
+            type_params = {}
+
+            for param_name, param_yaml in type_yaml['params'].items():
+                enum_name = param_yaml['enum']
+                if enum_name not in self.enums:
+                    raise RTLoadError(f"{enum_name} is not a valid enum")
+                param_enum = self.enums[enum_name]
+                type_params[param_name] = RTParamDefinition(param_name, param_yaml['longname'], param_enum)
 
             self.types[type_name] = RTTypeDefinition(self.next_id(), type_name, description, type_params)
 
         def get_type_binding_instance(type_name: str, param_yaml: Dict[str, str]):
+            if type_name not in self.types:
+                raise RTLoadError(f"{type_name} is not a valid type")
+
             type_def = self.types[type_name]
-            param_values = {type_def.params[param_name]: param_value for param_name, param_value in param_yaml.items()}
+            param_values = {}
+            for param_name, param_value in param_yaml.items():
+                if param_name not in type_def.params:
+                    raise RTLoadError(f"{type_name} has no parameter {param_name}")
+                param_def = type_def.params[param_name]
+
+                if param_value[0].isupper() and param_value not in param_def.enum.values:
+                    raise RTLoadError(f"{param_value} is not a valid value for parameter {param_name} of type {type_name}")
+
+                param_values[param_def] = param_value
+
+            missing_params = [param_def for param_def in type_def.params.values() if param_def not in param_values]
+            if missing_params:
+                missing_params_str = ", ".join(param_def.name for param_def in missing_params)
+                raise RTLoadError(f"Missing parameters {missing_params_str} for type {type_name} in method {method_name}")
+
             binding = RTTypeBinding(self.next_id(), type_def, param_values)
             return binding
 
