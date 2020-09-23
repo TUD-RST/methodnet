@@ -1,4 +1,6 @@
 import * as vis from "vis-network/standalone";
+import "bootstrap";
+import "bootstrap/dist/css/bootstrap.min.css";
 
 interface GraphData {
     methods: {
@@ -97,7 +99,9 @@ function initGraph(graphData: GraphData) {
                 springConstant: 0.02,  // default 0.04
                 springLength: 150 // default 95
             }
-        }
+        },
+        autoResize: true,
+        height: "100%"
     }
     network = new vis.Network(container, data, options)
 }

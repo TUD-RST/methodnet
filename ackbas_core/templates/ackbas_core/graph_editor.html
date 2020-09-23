@@ -1,0 +1,61 @@
+{% extends "ackbas_core/base.html" %}
+{% load static %}
+
+{% block styles %}
+<style type="text/css">
+    html, body {
+        height: 100%;
+        margin: 0;
+    }
+
+    #mynetwork {
+    }
+    #button-row {
+        display: flex;
+        flex-direction: row;
+        justify-content: center;
+        border: 1px solid lightgray;
+        box-shadow: 4px 4px 20px 0 rgba(230,230,230,1);
+    }
+    #button-row button {
+        margin: 1em;
+    }
+
+    #page-col {
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+    }
+
+    #page-col #mynetwork {
+        flex: 1 0 auto;
+        height: 90vh
+    }
+
+    #page-col #button-row {
+        flex: 0 1 40px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<script type="text/javascript">
+  graphData = {{ graph_data }}
+
+  window.onload = function() {
+      initGraph(graphData);
+  }
+</script>
+
+
+<div id="page-col">
+    <div id="mynetwork">Abc</div>
+
+    <div id="button-row">
+        <button type="button" class="btn btn-outline-success" onclick="startPhysics()">Start Physics</button>
+        <button type="button" class="btn btn-outline-danger" onclick="stopPhysics()">Stop Physics</button>
+    </div>
+</div>
+
+{% endblock  %}

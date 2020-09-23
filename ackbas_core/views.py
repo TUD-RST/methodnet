@@ -20,7 +20,7 @@ class LandingPageView(View):
         return TemplateResponse(request, "ackbas_core/landing.html", context)
 
 
-class TestGraphView(View):
+class GraphEditorView(View):
     @staticmethod
     def edge_dict(method: kg.RTMethod, type_binding: kg.RTTypeBinding, direction: Literal['input', 'output']):
         if direction == 'input':
@@ -48,7 +48,7 @@ class TestGraphView(View):
             'tooltip': "<br>".join(tooltip_lines)
         }
 
-    def get(self, request):
+    def get(self, request, graph):
         graph_data = {
             'methods': [],
             'types': [],
@@ -56,7 +56,7 @@ class TestGraphView(View):
             'edges': []
         }
 
-        rtgraph = kg.RTGraph('new_types.yml')
+        rtgraph = kg.RTGraph(graph + '.yml')
 
         for type in rtgraph.types.values():
             expanded_description = type.description
@@ -110,4 +110,4 @@ class TestGraphView(View):
 
         context = {'graph_data': SafeString(graph_data_json)}
 
-        return TemplateResponse(request, "ackbas_core/testgraph.html", context)
+        return TemplateResponse(request, "ackbas_core/graph_editor.html", context)
