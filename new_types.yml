@@ -1,103 +1,222 @@
 enums:
-  Steuerbarkeit: [Steuerbar, NichtSteuerbar, Unbekannt]
-  Beobachtbarkeit: [Beobachtbar, NichtBeobachtbar, Unbekannt]
+  Steuerbarkeit: [Steuerbar, NichtSteuerbar]
+  Beobachtbarkeit: [Beobachtbar, NichtBeobachtbar]
+  Stabilität: [Stabil, Instabil]
+  Normalform: [Regelungsnormalform, Beobachtungsnormalform]
+  Linear: [Linear, NichtLinear]
+  Proper: [NichtProper, Proper, StrengProper]
+  Minimalphasig: [Minimalphasig, NichtMinimalphasic]
+  Teilerfremd: [Teilerfremd, NichtTeilerfremd]
+  MatrixRolle: [A, B, C, D, Zustandsrückführung, LuenbergerVerstärkung]
 
 types:
   NonlinearSS:
-    description: 'Nichtlineares Zustandsraummodell'
-    params: {}
-  LTISS:
-    description: 'Lineares, zeit-invariantes Zustandsraummodell'
     params:
-      SB:
-        longname: Steuerbarkeit
-        enum: Steuerbarkeit
-      BB:
-        longname: Beobachtbarkeit
-        enum: Beobachtbarkeit
-  Zustandsrückführung:
-    description: ''
-    params: {}
-  Beobachter:
-    description: ''
-    params: {}
+      Zustandsdimension:
+        type: Int
+  LTISS:
+    params:
+      Zustandsdimension:
+        type: Int
+      Stabilität:
+        type: Stabilität
+      Normalform:
+        type: Normalform
+      Beobachtbar:
+        type: Beobachtbarkeit
+      Steuerbarkeit:
+        type: Steuerbarkeit
+  DGL:
+    params:
+      Ordnung:
+        type: Int
+      Linear:
+        type: Linear
+  ÜTF:
+    params:
+      Stabilität:
+        type: Stabilität
+      Proper:
+        type: Proper
+      Minimalphasig:
+        type: Minimalphasig
+      Teilerfremd:
+        type: Teilerfremd
+      Ordnung:
+        type: Int
+  ListeEigenwerte:
+    params:
+      Länge:
+        type: Int
+  Int: {}
   Matrix:
-    description: ''
-    params: {}
-  Eigenwerte:
-    description: ''
-    params: {}
-  Eigenvektoren:
-    description: ''
-    params: {}
-  MatrixNichtQuadratischFehler:
-    description: 'Matrix ist nicht quadratisch'
-    params: {}
+    params:
+      Zeilen:
+        type: Int
+      Spalten:
+        type: Int
+      Rolle:
+        type: MatrixRolle
 
 methods:
   Linearisieren:
-    description: 'Bilde Taylor-Approximation 1. Ordnung des nichtlinearen Modells '
     inputs:
-      NonlinearSS: {}
+      nichtlinearesSystem:
+        type: NonlinearSS
+        params:
+          Zustandsdimension: n
     outputs:
-      - LTISS:
-          SB: Unbekannt
-          BB: Unbekannt
-  SteuerbarkeitPrüfen:
-    description: ''
+      - linearisiertesSystem:
+          type: LTISS
+          params:
+            Zustandsdimension: n
+  ZuRegelungsnormalform:
     inputs:
-      LTISS:
-        SB: Unbekannt
-        BB: bb
+      ltiss:
+        type: LTISS
+        params:
+          Steuerbarkeit: Steuerbar
     outputs:
-      - LTISS:
-          SB: Steuerbar
-          BB: bb
-      - LTISS:
-          SB: NichtSteuerbar
-          BB: bb
-  BeobachtbarkeitPrüfen:
-    description: ''
+      - ltiss:
+          type: LTISS
+          params:
+            Normalform: Regelungsnormalform
+  ZuBeobachtungsnormalform:
     inputs:
-      LTISS:
-        SB: sb
-        BB: Unbekannt
+      ltiss:
+        type: LTISS
+        params:
+          Beobachtbarkeit: Beobachtbar
     outputs:
-      - LTISS:
-          SB: sb
-          BB: Beobachtbar
-      - LTISS:
-          SB: sb
-          BB: NichtBeobachtbar
-  ZustandsrückführungEntwerfen:
-    description: ''
+      - ltiss:
+          type: LTISS
+          params:
+            Normalform: Beobachtungsnormalform
+  TesteSteuerbarkeit:
     inputs:
-      LTISS:
-        SB: Steuerbar
-        BB: bb
+      ltiss:
+        type: LTISS
     outputs:
-      - Zustandsrückführung: {}
-  LuenbergerBeobachterEntwerfen:
-    description: ''
+      - ltiss:
+          type: LTISS
+          params:
+            Steuerbarkeit: Steuerbar
+      - ltiss:
+          type: LTISS
+          params:
+            Steuerbarkeit: NichtSteuerbar
+  TesteBeobachtbarkeit:
     inputs:
-      LTISS:
-        SB: sb
-        BB: Beobachtbar
+      ltiss:
+        type: LTISS
     outputs:
-      - Beobachter: {}
-  SystemMatrix:
-    description: 'Extrahiert die Systemmatrix'
+      - ltiss:
+          type: LTISS
+          params:
+            Beobachtbarkeit: Beobachtbar
+      - ltiss:
+          type: LTISS
+          params:
+            Beobachtbarkeit: NichtBeobachtbar
+  ÜTFzuSS:
     inputs:
-      LTISS:
-        SB: sb
-        BB: bb
+      tf:
+        type: ÜTF
+        params:
+          Proper: Proper
+          Ordnung: n
     outputs:
-      - Matrix: {}
-  EigenwerteBerechnen:
-    description: ''
+      - ltiss:
+          type: LTISS
+          params:
+            Steuerbarkeit: Steuerbar
+            Normalform: Regelungsnormalform
+            Zustandsdimension: n
+  SSzuÜTF:
     inputs:
-      Matrix: {}
+      ltiss:
+        type: LTISS
+        params:
+          Zustandsdimension: n
     outputs:
-      - Eigenwerte: {}
-        Eigenvektoren: {}
-      - MatrixNichtQuadratischFehler: {}
+      - tf:
+          type: ÜTF
+          params:
+            Ordnung: n
+  ÜTFistStabil:
+    inputs:
+      tf:
+        type: ÜTF
+    outputs:
+      - tf:
+          type: ÜTF
+          params:
+            Stabilität: Stabil
+      - tf:
+          type: ÜTF
+          params:
+            Stabilität: Instabil
+  ÜTFistProper:
+    inputs:
+      tf:
+        type: ÜTF
+    outputs:
+      - tf:
+          type: ÜTF
+          params:
+            Proper: Proper
+      - tf:
+          type: ÜTF
+          params:
+            Proper: NichtProper
+  ÜTFistTeilerfremd:
+    inputs:
+      tf:
+        type: ÜTF
+    outputs:
+      - tf:
+          type: ÜTF
+          params:
+            Teilerfremd: Teilerfremd
+      - tf:
+          type: ÜTF
+          params:
+            Teilerfremd: NichtTeilerfremd
+  Polplatzierung:
+    inputs:
+      ltiss:
+        type: LTISS
+        params:
+          Zustandsdimension: n
+          Steuerbarkeit: Steuerbar
+      poles:
+        type: ListeEigenwerte
+        params:
+          Länge: n
+        tune: true
+    outputs:
+      - k:
+          type: Matrix
+          params:
+            Zeilen: 1
+            Spalten: n
+            Rolle: Zustandsrückführung
+  LuenbergerEntwurf:
+    inputs:
+      ltiss:
+        type: LTISS
+        params:
+          Zustandsdimension: n
+          Beobachtbarkeit: Beobachtbar
+      poles:
+        type: ListeEigenwerte
+        params:
+          Länge: n
+        tune: true
+    outputs:
+      - k:
+          type: Matrix
+          params:
+            Zeilen: n
+            Spalten: 1
+            Rolle: LuenbergerVerstärkung

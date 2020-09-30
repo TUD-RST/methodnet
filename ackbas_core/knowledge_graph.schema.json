@@ -7,11 +7,11 @@
       "additionalProperties": {
         "type": "array",
         "items": {
-          "$ref":"#/definitions/identifier"
+          "$ref":"#/definitions/upperName"
         }
       },
       "propertyNames": {
-          "$ref": "#/definitions/identifier"
+          "$ref": "#/definitions/upperName"
       }
     },
     "types": {
@@ -25,32 +25,29 @@
           "params": {
             "type": "object",
             "propertyNames": {
-              "$ref": "#/definitions/identifier"
+              "$ref": "#/definitions/upperName"
             },
             "additionalProperties": {
               "type": "object",
               "properties": {
-                "longname": {
-                  "type": "string"
-                },
-                "enum": {
-                  "type": "string"
+                "type": {
+                  "$ref": "#/definitions/upperName"
                 }
               },
-              "required": ["longname", "enum"]
+              "additionalProperties": false
             }
           }
         },
-        "required": ["description", "params"]
+        "additionalProperties": false
       },
       "propertyNames": {
-        "$ref": "#/definitions/identifier"
+        "$ref": "#/definitions/upperName"
       }
     },
     "methods": {
       "type": "object",
       "propertyNames": {
-        "$ref": "#/definitions/identifier"
+        "$ref": "#/definitions/upperName"
       },
       "additionalProperties": {
         "type": "object",
@@ -59,47 +56,55 @@
             "type": "string"
           },
           "inputs": {
-            "$ref": "#/definitions/parameter_bindings"
+            "$ref": "#/definitions/portDefinitions"
           },
           "outputs": {
             "type": "array",
             "items": {
-              "$ref": "#/definitions/parameter_bindings"
+              "$ref": "#/definitions/portDefinitions"
             }
           }
         },
-        "required": ["description", "inputs", "outputs"]
+        "required": ["inputs", "outputs"],
+        "additionalProperties": false
       }
     }
   },
   "required": ["enums", "types", "methods"],
   "definitions": {
-    "parameter_bindings": {
+    "portDefinitions": {
       "type": "object",
       "propertyNames": {
-        "$ref": "#/definitions/identifier"
+        "$ref": "#/definitions/lowerName"
       },
       "additionalProperties": {
         "type": "object",
-        "propertyNames": {
-          "$ref": "#/definitions/identifier"
-        },
-        "additionalProperties": {
-          "anyOf": [
-            {
-              "$ref": "#/definitions/identifier"
+        "properties": {
+          "type": {
+            "$ref": "#/definitions/upperName"
+          },
+          "params": {
+            "type": "object",
+            "propertyNames": {
+              "$ref": "#/definitions/upperName"
             },
-            {
-              "type": "string",
-              "pattern": "^[a-zäöüA-ZÄÖÜ]+$"
-            }
-          ]
-        }
+            "additionalProperties": true
+          },
+          "tune": {
+            "type": "boolean"
+          }
+        },
+        "required": ["type"],
+        "additionalProperties": false
       }
     },
-    "identifier": {
+    "upperName": {
       "type": "string",
-      "pattern": "^[A-ZÄÖÜ][a-zäöüA-ZÄÖÜ]*$"
+      "pattern": "^[A-ZÄÖÜ][a-zäöüßA-ZÄÖÜ]*$"
+    },
+    "lowerName": {
+      "type": "string",
+      "pattern": "^[a-zäöü][a-zäöüßA-ZÄÖÜ]*$"
     }
   }
 }
