@@ -5,7 +5,7 @@ enums:
   Normalform: [Regelungsnormalform, Beobachtungsnormalform]
   Linear: [Linear, NichtLinear]
   Proper: [NichtProper, Proper, StrengProper]
-  Minimalphasig: [Minimalphasig, NichtMinimalphasic]
+  Minimalphasig: [Minimalphasig, NichtMinimalphasig]
   Teilerfremd: [Teilerfremd, NichtTeilerfremd]
   MatrixRolle: [A, B, C, D, Zustandsrückführung, LuenbergerVerstärkung]
 
@@ -22,7 +22,7 @@ types:
         type: Stabilität
       Normalform:
         type: Normalform
-      Beobachtbar:
+      Beobachtbarkeit:
         type: Beobachtbarkeit
       Steuerbarkeit:
         type: Steuerbarkeit
@@ -48,7 +48,6 @@ types:
     params:
       Länge:
         type: Int
-  Int: {}
   Matrix:
     params:
       Zeilen:
