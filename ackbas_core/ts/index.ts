@@ -2,26 +2,27 @@ import * as vis from "vis-network/standalone";
 import "bootstrap";
 import "bootstrap/dist/css/bootstrap.min.css";
 
+interface Port {
+    id: number
+    name: string
+}
+
 interface GraphData {
     methods: {
         id: number
         name: string
-        description: string
+        inputs: Port[]
+        outputs: Port[][]
     }[]
-    types: {
+    objects: {
         id: number
         name: string
-        description: string
     }[]
-    demuxes: {
-        id: number
-    }[]
-    edges: {
+    connections: {
         fromId: number
         toId: number
-        label: string
-        tooltip: string
     }[]
+    nextId: number
 }
 
 let network: vis.Network
@@ -30,11 +31,13 @@ function initGraph(graphData: GraphData) {
     // create an array with nodes
     let nodes: vis.Node[] = []
 
-    for (let type of graphData.types) {
+    // create an array with edges
+    let edges: vis.Edge[] = []
+
+    for (let ao of graphData.objects) {
         let newNode: vis.Node = {
-            id: type.id,
-            label: "     " + type.name + "     ",
-            title: type.description.length ? type.description : undefined,
+            id: ao.id,
+            label: "     " + ao.name + "     ",
             shape: "ellipse",
             color: {
                 border: '#42cb52',
@@ -44,42 +47,85 @@ function initGraph(graphData: GraphData) {
         nodes.push(newNode)
     }
 
+    // fix first object for physics
+    nodes[0].fixed = true
+
     for (let method of graphData.methods) {
-        let newNode: vis.Node = {
+        let methodNode: vis.Node = {
             id: method.id,
             label: method.name,
-            title: method.description.length ? method.description : undefined,
             shape: "box",
             color: {
                 background: '#e6f0ff'
             }
         }
-        nodes.push(newNode)
-    }
 
-    for (let demux of graphData.demuxes) {
-        let newNode: vis.Node = {
-            id: demux.id,
-            shape: "square",
-            color: {
-                background: "black",
-                border: "black"
-            },
-            size: 10
+        nodes.push(methodNode)
+
+        for (let port of method.inputs) {
+            let portNode: vis.Node = {
+                id: port.id,
+                label: port.name,
+                shape: "dot",
+                size: 4
+            }
+
+            nodes.push(portNode)
+
+            edges.push({
+                from: port.id,
+                to: method.id,
+                color: 'black',
+                arrows: 'to'
+            })
         }
-        nodes.push(newNode)
+
+        for (let output_option of method.outputs) {
+            let demux: vis.Node = {
+                id: graphData.nextId,
+                shape: "square",
+                color: {
+                    background: "black",
+                    border: "black"
+                },
+                size: 10
+            }
+            nodes.push(demux)
+            graphData.nextId++
+
+            edges.push({
+                from: method.id,
+                to: demux.id,
+                color: 'black',
+                arrows: 'to'
+            })
+
+            for (let port of output_option) {
+                let portNode: vis.Node = {
+                    id: port.id,
+                    label: port.name,
+                    shape: "dot",
+                    size: 4
+                }
+
+                nodes.push(portNode)
+
+                edges.push({
+                    from: demux.id,
+                    to: port.id,
+                    color: 'black',
+                    arrows: 'to'
+                })
+            }
+        }
     }
 
-    // create an array with edges
-    let edges: vis.Edge[] = []
 
-    for (let edge of graphData.edges) {
+    for (let con of graphData.connections) {
         let newEdge: vis.Edge = {
             //id: edge.id,
-            from: edge.fromId,
-            to: edge.toId,
-            label: edge.label,
-            title: edge.tooltip.length ? edge.tooltip : undefined,
+            from: con.fromId,
+            to: con.toId,
             color: 'black',
             arrows: 'to'
         }
@@ -96,8 +142,8 @@ function initGraph(graphData: GraphData) {
         physics: {
             barnesHut: {
                 avoidOverlap: 0.1, // default 0
-                springConstant: 0.02,  // default 0.04
-                springLength: 150 // default 95
+                springConstant: 0.2,  // default 0.04
+                springLength: 40 // default 95
             }
         },
         autoResize: true,
@@ -117,7 +163,11 @@ function stopPhysics() {
 function startPhysics() {
     network.setOptions({
         physics: {
-            enabled: true
+            enabled: true,
+            wind: {
+                x: 0,
+                y: 1
+            }
         }
     })
 }

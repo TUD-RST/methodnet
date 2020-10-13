@@ -104,12 +104,13 @@ var network;
 function initGraph(graphData) {
     // create an array with nodes
     var nodes = [];
-    for (var _i = 0, _a = graphData.types; _i < _a.length; _i++) {
-        var type = _a[_i];
+    // create an array with edges
+    var edges = [];
+    for (var _i = 0, _a = graphData.objects; _i < _a.length; _i++) {
+        var ao = _a[_i];
         var newNode = {
-            id: type.id,
-            label: "     " + type.name + "     ",
-            title: type.description.length ? type.description : undefined,
+            id: ao.id,
+            label: "     " + ao.name + "     ",
             shape: "ellipse",
             color: {
                 border: '#42cb52',
@@ -118,42 +119,78 @@ function initGraph(graphData) {
         };
         nodes.push(newNode);
     }
+    // fix first object for physics
+    nodes[0].fixed = true;
     for (var _b = 0, _c = graphData.methods; _b < _c.length; _b++) {
         var method = _c[_b];
-        var newNode = {
+        var methodNode = {
             id: method.id,
             label: method.name,
-            title: method.description.length ? method.description : undefined,
             shape: "box",
             color: {
                 background: '#e6f0ff'
             }
         };
-        nodes.push(newNode);
+        nodes.push(methodNode);
+        for (var _d = 0, _e = method.inputs; _d < _e.length; _d++) {
+            var port = _e[_d];
+            var portNode = {
+                id: port.id,
+                label: port.name,
+                shape: "dot",
+                size: 4
+            };
+            nodes.push(portNode);
+            edges.push({
+                from: port.id,
+                to: method.id,
+                color: 'black',
+                arrows: 'to'
+            });
+        }
+        for (var _f = 0, _g = method.outputs; _f < _g.length; _f++) {
+            var output_option = _g[_f];
+            var demux = {
+                id: graphData.nextId,
+                shape: "square",
+                color: {
+                    background: "black",
+                    border: "black"
+                },
+                size: 10
+            };
+            nodes.push(demux);
+            graphData.nextId++;
+            edges.push({
+                from: method.id,
+                to: demux.id,
+                color: 'black',
+                arrows: 'to'
+            });
+            for (var _h = 0, output_option_1 = output_option; _h < output_option_1.length; _h++) {
+                var port = output_option_1[_h];
+                var portNode = {
+                    id: port.id,
+                    label: port.name,
+                    shape: "dot",
+                    size: 4
+                };
+                nodes.push(portNode);
+                edges.push({
+                    from: demux.id,
+                    to: port.id,
+                    color: 'black',
+                    arrows: 'to'
+                });
+            }
+        }
     }
-    for (var _d = 0, _e = graphData.demuxes; _d < _e.length; _d++) {
-        var demux = _e[_d];
-        var newNode = {
-            id: demux.id,
-            shape: "square",
-            color: {
-                background: "black",
-                border: "black"
-            },
-            size: 10
-        };
-        nodes.push(newNode);
-    }
-    // create an array with edges
-    var edges = [];
-    for (var _f = 0, _g = graphData.edges; _f < _g.length; _f++) {
-        var edge = _g[_f];
+    for (var _j = 0, _k = graphData.connections; _j < _k.length; _j++) {
+        var con = _k[_j];
         var newEdge = {
             //id: edge.id,
-            from: edge.fromId,
-            to: edge.toId,
-            label: edge.label,
-            title: edge.tooltip.length ? edge.tooltip : undefined,
+            from: con.fromId,
+            to: con.toId,
             color: 'black',
             arrows: 'to'
         };
@@ -169,8 +206,8 @@ function initGraph(graphData) {
         physics: {
             barnesHut: {
                 avoidOverlap: 0.1,
-                springConstant: 0.02,
-                springLength: 150 // default 95
+                springConstant: 0.2,
+                springLength: 40 // default 95
             }
         },
         autoResize: true,
@@ -188,7 +225,11 @@ function stopPhysics() {
 function startPhysics() {
     network.setOptions({
         physics: {
-            enabled: true
+            enabled: true,
+            wind: {
+                x: 0,
+                y: 1
+            }
         }
     });
 }

@@ -38,7 +38,7 @@ class RTTypeDefinition:
 class RTMethodPort:
     name: str
     type: RTTypeDefinition
-    constraints: Dict[RTParamDefinition, str]
+    constraints: Dict[RTParamDefinition, str] = field(compare=False)
 
 
 @dataclass
