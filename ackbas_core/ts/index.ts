@@ -5,6 +5,7 @@ import "bootstrap/dist/css/bootstrap.min.css";
 interface Port {
     id: number
     name: string
+    constraints: object
 }
 
 interface GraphData {
@@ -17,6 +18,7 @@ interface GraphData {
     objects: {
         id: number
         name: string
+        params: object
     }[]
     connections: {
         fromId: number
@@ -26,6 +28,15 @@ interface GraphData {
 }
 
 let network: vis.Network
+
+function dictToTooltip(dict: object): string {
+    let tooltip = ""
+    for (let [param_name, param_val] of Object.entries(dict)) {
+        tooltip += param_name + ": " + param_val + "<br>"
+    }
+
+    return tooltip
+}
 
 function initGraph(graphData: GraphData) {
     // create an array with nodes
@@ -38,6 +49,7 @@ function initGraph(graphData: GraphData) {
         let newNode: vis.Node = {
             id: ao.id,
             label: "     " + ao.name + "     ",
+            title: dictToTooltip(ao.params),
             shape: "ellipse",
             color: {
                 border: '#42cb52',
@@ -66,6 +78,7 @@ function initGraph(graphData: GraphData) {
             let portNode: vis.Node = {
                 id: port.id,
                 label: port.name,
+                title: dictToTooltip(port.constraints),
                 shape: "dot",
                 size: 4
             }
@@ -104,6 +117,7 @@ function initGraph(graphData: GraphData) {
                 let portNode: vis.Node = {
                     id: port.id,
                     label: port.name,
+                    title: dictToTooltip(port.constraints),
                     shape: "dot",
                     size: 4
                 }
@@ -144,7 +158,12 @@ function initGraph(graphData: GraphData) {
                 avoidOverlap: 0.1, // default 0
                 springConstant: 0.2,  // default 0.04
                 springLength: 40 // default 95
+            },
+            wind: {
+                x: 0,
+                y: 0.5
             }
+
         },
         autoResize: true,
         height: "100%"
@@ -163,11 +182,7 @@ function stopPhysics() {
 function startPhysics() {
     network.setOptions({
         physics: {
-            enabled: true,
-            wind: {
-                x: 0,
-                y: 1
-            }
+            enabled: true
         }
     })
 }

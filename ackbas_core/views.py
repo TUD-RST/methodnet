@@ -66,31 +66,23 @@ class GraphEditorView(View):
         for ao in abstract_objects.values():
             graph_data['objects'].append({
                 "id": id,
-                "name": ao.name
+                "name": ao.name,
+                "params": {
+                    param_def.name: param_val for param_def, param_val in ao.param_values.items()
+                }
             })
             ao_name_to_id[ao.name] = id
             id += 1
-
-        def make_port_dict_and_add_connection(port_def: kg.RTMethodPort, connected_ao: AbstractObject, is_input):
-            nonlocal id
-            port_dict = {
-                'id': id,
-                'name': port_def.name
-            }
-            graph_data['connections'].append({
-                'fromId': ao_name_to_id[connected_ao.name],
-                'toId': id
-            })
-
-            id += 1
-            return port_dict
 
         for mc in method_calls:
             inputs = []
             for port, ao in mc.inputs.items():
                 port_dict = {
                     'id': id,
-                    'name': port.name
+                    'name': port.name,
+                    'constraints': {
+                        param_def.name: param_val for param_def, param_val in port.constraints.items()
+                    }
                 }
                 graph_data['connections'].append({
                     'fromId': ao_name_to_id[ao.name],
@@ -108,7 +100,10 @@ class GraphEditorView(View):
 
                     port_dict = {
                         'id': id,
-                        'name': port.name
+                        'name': port.name,
+                        'constraints': {
+                            param_def.name: param_val for param_def, param_val in port.constraints.items()
+                        }
                     }
                     graph_data['connections'].append({
                         'fromId': id,

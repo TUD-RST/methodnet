@@ -101,6 +101,14 @@ var vis = __webpack_require__(/*! vis-network/standalone */ "./node_modules/vis-
 __webpack_require__(/*! bootstrap */ "./node_modules/bootstrap/dist/js/bootstrap.js");
 __webpack_require__(/*! bootstrap/dist/css/bootstrap.min.css */ "./node_modules/bootstrap/dist/css/bootstrap.min.css");
 var network;
+function dictToTooltip(dict) {
+    var tooltip = "";
+    for (var _i = 0, _a = Object.entries(dict); _i < _a.length; _i++) {
+        var _b = _a[_i], param_name = _b[0], param_val = _b[1];
+        tooltip += param_name + ": " + param_val + "<br>";
+    }
+    return tooltip;
+}
 function initGraph(graphData) {
     // create an array with nodes
     var nodes = [];
@@ -111,6 +119,7 @@ function initGraph(graphData) {
         var newNode = {
             id: ao.id,
             label: "     " + ao.name + "     ",
+            title: dictToTooltip(ao.params),
             shape: "ellipse",
             color: {
                 border: '#42cb52',
@@ -137,6 +146,7 @@ function initGraph(graphData) {
             var portNode = {
                 id: port.id,
                 label: port.name,
+                title: dictToTooltip(port.constraints),
                 shape: "dot",
                 size: 4
             };
@@ -172,6 +182,7 @@ function initGraph(graphData) {
                 var portNode = {
                     id: port.id,
                     label: port.name,
+                    title: dictToTooltip(port.constraints),
                     shape: "dot",
                     size: 4
                 };
@@ -208,6 +219,10 @@ function initGraph(graphData) {
                 avoidOverlap: 0.1,
                 springConstant: 0.2,
                 springLength: 40 // default 95
+            },
+            wind: {
+                x: 0,
+                y: 0.5
             }
         },
         autoResize: true,
@@ -225,11 +240,7 @@ function stopPhysics() {
 function startPhysics() {
     network.setOptions({
         physics: {
-            enabled: true,
-            wind: {
-                x: 0,
-                y: 1
-            }
+            enabled: true
         }
     });
 }
