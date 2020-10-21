@@ -24,20 +24,20 @@ class MethodCall:
 
             for input, input_obj in self.inputs.items():
                 if input.name == output.name:
-                    output_obj.param_values = input_obj.param_values
+                    output_obj.param_values = input_obj.param_values.copy()
                     break
             else:
                 output_obj.param_values = {}
 
             for param_def, constraint_val in output.constraints.items():
-                if constraint_val[0].isupper():
+                if (isinstance(constraint_val, str) and constraint_val[0].isupper()) or isinstance(constraint_val, int):
                     # Specific value, just set it
                     output_obj.param_values[param_def] = constraint_val
                 else:
                     # search input ports for a constraint containing this value
                     for input, input_obj in self.inputs.items():
                         for input_param_def, input_constraint_val in input.constraints.items():
-                            if input_constraint_val == constraint_val:
+                            if input_constraint_val == constraint_val and input_param_def in input_obj.param_values:
                                 # then read the input objects parameter and set it for the output object
                                 output_obj.param_values[param_def] = input_obj.param_values[input_param_def]
 

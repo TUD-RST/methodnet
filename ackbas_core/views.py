@@ -34,24 +34,114 @@ class GraphEditorView(View):
         rtgraph = kg.RTGraph('new_types.yml')
 
         start_ao_spec = {
-            'tf': {
-                'type': 'ÜTF',
+            'dgl': {
+                'type': 'DGL',
                 'params': {
-                    'Ordnung': 3,
-                    'Proper': 'Proper'
+                    'Linear': 'NichtLinear'
                 }
             }
         }
 
         call_spec = [
             {
-                'method': 'ÜTFzuSS',
+                'method': 'DGLzuSS',
                 'inputs': {
-                    'tf': 'tf'
+                    'dgl': 'dgl'
                 },
                 'outputs': [
                     {
-                        'ltiss': 'ss'
+                        'ss': 'ssnonlin'
+                    }
+                ]
+            },
+            {
+                'method': 'TesteSteuerbarkeitNichtlinear',
+                'inputs': {
+                    'ss': 'ssnonlin'
+                },
+                'outputs': [
+                    {
+                        'ss': 'ssnonlincontr'
+                    },
+                    {
+                        'ss': 'ssnonlinnotcontr'
+                    },
+                    {
+                        #'ss': 'ssnonlinunknowncontr'
+                    },
+                ]
+            },
+            {
+                'method': 'Trajektorienplanung',
+                'inputs': {
+                    'ss': 'ssnonlincontr'
+                },
+                'outputs': [
+                    {
+                        'xtraj': 'xtraj',
+                        'utraj': 'utraj'
+                    }
+                ]
+            },
+            {
+                'method': 'LinearisierungAnTrajektorie',
+                'inputs': {
+                    'ss': 'ssnonlin',
+                    'xtraj': 'xtraj',
+                    'utraj': 'utraj'
+                },
+                'outputs': [
+                    {
+                        'ssltv': 'ssltv'
+                    }
+                ]
+            },
+            {
+                'method': 'LTVLQREntwurf',
+                'inputs': {
+                    'ssltv': 'ssltv'
+                },
+                'outputs': [
+                    {
+                        'k': 'k'
+                    }
+                ]
+            },
+            {
+                'method': 'BaueTrajektorienfolgeregler',
+                'inputs': {
+                    'xtraj': 'xtraj',
+                    'utraj': 'utraj',
+                    'k': 'k',
+                    'obs': 'obs'
+                },
+                'outputs': [
+                    {
+                        'controller': 'controller'
+                    }
+                ]
+            },
+            {
+                'method': 'TesteBeobachtbarkeitNichtlinear',
+                'inputs': {
+                    'ss': 'ssnonlin'
+                },
+                'outputs': [
+                    {
+                        'ss': 'ssnonlinobs'
+                    },
+                    {},
+                    {}
+                ]
+            },
+            {
+                'method': 'ZeitdiskreterEKFEntwurf',
+                'inputs': {
+                    'ss': 'ssnonlinobs'
+                },
+                'outputs': [
+                    {
+                        'obs': 'obs'
                     }
                 ]
             }
@@ -66,6 +156,7 @@ class GraphEditorView(View):
         for ao in abstract_objects.values():
             graph_data['objects'].append({
                 "id": id,
+                "type": ao.type.name,
                 "name": ao.name,
                 "params": {
                     param_def.name: param_val for param_def, param_val in ao.param_values.items()
@@ -76,7 +167,7 @@ class GraphEditorView(View):
 
         for mc in method_calls:
             inputs = []
-            for port, ao in mc.inputs.items():
+            for port in mc.method.inputs.values():
                 port_dict = {
                     'id': id,
                     'name': port.name,
@@ -84,10 +175,12 @@ class GraphEditorView(View):
                         param_def.name: param_val for param_def, param_val in port.constraints.items()
                     }
                 }
-                graph_data['connections'].append({
-                    'fromId': ao_name_to_id[ao.name],
-                    'toId': id
-                })
+                if port in mc.inputs:
+                    ao = mc.inputs[port]
+                    graph_data['connections'].append({
+                        'fromId': ao_name_to_id[ao.name],
+                        'toId': id
+                    })
 
                 id += 1
                 inputs.append(port_dict)
@@ -96,8 +189,6 @@ class GraphEditorView(View):
             for out_option in mc.method.outputs:
                 out_option_ports = []
                 for port in out_option.values():
-                    ao = mc.outputs[port]
-
                     port_dict = {
                         'id': id,
                         'name': port.name,
@@ -105,10 +196,13 @@ class GraphEditorView(View):
                             param_def.name: param_val for param_def, param_val in port.constraints.items()
                         }
                     }
-                    graph_data['connections'].append({
-                        'fromId': id,
-                        'toId': ao_name_to_id[ao.name]
-                    })
+                    if port in mc.outputs:
+                        ao = mc.outputs[port]
+
+                        graph_data['connections'].append({
+                            'fromId': id,
+                            'toId': ao_name_to_id[ao.name]
+                        })
 
                     id += 1
                     out_option_ports.append(port_dict)

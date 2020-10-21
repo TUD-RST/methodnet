@@ -41,6 +41,11 @@ class RTMethodPort:
     constraints: Dict[RTParamDefinition, str] = field(compare=False)
 
 
+@dataclass(frozen=True)
+class RTMethodOutPort(RTMethodPort):
+    option_index: int
+
+
 @dataclass
 class RTMethod:
     name: str
@@ -72,18 +77,19 @@ class RTGraph:
         for type_name, type_yaml in yaml_content['types'].items():
             type_params = {}
 
-            for param_name, param_yaml in type_yaml['params'].items():
-                param_type_name = param_yaml['type']
-                if param_type_name not in self.param_types:
-                    raise RTLoadError(f"{param_type_name} is not a valid param type")
-                param_type = self.param_types[param_type_name]
-                type_params[param_name] = RTParamDefinition(param_name, param_type)
+            if 'params' in type_yaml:
+                for param_name, param_yaml in type_yaml['params'].items():
+                    param_type_name = param_yaml['type']
+                    if param_type_name not in self.param_types:
+                        raise RTLoadError(f"{param_type_name} is not a valid param type")
+                    param_type = self.param_types[param_type_name]
+                    type_params[param_name] = RTParamDefinition(param_name, param_type)
 
             self.types[type_name] = RTTypeDefinition(type_name, type_params)
 
         self.methods: Dict[str, RTMethod] = {}
         for method_name, method_yaml in yaml_content['methods'].items():
-            def make_method_port(port_name, port_yaml):
+            def make_method_port(port_name, port_yaml, out_index=None):
                 type_def = self.types[port_yaml['type']]
                 if 'params' in port_yaml:
                     constraints = {
@@ -91,10 +97,13 @@ class RTGraph:
                     }
                 else:
                     constraints = {}
-                return RTMethodPort(port_name, type_def, constraints)
+                if out_index is None:
+                    return RTMethodPort(port_name, type_def, constraints)
+                else:
+                    return RTMethodOutPort(port_name, type_def, constraints, out_index)
 
             inputs = {port_name: make_method_port(port_name, port_yaml) for port_name, port_yaml in method_yaml['inputs'].items()}
-            outputs = [{port_name: make_method_port(port_name, port_yaml) for port_name, port_yaml in output_option_dict.items()} for output_option_dict in method_yaml['outputs']]
+            outputs = [{port_name: make_method_port(port_name, port_yaml, out_index) for port_name, port_yaml in output_option_dict.items()} for out_index, output_option_dict in enumerate(method_yaml['outputs'])]
 
             self.methods[method_name] = RTMethod(method_name, inputs, outputs)
 

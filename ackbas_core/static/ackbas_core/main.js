@@ -119,7 +119,7 @@ function initGraph(graphData) {
         var newNode = {
             id: ao.id,
             label: "     " + ao.name + "     ",
-            title: dictToTooltip(ao.params),
+            title: '<b>' + ao.type + '</b><br>' + dictToTooltip(ao.params),
             shape: "ellipse",
             color: {
                 border: '#42cb52',

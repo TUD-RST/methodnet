@@ -17,6 +17,7 @@ interface GraphData {
     }[]
     objects: {
         id: number
+        type: string
         name: string
         params: object
     }[]
@@ -49,7 +50,7 @@ function initGraph(graphData: GraphData) {
         let newNode: vis.Node = {
             id: ao.id,
             label: "     " + ao.name + "     ",
-            title: dictToTooltip(ao.params),
+            title: '<b>' + ao.type + '</b><br>' + dictToTooltip(ao.params),
             shape: "ellipse",
             color: {
                 border: '#42cb52',

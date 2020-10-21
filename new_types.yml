@@ -8,15 +8,35 @@ enums:
   Minimalphasig: [Minimalphasig, NichtMinimalphasig]
   Teilerfremd: [Teilerfremd, NichtTeilerfremd]
   MatrixRolle: [A, B, C, D, Zustandsrückführung, LuenbergerVerstärkung]
+  ZeitfunktionRolle: [Zustandstrajektorie, Eingangstrajektorie, Zustandsrückführung]
 
 types:
-  NonlinearSS:
+  Real: {}
+  SSNichtlinear:
     params:
       Zustandsdimension:
         type: Int
-  LTISS:
+      Eingangsdimension:
+        type: Int
+      Beobachtbarkeit:
+        type: Beobachtbarkeit
+      Steuerbarkeit:
+        type: Steuerbarkeit
+  SSLTV:
     params:
       Zustandsdimension:
+        type: Int
+      Eingangsdimension:
+        type: Int
+      Beobachtbarkeit:
+        type: Beobachtbarkeit
+      Steuerbarkeit:
+        type: Steuerbarkeit
+  SSLTI:
+    params:
+      Zustandsdimension:
+        type: Int
+      Eingangsdimension:
         type: Int
       Stabilität:
         type: Stabilität
@@ -56,67 +76,144 @@ types:
         type: Int
       Rolle:
         type: MatrixRolle
+  Zeitfunktion:
+    params:
+      Zeilen:
+        type: Int
+      Spalten:
+        type: Int
+      Rolle:
+        type: ZeitfunktionRolle
+  Beobachterfunktion:
+    params:
+      Zustandsdimension:
+        type: Int
+      Eingangsdimension:
+        type: Int
+  Trajektorienfolgeregler:
+    params:
+      Zustandsdimension:
+        type: Int
+      Eingangsdimension:
+        type: Int
+
 
 methods:
   Linearisieren:
     inputs:
       nichtlinearesSystem:
-        type: NonlinearSS
+        type: SSNichtlinear
         params:
           Zustandsdimension: n
     outputs:
       - linearisiertesSystem:
-          type: LTISS
+          type: SSLTI
           params:
             Zustandsdimension: n
   ZuRegelungsnormalform:
     inputs:
       ltiss:
-        type: LTISS
+        type: SSLTI
         params:
           Steuerbarkeit: Steuerbar
     outputs:
       - ltiss:
-          type: LTISS
+          type: SSLTI
           params:
             Normalform: Regelungsnormalform
   ZuBeobachtungsnormalform:
     inputs:
       ltiss:
-        type: LTISS
+        type: SSLTI
         params:
           Beobachtbarkeit: Beobachtbar
     outputs:
       - ltiss:
-          type: LTISS
+          type: SSLTI
           params:
             Normalform: Beobachtungsnormalform
-  TesteSteuerbarkeit:
+  TesteSteuerbarkeitLTI:
     inputs:
       ltiss:
-        type: LTISS
+        type: SSLTI
     outputs:
       - ltiss:
-          type: LTISS
+          type: SSLTI
           params:
             Steuerbarkeit: Steuerbar
       - ltiss:
-          type: LTISS
+          type: SSLTI
           params:
             Steuerbarkeit: NichtSteuerbar
-  TesteBeobachtbarkeit:
+  TesteBeobachtbarkeitLTI:
     inputs:
       ltiss:
-        type: LTISS
+        type: SSLTI
     outputs:
       - ltiss:
-          type: LTISS
+          type: SSLTI
           params:
             Beobachtbarkeit: Beobachtbar
       - ltiss:
-          type: LTISS
+          type: SSLTI
           params:
             Beobachtbarkeit: NichtBeobachtbar
+  TesteSteuerbarkeitLTV:
+    inputs:
+      ssltv:
+        type: SSLTV
+    outputs:
+      - ssltv:
+          type: SSLTV
+          params:
+            Steuerbarkeit: Steuerbar
+      - ssltv:
+          type: SSLTV
+          params:
+            Steuerbarkeit: NichtSteuerbar
+  TesteBeobachtbarkeitLTV:
+    inputs:
+      ssltv:
+        type: SSLTV
+    outputs:
+      - ssltv:
+          type: SSLTV
+          params:
+            Beobachtbarkeit: Beobachtbar
+      - ssltv:
+          type: SSLTV
+          params:
+            Beobachtbarkeit: NichtBeobachtbar
+  TesteSteuerbarkeitNichtlinear:
+    inputs:
+      ss:
+        type: SSNichtlinear
+    outputs:
+      - ss:
+          type: SSNichtlinear
+          params:
+            Steuerbarkeit: Steuerbar
+      - ss:
+          type: SSNichtlinear
+          params:
+            Steuerbarkeit: NichtSteuerbar
+      - ss:  # keine Aussage möglich
+          type: SSNichtlinear
+  TesteBeobachtbarkeitNichtlinear:
+    inputs:
+      ss:
+        type: SSNichtlinear
+    outputs:
+      - ss:
+          type: SSNichtlinear
+          params:
+            Beobachtbarkeit: Beobachtbar
+      - ss:
+          type: SSNichtlinear
+          params:
+            Beobachtbarkeit: NichtBeobachtbar
+      - ss:  # keine Aussage möglich
+          type: SSNichtlinear
   ÜTFzuSS:
     inputs:
       tf:
@@ -126,7 +223,7 @@ methods:
           Ordnung: n
     outputs:
       - ltiss:
-          type: LTISS
+          type: SSLTI
           params:
             Steuerbarkeit: Steuerbar
             Normalform: Regelungsnormalform
@@ -134,7 +231,7 @@ methods:
   SSzuÜTF:
     inputs:
       ltiss:
-        type: LTISS
+        type: SSLTI
         params:
           Zustandsdimension: n
     outputs:
@@ -184,7 +281,7 @@ methods:
   Polplatzierung:
     inputs:
       ltiss:
-        type: LTISS
+        type: SSLTI
         params:
           Zustandsdimension: n
           Steuerbarkeit: Steuerbar
@@ -203,7 +300,7 @@ methods:
   LuenbergerEntwurf:
     inputs:
       ltiss:
-        type: LTISS
+        type: SSLTI
         params:
           Zustandsdimension: n
           Beobachtbarkeit: Beobachtbar
@@ -219,3 +316,154 @@ methods:
             Zeilen: n
             Spalten: 1
             Rolle: LuenbergerVerstärkung
+  DGLzuSS:
+    inputs:
+      dgl:
+        type: DGL
+    outputs:
+      - ss:
+          type: SSNichtlinear
+  Trajektorienplanung:
+    inputs:
+      ss:
+        type: SSNichtlinear
+        params:
+          Zustandsdimension: n
+          Eingangsdimension: m
+          Steuerbarkeit: Steuerbar
+      xstart:
+        type: Matrix
+        params:
+          Zeilen: n
+          Spalten: 1
+      xend:
+        type: Matrix
+        params:
+          Zeilen: n
+          Spalten: 1
+      tend:
+        type: Real
+    outputs:
+      - xtraj:
+          type: Zeitfunktion
+          params:
+            Zeilen: n
+            Spalten: 1
+            Rolle: Zustandstrajektorie
+        utraj:
+          type: Zeitfunktion
+          params:
+            Zeilen: m
+            Spalten: 1
+            Rolle: Eingangstrajektorie
+  LinearisierungAnTrajektorie:
+    inputs:
+      ss:
+        type: SSNichtlinear
+        params:
+          Zustandsdimension: n
+          Eingangsdimension: m
+          Steuerbarkeit: s
+      xtraj:
+        type: Zeitfunktion
+        params:
+          Zeilen: n
+          Spalten: 1
+          Rolle: Zustandstrajektorie
+      utraj:
+        type: Zeitfunktion
+        params:
+          Zeilen: m
+          Spalten: 1
+          Rolle: Eingangstrajektorie
+    outputs:
+      - ssltv:
+          type: SSLTV
+          params:
+            Zustandsdimension: n
+            Eingangsdimension: m
+            Steuerbarkeit: s
+  LTVLQREntwurf:
+    inputs:
+      ssltv:
+        type: SSLTV
+        params:
+          Zustandsdimension: n
+          Eingangsdimension: m
+          Steuerbarkeit: Steuerbar
+      q:
+        type: Matrix
+        params:
+          Zeilen: n
+          Spalten: n
+        tune: true
+      r:
+        type: Matrix
+        params:
+          Zeilen: m
+          Spalten: m
+        tune: true
+    outputs:
+      - k:
+          type: Zeitfunktion
+          params:
+            Zeilen: m
+            Spalten: n
+            Rolle: Zustandsrückführung
+  ZeitdiskreterEKFEntwurf:
+    inputs:
+      ss:
+        type: SSNichtlinear
+        params:
+          Beobachtbarkeit: Beobachtbar
+          Zustandsdimension: n
+          Eingangsdimension: m
+      q:
+        type: Matrix
+        params:
+          Zeilen: n
+          Spalten: n
+        tune: true
+      r:
+        type: Matrix
+        params:
+          Zeilen: m
+          Spalten: m
+        tune: true
+    outputs:
+      - obs:
+          type: Beobachterfunktion
+          params:
+            Zustandsdimension: n
+            Eingangsdimension: m
+  BaueTrajektorienfolgeregler:
+    inputs:
+      xtraj:
+        type: Zeitfunktion
+        params:
+          Rolle: Zustandstrajektorie
+          Zeilen: n
+          Spalten: 1
+      utraj:
+        type: Zeitfunktion
+        params:
+          Rolle: Eingangstrajektorie
+          Zeilen: m
+          Spalten: 1
+      k:
+        type: Zeitfunktion
+        params:
+          Rolle: Zustandsrückführung
+          Zeilen: m
+          Spalten: n
+      obs:
+        type: Beobachterfunktion
+        params:
+          Eingangsdimension: m
+          Zustandsdimension: n
+    outputs:
+      - controller:
+          type: Trajektorienfolgeregler
+          params:
+            Zustandsdimension: n
+            Eingangsdimension: m
