@@ -59,8 +59,8 @@
             "$ref": "#/definitions/portDefinitions"
           },
           "outputs": {
-            "type": "array",
-            "items": {
+            "type": "object",
+            "additionalProperties": {
               "$ref": "#/definitions/portDefinitions"
             }
           }

@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import yaml
-from typing import List, Dict
+from typing import List, Dict, Union
 import os
 from dataclasses import dataclass, field
 import jsonschema
@@ -12,45 +12,56 @@ class RTLoadError(Exception):
     pass
 
 
-@dataclass(frozen=True)
-class RTParamType:
+@dataclass
+class RTParamType:  # e.g. Int, Steuerbarkeit, MatrixRolle
     name: str
 
 
-@dataclass(frozen=True)
-class RTEnum(RTParamType):
-    values: List[str] = field(compare=False)
+@dataclass
+class RTParamPlaceholder:
+    name: str
 
 
-@dataclass(frozen=True)
+@dataclass
+class RTEnumType(RTParamType):
+    values: List[str]
+
+
+@dataclass
+class RTEnumValue:
+    type: RTEnumType
+    val: int
+
+
+@dataclass
 class RTParamDefinition:
     name: str
     type: RTParamType
 
 
-@dataclass(frozen=True)
+@dataclass
 class RTTypeDefinition:
     name: str
-    params: Dict[str, RTParamDefinition] = field(compare=False)
+    params: Dict[str, RTParamDefinition]
 
 
-@dataclass(frozen=True)
-class RTMethodPort:
-    name: str
+@dataclass
+class RTMethodInput:
     type: RTTypeDefinition
-    constraints: Dict[RTParamDefinition, str] = field(compare=False)
+    param_constraints: Dict[str, Union[int, RTEnumValue, RTParamPlaceholder]]
 
 
-@dataclass(frozen=True)
-class RTMethodOutPort(RTMethodPort):
-    option_index: int
+@dataclass
+class RTMethodOutput:
+    type: RTTypeDefinition
+    param_statements: Dict[str, Union[int, RTEnumValue, RTParamPlaceholder]]  # does not support integer expressions
 
 
 @dataclass
 class RTMethod:
     name: str
-    inputs: Dict[str, RTMethodPort]
-    outputs: List[Dict[str, RTMethodPort]]
+    inputs: Dict[str, RTMethodInput]
+    outputs: Dict[str, Dict[str, RTMethodOutput]]
 
 
 class RTGraph:
@@ -71,7 +82,7 @@ class RTGraph:
             'Int': RTParamType('Int')
         }
         for enum_name, enum_items in yaml_content['enums'].items():
-            self.param_types[enum_name] = RTEnum(enum_name, enum_items)
+            self.param_types[enum_name] = RTEnumType(enum_name, enum_items)
 
         self.types: Dict[str, RTTypeDefinition] = {}
         for type_name, type_yaml in yaml_content['types'].items():
@@ -89,21 +100,58 @@ class RTGraph:
 
         self.methods: Dict[str, RTMethod] = {}
         for method_name, method_yaml in yaml_content['methods'].items():
-            def make_method_port(port_name, port_yaml, out_index=None):
-                type_def = self.types[port_yaml['type']]
-                if 'params' in port_yaml:
-                    constraints = {
-                        type_def.params[param_name]: param_value for param_name, param_value in port_yaml['params'].items()
-                    }
-                else:
-                    constraints = {}
-                if out_index is None:
-                    return RTMethodPort(port_name, type_def, constraints)
-                else:
-                    return RTMethodOutPort(port_name, type_def, constraints, out_index)
+            inputs: Dict[str, RTMethodInput] = {}
+            for input_name, input_yaml in method_yaml['inputs'].items():
+                type_def = self.types[input_yaml['type']]
+                param_constraints = {}
+                if 'params' in input_yaml:
+                    for param_name, param_val in input_yaml['params'].items():
+                        # the following matching should actually be done based on the expected type
+                        if isinstance(param_val, int):  # integer constant
+                            param_constraints[param_name] = param_val
+                        elif isinstance(param_val, str):
+                            if param_val[0].isupper():  # Enum literal
+                                enum_type: RTEnumType = type_def.params[param_name].type
+                                for i, enum_val in enumerate(enum_type.values):
+                                    if param_val == enum_val:
+                                        param_constraints[param_name] = RTEnumValue(enum_type, i)
+                                        break
+                                else:
+                                    raise RTLoadError(param_val + " is not valid for enum " + enum_type.name)
+                            else:  # placeholder
+                                param_constraints[param_name] = RTParamPlaceholder(param_val)
+                        else:
+                            raise RTLoadError(param_val + " of type " + type(param_val) + " is not a valid constraint")
 
-            inputs = {port_name: make_method_port(port_name, port_yaml) for port_name, port_yaml in method_yaml['inputs'].items()}
-            outputs = [{port_name: make_method_port(port_name, port_yaml, out_index) for port_name, port_yaml in output_option_dict.items()} for out_index, output_option_dict in enumerate(method_yaml['outputs'])]
+                inputs[input_name] = RTMethodInput(type_def, param_constraints)
+
+            outputs: Dict[str, Dict[str, RTMethodOutput]] = {}
+            for output_option, option_yaml in method_yaml['outputs'].items():
+                option_dict = {}
+                for output_name, output_yaml in option_yaml.items():
+                    type_def = self.types[output_yaml['type']]
+                    param_statements = {}
+                    if 'params' in output_yaml:
+                        for param_name, param_val in output_yaml['params'].items():
+                            # the following matching should actually be done based on the expected type
+                            if isinstance(param_val, int):  # integer constant
+                                param_statements[param_name] = param_val
+                            elif isinstance(param_val, str):
+                                if param_val[0].isupper():  # Enum literal
+                                    enum_type: RTEnumType = type_def.params[param_name].type
+                                    for i, enum_val in enumerate(enum_type.values):
+                                        if param_val == enum_val:
+                                            param_statements[param_name] = RTEnumValue(enum_type, i)
+                                            break
+                                    else:
+                                        raise RTLoadError(param_val + " is not valid for enum " + enum_type.name)
+                                else:  # placeholder
+                                    param_statements[param_name] = RTParamPlaceholder(param_val)
+                            else:
+                                raise RTLoadError(param_val + " of type " + type(param_val) + " is not a valid constraint")
+
+                    option_dict[output_name] = RTMethodOutput(type_def, param_statements)
+                outputs[output_option] = option_dict
 
             self.methods[method_name] = RTMethod(method_name, inputs, outputs)
 
@@ -113,5 +161,5 @@ class RTGraph:
 
 
 if __name__ == '__main__':
-    graph = RTGraph('../new_types.yml')
-    print(graph)
+    graph = RTGraph('../minimal.yml')
+    print(graph.methods)

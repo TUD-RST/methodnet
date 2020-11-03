@@ -1,0 +1,46 @@
+enums:
+  MeinEnum: [Eins, Zwei, Drei]
+
+types:
+  TypOhneParameter: {}
+  TypEins:
+    params:
+      EineZahl:
+        type: Int
+      EinEnum:
+        type: MeinEnum
+
+
+methods:
+  EinTest:
+    inputs:
+      in:
+        type: TypEins
+    outputs:
+      optionEins:
+        in:
+          type: TypEins
+          params:
+            EinEnum: Eins
+      optionZwei:
+        in:
+          type: TypEins
+          params:
+            EinEnum: Zwei
+      optionDrei:
+        in:  # keine Aussage möglich
+          type: TypEins
+  AndereMethode:
+    inputs:
+      inEins:
+        type: TypOhneParameter
+      inZwei:
+        type: TypEins
+        params:
+          EineZahl: n
+    outputs:
+      optionEins:
+        out:
+          type: TypEins
+          params:
+            EineZahl: 2*n
