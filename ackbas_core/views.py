@@ -9,7 +9,7 @@ import json
 
 from typing import Dict
 
-from ackbas_core.solution_sketch import build_solution, RTObjectInstance
+from ackbas_core.solution_sketch import build_solution, RTObjectInstance, brute_force_solution
 
 
 class LandingPageView(View):
@@ -105,9 +105,17 @@ class GraphEditorView(View):
             }
         ]
 
-        object_instances, method_instances = build_solution(rtgraph, start_ao_spec, call_spec)
-        object_instances['loesung1'].output_of.propagate()
-        object_instances['loesung2'].output_of.propagate()
+        # object_instances, method_instances = build_solution(rtgraph, start_ao_spec, call_spec)
+        # object_instances['loesung1'].output_of.propagate()
+        # object_instances['loesung2'].output_of.propagate()
+
+        start_object = RTObjectInstance('start', rtgraph.types['TypEins'], {
+            'WertEins': 42
+        }, None)
+
+        end_spec = kg.RTMethodInput(rtgraph.types['TypDrei'], {'WertDrei': 42})
+
+        object_instances, method_instances = brute_force_solution(rtgraph, {'start': start_object}, end_spec)
 
         id = 1
         ao_name_to_id: Dict[str, int] = {}

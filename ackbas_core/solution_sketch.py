@@ -1,8 +1,9 @@
 from __future__ import annotations
 from dataclasses import dataclass
-from typing import Dict, Union, Optional
+from typing import Dict, Union, Optional, List
 from ackbas_core.knowledge_graph import RTTypeDefinition, RTMethod, RTGraph, \
-    RTEnumValue, RTParamPlaceholder
+    RTEnumValue, RTParamPlaceholder, RTMethodInput
+import itertools
 
 
 @dataclass
@@ -105,6 +106,109 @@ def build_solution(graph, start_ao_spec, call_spec):
     return abstract_objects, method_calls
 
 
+def brute_force_solution(graph: RTGraph, start_objects: Dict[str, RTObjectInstance], end_spec: RTMethodInput):
+    # define two lists, "potential connections", "tried connections"
+    # fill "potential connections" with every connection that fits and that isn't yet in "tried connections"
+    # for every "potential connection" pop it, add it to "tried connections", and if it results in a new object, add it to the graph, exit if new object fits end_spec
+    # repeat with new "potential connections", exit if no exist
+    potential_connections = []
+    tried_connections = []
+
+    object_instances = start_objects.copy()
+    method_instances = []
+
+    found_target_obj = False
+    exhausted_every_connection = False
+
+    auto_id = 0
+
+    while not found_target_obj and not exhausted_every_connection:
+        for method_name, method_def in graph.methods.items():
+            dict_of_input_lists = {input_name: [obj_name for obj_name, obj in object_instances.items() if object_matches_input_spec(obj, input_spec)] for input_name, input_spec in method_def.inputs.items()}
+            list_of_input_connections = dict_cartesian(dict_of_input_lists)
+
+            for input_connection in list_of_input_connections:
+                input_connection_with_method = {
+                    'method': method_name,
+                    'inputs': input_connection
+                }
+                if input_connection_with_method not in tried_connections:
+                    potential_connections.append(input_connection_with_method)
+
+        if not potential_connections:
+            exhausted_every_connection = True
+
+        while potential_connections:
+            new_connection = potential_connections.pop()
+            tried_connections.append(new_connection)
+
+            method_def = graph.methods[new_connection['method']]
+            inputs = {input_name: object_instances[new_connection['inputs'][input_name]] for input_name in method_def.inputs.keys()}
+            outputs = {
+                option_name: {
+                    output_name: RTObjectInstance("o" + str(auto_id := auto_id + 1), output_def.type, {}, None) for output_name, output_def in output_option.items()
+                } for option_name, output_option in method_def.outputs.items()
+            }
+            new_method_instance = RTMethodInstance(method_def, inputs, outputs)
+            new_method_instance.propagate()
+
+            method_adds_new_object = False
+            for option_name in outputs:
+                for output_name in outputs[option_name].keys():
+                    output_obj = new_method_instance.outputs[option_name][output_name]
+                    output_obj.output_of = new_method_instance
+
+                    for old_obj in object_instances.values():
+                        if not new_object_is_redundant(old_obj, output_obj):
+                            method_adds_new_object = True
+
+            if method_adds_new_object:
+                method_instances.append(new_method_instance)
+                for option_name in outputs:
+                    for output_name in outputs[option_name].keys():
+                        output_obj = new_method_instance.outputs[option_name][output_name]
+                        object_instances[output_obj.name] = output_obj
+
+                        if object_matches_input_spec(output_obj, end_spec):
+                            found_target_obj = True
+
+    return object_instances, method_instances
+
+
+def object_matches_input_spec(o: RTObjectInstance, input_spec: RTMethodInput):
+    if o.type != input_spec.type:
+        return False
+
+    for param_name, constraint in input_spec.param_constraints.items():
+        if param_name not in o.param_values:
+            return False
+        if (isinstance(constraint, int) or isinstance(constraint, RTEnumValue)) and o.param_values[param_name] != constraint:
+            return False
+    return True
+
+
+def new_object_is_redundant(old_object: RTObjectInstance, new_object: RTObjectInstance):
+    if old_object.type != new_object.type:
+        return False
+    for param_name, param_val in new_object.param_values.items():
+        if param_name not in old_object.param_values or old_object.param_values[param_name] != param_val:
+            return False
+    return True
+
+
+def dict_cartesian(dict_of_lists: Dict[str, List]):
+    """
+    Example: {'a': [1, 2], 'b': [3, 4, 5]} results in
+    [{'a': 1, 'b': 3}, {'a': 1, 'b': 4}, ..., {'a': 2, 'b': 5}]
+    """
+    return [
+        {
+            key: combination_tuple[i_key]
+            for i_key, key in enumerate(dict_of_lists.keys())
+        } for combination_tuple in itertools.product(*dict_of_lists.values())
+    ]
+
+
 if __name__ == '__main__':
     graph = RTGraph('../minimal.yml')
 
@@ -180,7 +284,15 @@ if __name__ == '__main__':
         }
     ]
 
-    object_instances, method_instances = build_solution(graph, start_ao_spec, call_spec)
-    object_instances['loesung1'].output_of.propagate()
-    object_instances['loesung2'].output_of.propagate()
-    print(object_instances['loesung1'])
+    # object_instances, method_instances = build_solution(graph, start_ao_spec, call_spec)
+    # object_instances['loesung1'].output_of.propagate()
+    # object_instances['loesung2'].output_of.propagate()
+    # print(object_instances['loesung1'])
+
+    start_object = RTObjectInstance('start', graph.types['TypEins'], {
+        'WertEins': 42
+    }, None)
+
+    end_spec = RTMethodInput(graph.types['TypDrei'], {'WertDrei': 42})
+
+    object_instances, method_instances = brute_force_solution(graph, {'start': start_object}, end_spec)
