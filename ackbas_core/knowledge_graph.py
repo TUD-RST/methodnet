@@ -133,22 +133,7 @@ class RTGraph:
                     param_statements = {}
                     if 'params' in output_yaml:
                         for param_name, param_val in output_yaml['params'].items():
-                            # the following matching should actually be done based on the expected type
-                            if isinstance(param_val, int):  # integer constant
-                                param_statements[param_name] = param_val
-                            elif isinstance(param_val, str):
-                                if param_val[0].isupper():  # Enum literal
-                                    enum_type: RTEnumType = type_def.params[param_name].type
-                                    for i, enum_val in enumerate(enum_type.values):
-                                        if param_val == enum_val:
-                                            param_statements[param_name] = RTEnumValue(enum_type, i)
-                                            break
-                                    else:
-                                        raise RTLoadError(param_val + " is not valid for enum " + enum_type.name)
-                                else:  # placeholder
-                                    param_statements[param_name] = RTParamPlaceholder(param_val)
-                            else:
-                                raise RTLoadError(param_val + " of type " + type(param_val) + " is not a valid constraint")
+                            param_statements[param_name] = self.instantiate_param(type_def.params[param_name].type, param_val)
 
                     option_dict[output_name] = RTMethodOutput(type_def, param_statements)
                 outputs[output_option] = option_dict
@@ -158,6 +143,24 @@ class RTGraph:
     def next_id(self):
         self.node_id += 1
         return self.node_id - 1
+
+    @staticmethod
+    def instantiate_param(param_type: RTParamType, literal_val: Union[int, str]):
+        # the following matching should actually be done based on the expected type
+        if isinstance(literal_val, int):  # integer constant
+            return literal_val
+        elif isinstance(literal_val, str):
+            if literal_val[0].isupper():  # Enum literal
+                enum_type: RTEnumType = param_type
+                for i, enum_val in enumerate(enum_type.values):
+                    if literal_val == enum_val:
+                        return RTEnumValue(enum_type, i)
+                else:
+                    raise RTLoadError(literal_val + " is not valid for enum " + enum_type.name)
+            else:  # placeholder
+                return RTParamPlaceholder(literal_val)
+        else:
+            raise RTLoadError(literal_val + " of type " + type(literal_val) + " is not a valid constraint")
 
 
 if __name__ == '__main__':

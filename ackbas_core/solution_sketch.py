@@ -1,58 +1,66 @@
 from __future__ import annotations
 from dataclasses import dataclass
-from typing import Dict, List
-from ackbas_core.knowledge_graph import RTTypeDefinition, RTParamDefinition, RTMethod, RTMethodPort, RTGraph
+from typing import Dict, Union, Optional
+from ackbas_core.knowledge_graph import RTTypeDefinition, RTMethod, RTGraph, \
+    RTEnumValue, RTParamPlaceholder
 
 
 @dataclass
-class AbstractObject:
+class RTObjectInstance:
     name: str
     type: RTTypeDefinition
-    param_values: Dict[RTParamDefinition, str]
-    dependent_methods: List[MethodCall]
+    param_values: Dict[str, Union[int, RTEnumValue]]
+    output_of: Optional[RTMethodInstance]
 
 
 @dataclass
-class MethodCall:
+class RTMethodInstance:
     method: RTMethod
-    inputs: Dict[RTMethodPort, AbstractObject]
-    outputs: Dict[RTMethodPort, AbstractObject]
+    inputs: Dict[str, Optional[RTObjectInstance]]
+    outputs: Dict[str, Dict[str, Optional[RTObjectInstance]]]
 
-    def propagate(self):
-        for output, output_obj in self.outputs.items():
-            output_obj.type = output.type
+    def propagate(self):  # bäh
+        # propagate parameters to objects connected to inputs
+        for input_obj in self.inputs.values():
+            if input_obj is not None:
+                input_obj.output_of.propagate()
 
-            for input, input_obj in self.inputs.items():
-                if input.name == output.name:
-                    output_obj.param_values = input_obj.param_values.copy()
-                    break
-            else:
-                output_obj.param_values = {}
+        for option_name, output_option in self.outputs.items():
+            for output_name, output_obj in output_option.items():
+                if output_obj is None:
+                    continue
 
-            for param_def, constraint_val in output.constraints.items():
-                if (isinstance(constraint_val, str) and constraint_val[0].isupper()) or isinstance(constraint_val, int):
-                    # Specific value, just set it
-                    output_obj.param_values[param_def] = constraint_val
-                else:
-                    # search input ports for a constraint containing this value
-                    for input, input_obj in self.inputs.items():
-                        for input_param_def, input_constraint_val in input.constraints.items():
-                            if input_constraint_val == constraint_val and input_param_def in input_obj.param_values:
-                                # then read the input objects parameter and set it for the output object
-                                output_obj.param_values[param_def] = input_obj.param_values[input_param_def]
+                output_def = self.method.outputs[option_name][output_name]
+                output_obj.type = output_def.type
 
-        for output_obj in self.outputs.values():
-            for dependent_method in output_obj.dependent_methods:
-                dependent_method.propagate()
+                for param_name, param_statement in output_def.param_statements.items():
+                    if isinstance(param_statement, int) or isinstance(param_statement, RTEnumValue):
+                        # output param is literal value, just set it
+                        output_obj.param_values[param_name] = param_statement
+                    elif isinstance(param_statement, RTParamPlaceholder):
+                        # search inputs for matching placeholder
+                        for input_name, input_def in self.method.inputs.items():
+                            for in_param_name, param_constraint in input_def.param_constraints.items():
+                                if isinstance(param_constraint, RTParamPlaceholder) and param_constraint.name == param_statement.name:
+                                    # we found the matching placeholder
+                                    # now find the input object
+                                    input_obj = self.inputs[input_name]
+                                    assert input_obj is not None, "Cannot infer parameter " + param_name + " for " + output_obj.name + " because input " + input_name + " is not connected"
+                                    output_obj.param_values[param_name] = input_obj.param_values[in_param_name]
+                                    # now we need to break out of these loops
+                                    break
+                            else:
+                                continue
+                            break
 
 
 def build_solution(graph, start_ao_spec, call_spec):
-    abstract_objects: Dict[str, AbstractObject] = {}
+    abstract_objects: Dict[str, RTObjectInstance] = {}
     method_calls = []
 
     def get_ao(name):
         if name not in abstract_objects:
-            abstract_objects[name] = AbstractObject(name, None, {}, [])
+            abstract_objects[name] = RTObjectInstance(name, None, {}, None)
 
         return abstract_objects[name]
 
@@ -61,27 +69,30 @@ def build_solution(graph, start_ao_spec, call_spec):
         ao.type = graph.types[ao_spec['type']]
 
         for param_name, param_val in ao_spec['params'].items():
-            ao.param_values[ao.type.params[param_name]] = param_val
-
-        abstract_objects[ao_name] = ao
+            ao.param_values[param_name] = graph.instantiate_param(ao.type.params[param_name].type, param_val)
 
     for method_call_descr in call_spec:
         method_def = graph.methods[method_call_descr['method']]
 
         inputs = {}
         for port_name, ao_name in method_call_descr['inputs'].items():
-            port_def = method_def.inputs[port_name]
-            inputs[port_def] = get_ao(ao_name)
+            inputs[port_name] = get_ao(ao_name)
 
         outputs = {}
-        for option_i, output_set in enumerate(method_call_descr['outputs']):
-            for port_name, ao_name in output_set.items():
-                port_def = method_def.outputs[option_i][port_name]
-                outputs[port_def] = get_ao(ao_name)
+        for option_name, output_option in method_call_descr['outputs'].items():
+            for port_name, ao_name in output_option.items():
+                if option_name not in outputs:
+                    outputs[option_name] = {}
 
-        method_call = MethodCall(method_def, inputs, outputs)
-        for ao in method_call.inputs.values():
-            ao.dependent_methods.append(method_call)
+                output_obj = get_ao(ao_name)
+                outputs[option_name][port_name] = output_obj
+
+        method_call = RTMethodInstance(method_def, inputs, outputs)
+
+        for output_option in method_call.outputs.values():
+            for output_obj in output_option.values():
+                output_obj.output_of = method_call
+
         method_calls.append(method_call)
 
     return abstract_objects, method_calls
