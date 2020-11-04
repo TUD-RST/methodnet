@@ -1,46 +1,76 @@
 enums:
-  MeinEnum: [Eins, Zwei, Drei]
+  MeinEnum: [Eins, Zwei]
 
 types:
   TypOhneParameter: {}
   TypEins:
     params:
-      EineZahl:
+      WertEins:
         type: Int
-      EinEnum:
+  TypZwei:
+    params:
+      WertZwei:
+        type: Int
+      WertEnum:
         type: MeinEnum
+  TypDrei:
+    params:
+      WertDrei:
+        type: Int
 
 
 methods:
-  EinTest:
+  Konvertiere:
     inputs:
       in:
         type: TypEins
-    outputs:
-      optionEins:
-        in:
-          type: TypEins
-          params:
-            EinEnum: Eins
-      optionZwei:
-        in:
-          type: TypEins
-          params:
-            EinEnum: Zwei
-      optionDrei:
-        in:  # keine Aussage möglich
-          type: TypEins
-  AndereMethode:
-    inputs:
-      inEins:
-        type: TypOhneParameter
-      inZwei:
-        type: TypEins
         params:
-          EineZahl: n
+          WertEins: n
     outputs:
       optionEins:
         out:
-          type: TypEins
+          type: TypZwei
           params:
-            EineZahl: 2*n
+            WertZwei: n
+  Teste:
+    inputs:
+      objektZwei:
+        type: TypZwei
+    outputs:
+      optionGut:
+        objektZwei:
+          type: TypZwei
+          params:
+            WertEnum: Eins
+      optionSchlecht:
+        objektZwei:
+          type: TypZwei
+          params:
+            WertEnum: Zwei
+  Korrigiere:
+    inputs:
+      objektZwei:
+        type: TypZwei
+        params:
+          WertEnum: Zwei
+    outputs:
+      optionEins:
+        objektZwei:
+          type: TypZwei
+          params:
+            WertEnum: Eins
+  Kombiniere:
+    inputs:
+      objektEins:
+        type: TypEins
+      objektZwei:
+        type: TypZwei
+        params:
+          WertZwei: x
+          WertEnum: Eins
+    outputs:
+      optionEins:
+        objektDrei:
+          type: TypDrei
+          params:
+            WertDrei: x

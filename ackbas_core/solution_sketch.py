@@ -22,7 +22,7 @@ class RTMethodInstance:
     def propagate(self):  # bäh
         # propagate parameters to objects connected to inputs
         for input_obj in self.inputs.values():
-            if input_obj is not None:
+            if input_obj is not None and input_obj.output_of is not None:
                 input_obj.output_of.propagate()
 
         for option_name, output_option in self.outputs.items():
@@ -32,6 +32,13 @@ class RTMethodInstance:
 
                 output_def = self.method.outputs[option_name][output_name]
                 output_obj.type = output_def.type
+
+                # copy parameters from matching input object if it exists
+                for input_name, input_obj in self.inputs.items():
+                    if input_name == output_name:
+                        for param_name, param_val in input_obj.param_values.items():
+                            output_obj.param_values[param_name] = param_val
+                        break
 
                 for param_name, param_statement in output_def.param_statements.items():
                     if isinstance(param_statement, int) or isinstance(param_statement, RTEnumValue):
@@ -99,32 +106,81 @@ def build_solution(graph, start_ao_spec, call_spec):
 
 
 if __name__ == '__main__':
-    graph = RTGraph('../new_types.yml')
+    graph = RTGraph('../minimal.yml')
 
     start_ao_spec = {
-        'tf': {
-            'type': 'ÜTF',
+        'start': {
+            'type': 'TypEins',
             'params': {
-                'Ordnung': 3,
-                'Proper': 'Proper'
+                'WertEins': 42
             }
         }
     }
 
     call_spec = [
         {
-            'method': 'ÜTFzuSS',
+            'method': 'Konvertiere',
             'inputs': {
-                'tf': 'tf'
+                'in': 'start'
             },
-            'outputs': [
-                {
-                    'ltiss': 'ss'
+            'outputs': {
+                'optionEins': {
+                    'out': 'konvertiert'
                 }
-            ]
+            }
+        },
+        {
+            'method': 'Teste',
+            'inputs': {
+                'objektZwei': 'konvertiert'
+            },
+            'outputs': {
+                'optionGut': {
+                    'objektZwei': 'gut'
+                },
+                'optionSchlecht': {
+                    'objektZwei': 'schlecht'
+                }
+            }
+        },
+        {
+            'method': 'Kombiniere',
+            'inputs': {
+                'objektEins': 'start',
+                'objektZwei': 'gut'
+            },
+            'outputs': {
+                'optionEins': {
+                    'objektDrei': 'loesung1'
+                }
+            }
+        },
+        {
+            'method': 'Korrigiere',
+            'inputs': {
+                'objektZwei': 'schlecht'
+            },
+            'outputs': {
+                'optionEins': {
+                    'objektZwei': 'korrigiert'
+                }
+            }
+        },
+        {
+            'method': 'Kombiniere',
+            'inputs': {
+                'objektEins': 'start',
+                'objektZwei': 'korrigiert'
+            },
+            'outputs': {
+                'optionEins': {
+                    'objektDrei': 'loesung2'
+                }
+            }
         }
     ]
 
-    abstract_objects, method_calls = build_solution(graph, start_ao_spec, call_spec)
-    method_calls[0].propagate()
-    print(abstract_objects['ss'])
+    object_instances, method_instances = build_solution(graph, start_ao_spec, call_spec)
+    object_instances['loesung1'].output_of.propagate()
+    object_instances['loesung2'].output_of.propagate()
+    print(object_instances['loesung1'])

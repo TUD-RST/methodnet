@@ -21,6 +21,9 @@ class RTParamType:  # e.g. Int, Steuerbarkeit, MatrixRolle
 class RTParamPlaceholder:
     name: str
 
+    def __repr__(self):
+        return "$" + self.name
+
 
 @dataclass
 class RTEnumType(RTParamType):
@@ -31,6 +34,9 @@ class RTEnumType(RTParamType):
 class RTEnumValue:
     type: RTEnumType
     val: int
+
+    def __repr__(self):
+        return self.type.name + "." + self.type.values[self.val]
 
 
 @dataclass

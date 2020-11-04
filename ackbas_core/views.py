@@ -7,9 +7,9 @@ import ackbas_core.knowledge_graph as kg
 
 import json
 
-from typing import List, Literal, Union, Dict
+from typing import Dict
 
-from ackbas_core.solution_sketch import build_solution, AbstractObject
+from ackbas_core.solution_sketch import build_solution, RTObjectInstance
 
 
 class LandingPageView(View):
@@ -31,178 +31,139 @@ class GraphEditorView(View):
             'nextId': 0
         }
 
-        rtgraph = kg.RTGraph('new_types.yml')
+        rtgraph = kg.RTGraph('minimal.yml')
 
         start_ao_spec = {
-            'dgl': {
-                'type': 'DGL',
+            'start': {
+                'type': 'TypEins',
                 'params': {
-                    'Linear': 'NichtLinear'
+                    'WertEins': 42
                 }
             }
         }
 
         call_spec = [
             {
-                'method': 'DGLzuSS',
+                'method': 'Konvertiere',
                 'inputs': {
-                    'dgl': 'dgl'
+                    'in': 'start'
                 },
-                'outputs': [
-                    {
-                        'ss': 'ssnonlin'
+                'outputs': {
+                    'optionEins': {
+                        'out': 'konvertiert'
                     }
-                ]
+                }
             },
             {
-                'method': 'TesteSteuerbarkeitNichtlinear',
+                'method': 'Teste',
                 'inputs': {
-                    'ss': 'ssnonlin'
+                    'objektZwei': 'konvertiert'
                 },
-                'outputs': [
-                    {
-                        'ss': 'ssnonlincontr'
+                'outputs': {
+                    'optionGut': {
+                        'objektZwei': 'gut'
                     },
-                    {
-                        'ss': 'ssnonlinnotcontr'
-                    },
-                    {
-                        #'ss': 'ssnonlinunknowncontr'
-                    },
-                ]
-            },
-            {
-                'method': 'Trajektorienplanung',
-                'inputs': {
-                    'ss': 'ssnonlincontr'
-                },
-                'outputs': [
-                    {
-                        'xtraj': 'xtraj',
-                        'utraj': 'utraj'
+                    'optionSchlecht': {
+                        'objektZwei': 'schlecht'
                     }
-                ]
+                }
             },
             {
-                'method': 'LinearisierungAnTrajektorie',
+                'method': 'Kombiniere',
                 'inputs': {
-                    'ss': 'ssnonlin',
-                    'xtraj': 'xtraj',
-                    'utraj': 'utraj'
+                    'objektEins': 'start',
+                    'objektZwei': 'gut'
                 },
-                'outputs': [
-                    {
-                        'ssltv': 'ssltv'
+                'outputs': {
+                    'optionEins': {
+                        'objektDrei': 'loesung1'
                     }
-                ]
+                }
             },
             {
-                'method': 'LTVLQREntwurf',
+                'method': 'Korrigiere',
                 'inputs': {
-                    'ssltv': 'ssltv'
+                    'objektZwei': 'schlecht'
                 },
-                'outputs': [
-                    {
-                        'k': 'k'
+                'outputs': {
+                    'optionEins': {
+                        'objektZwei': 'korrigiert'
                     }
-                ]
+                }
             },
             {
-                'method': 'BaueTrajektorienfolgeregler',
+                'method': 'Kombiniere',
                 'inputs': {
-                    'xtraj': 'xtraj',
-                    'utraj': 'utraj',
-                    'k': 'k',
-                    'obs': 'obs'
+                    'objektEins': 'start',
+                    'objektZwei': 'korrigiert'
                 },
-                'outputs': [
-                    {
-                        'controller': 'controller'
+                'outputs': {
+                    'optionEins': {
+                        'objektDrei': 'loesung2'
                     }
-                ]
-            },
-            {
-                'method': 'TesteBeobachtbarkeitNichtlinear',
-                'inputs': {
-                    'ss': 'ssnonlin'
-                },
-                'outputs': [
-                    {
-                        'ss': 'ssnonlinobs'
-                    },
-                    {},
-                    {}
-                ]
-            },
-            {
-                'method': 'ZeitdiskreterEKFEntwurf',
-                'inputs': {
-                    'ss': 'ssnonlinobs'
-                },
-                'outputs': [
-                    {
-                        'obs': 'obs'
-                    }
-                ]
+                }
             }
         ]
 
-        abstract_objects, method_calls = build_solution(rtgraph, start_ao_spec, call_spec)
-        method_calls[0].propagate()
+        object_instances, method_instances = build_solution(rtgraph, start_ao_spec, call_spec)
+        object_instances['loesung1'].output_of.propagate()
+        object_instances['loesung2'].output_of.propagate()
 
         id = 1
         ao_name_to_id: Dict[str, int] = {}
 
-        for ao in abstract_objects.values():
+        for ao in object_instances.values():
             graph_data['objects'].append({
                 "id": id,
                 "type": ao.type.name,
                 "name": ao.name,
                 "params": {
-                    param_def.name: param_val for param_def, param_val in ao.param_values.items()
+                    param_name: str(param_val) for param_name, param_val in ao.param_values.items()
                 }
             })
             ao_name_to_id[ao.name] = id
             id += 1
 
-        for mc in method_calls:
+        for mc in method_instances:
             inputs = []
-            for port in mc.method.inputs.values():
+            for port_name, port in mc.method.inputs.items():
                 port_dict = {
                     'id': id,
-                    'name': port.name,
+                    'name': port_name,
                     'constraints': {
-                        param_def.name: param_val for param_def, param_val in port.constraints.items()
+                        param_name: str(param_val) for param_name, param_val in port.param_constraints.items()
                     }
                 }
-                if port in mc.inputs:
-                    ao = mc.inputs[port]
-                    graph_data['connections'].append({
-                        'fromId': ao_name_to_id[ao.name],
-                        'toId': id
-                    })
+                if port_name in mc.inputs:
+                    ao = mc.inputs[port_name]
+                    if ao is not None:
+                        graph_data['connections'].append({
+                            'fromId': ao_name_to_id[ao.name],
+                            'toId': id
+                        })
 
                 id += 1
                 inputs.append(port_dict)
 
             outputs = []
-            for out_option in mc.method.outputs:
+            for option_name, out_option in mc.method.outputs.items():
                 out_option_ports = []
-                for port in out_option.values():
+                for port_name, port in out_option.items():
                     port_dict = {
                         'id': id,
-                        'name': port.name,
+                        'name': port_name,
                         'constraints': {
-                            param_def.name: param_val for param_def, param_val in port.constraints.items()
+                            param_name: str(param_val) for param_name, param_val in port.param_statements.items()
                         }
                     }
-                    if port in mc.outputs:
-                        ao = mc.outputs[port]
+                    if port_name in mc.outputs[option_name]:
+                        ao = mc.outputs[option_name][port_name]
 
-                        graph_data['connections'].append({
-                            'fromId': id,
-                            'toId': ao_name_to_id[ao.name]
-                        })
+                        if ao is not None:
+                            graph_data['connections'].append({
+                                'fromId': id,
+                                'toId': ao_name_to_id[ao.name]
+                            })
 
                     id += 1
                     out_option_ports.append(port_dict)
