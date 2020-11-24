@@ -213,9 +213,13 @@ def flood_fill(solution_graph: RTSolutionGraph, knowledge_graph: RTGraph, choice
                                     output_obj = new_method_instance.outputs[option_name][output_name]
                                     output_obj.output_of = new_method_instance
 
+                                    object_is_redundant = False
                                     for old_obj in solution_graph.get_objects_in_choice_space(choice_space):
-                                        if not new_object_is_redundant(old_obj, output_obj):
-                                            method_adds_new_object = True
+                                        if new_object_is_redundant(old_obj, output_obj):
+                                            object_is_redundant = True
+
+                                    if not object_is_redundant:
+                                        method_adds_new_object = True
 
                             if method_adds_new_object:
                                 # add new method and objects to graph
