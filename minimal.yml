@@ -76,3 +76,13 @@ methods:
           type: TypDrei
           params:
             WertDrei: x
+  Nutzlos:
+    inputs:
+      objektEins:
+        type: TypEins
+    outputs:
+      optionEins:
+        objektEins:
+          type: TypEins
+          params:
+            WertEins: 1337

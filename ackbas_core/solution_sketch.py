@@ -20,6 +20,16 @@ class RTSolutionGraph:
     def get_objects_in_choice_space(self, choice_space: RTChoiceSpace):
         return [o for o in self.object_instances.values() if o.in_choice_space(choice_space)]
 
+    def prune(self):
+        # remove all methods and objects not on the solution path
+        for obj_name, obj in list(self.object_instances.items()):
+            if obj.output_of and not obj.output_of.on_solution_path:
+                del self.object_instances[obj_name]
+
+        for method_name, method in list(self.method_instances.items()):
+            if not method.on_solution_path:
+                del self.method_instances[method_name]
+
     def next_id(self):
         self._auto_id += 1
         return self._auto_id - 1
@@ -47,10 +57,11 @@ class RTMethodInstance:
     name: str
     inputs: Dict[str, Optional[RTObjectInstance]]
     outputs: Dict[str, Dict[str, Optional[RTObjectInstance]]]
+    on_solution_path = False
 
     def propagate(self):
         # TODO: maybe this should automatically be done when instantiating the method? or at least automatically create
-        # the output objects
+        #       the output objects
 
         # propagate parameters to objects connected to inputs
         for input_obj in self.inputs.values():
@@ -112,6 +123,16 @@ class RTMethodInstance:
                             else:
                                 continue
                             break
+
+    def color_as_on_solution_path(self):
+        self.on_solution_path = True
+
+        for input_obj in self.inputs.values():
+            if input_obj is not None:
+                predecessor_method = input_obj.output_of
+                if predecessor_method is not None:
+                    if not predecessor_method.on_solution_path:
+                        predecessor_method.color_as_on_solution_path()
 
 
 def build_solution(graph, start_ao_spec, call_spec):
@@ -179,6 +200,11 @@ def flood_fill(solution_graph: RTSolutionGraph, knowledge_graph: RTGraph, choice
 
     while fresh_objects:
         for fresh_object in fresh_objects:
+            if object_matches_input_spec(fresh_object, solution_graph.target_spec):
+                if fresh_object.output_of:
+                    fresh_object.output_of.color_as_on_solution_path()
+                return
+
             for method_name, method_def in knowledge_graph.methods.items():
                 for input_name, input_spec in method_def.inputs.items():
                     if object_matches_input_spec(fresh_object, input_spec):
@@ -232,8 +258,6 @@ def flood_fill(solution_graph: RTSolutionGraph, knowledge_graph: RTGraph, choice
                                         if output_obj.in_choice_space(choice_space):
                                             new_fresh_objects.append(output_obj)
                                         else:
-                                            if object_matches_input_spec(output_obj, solution_graph.target_spec):
-                                                return
                                             future_objects.append(output_obj)
 
         fresh_objects = new_fresh_objects

@@ -42,6 +42,7 @@ class GraphEditorView(View):
         solution_graph = RTSolutionGraph(end_spec)
         solution_graph.object_instances['start'] = start_object
         flood_fill(solution_graph, rtgraph, {}, [start_object])
+        solution_graph.prune()
 
         object_instances = solution_graph.object_instances
         method_instances = solution_graph.method_instances
