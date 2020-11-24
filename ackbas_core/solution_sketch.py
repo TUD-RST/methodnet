@@ -2,7 +2,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Dict, Union, Optional, List
 from ackbas_core.knowledge_graph import RTTypeDefinition, RTMethod, RTGraph, \
-    RTEnumValue, RTParamPlaceholder, RTMethodInput
+    RTEnumValue, RTParamPlaceholder, RTMethodInput, RTParamUnset
 import itertools
 
 
@@ -228,7 +228,7 @@ def flood_fill(solution_graph: RTSolutionGraph, knowledge_graph: RTGraph, choice
                                         if output_obj.in_choice_space(choice_space):
                                             new_fresh_objects.append(output_obj)
                                         else:
-                                            if object_matches_input_spec(output_obj, end_spec):
+                                            if object_matches_input_spec(output_obj, solution_graph.target_spec):
                                                 return
                                             future_objects.append(output_obj)
 
@@ -256,10 +256,14 @@ def object_matches_input_spec(o: RTObjectInstance, input_spec: RTMethodInput):
         return False
 
     for param_name, constraint in input_spec.param_constraints.items():
-        if param_name not in o.param_values:
-            return False
-        if (isinstance(constraint, int) or isinstance(constraint, RTEnumValue)) and o.param_values[param_name] != constraint:
-            return False
+        if isinstance(constraint, RTParamUnset):
+            if param_name in o.param_values:
+                return False
+        else:
+            if param_name not in o.param_values:
+                return False
+            elif (isinstance(constraint, int) or isinstance(constraint, RTEnumValue)) and o.param_values[param_name] != constraint:
+                return False
     return True
 
 
@@ -299,90 +303,12 @@ def dict_diff(a, b):
 if __name__ == '__main__':
     graph = RTGraph('../minimal.yml')
 
-    start_ao_spec = {
-        'start': {
-            'type': 'TypEins',
-            'params': {
-                'WertEins': 42
-            }
-        }
-    }
-
-    call_spec = [
-        {
-            'method': 'Konvertiere',
-            'inputs': {
-                'in': 'start'
-            },
-            'outputs': {
-                'optionEins': {
-                    'out': 'konvertiert'
-                }
-            }
-        },
-        {
-            'method': 'Teste',
-            'inputs': {
-                'objektZwei': 'konvertiert'
-            },
-            'outputs': {
-                'optionGut': {
-                    'objektZwei': 'gut'
-                },
-                'optionSchlecht': {
-                    'objektZwei': 'schlecht'
-                }
-            }
-        },
-        {
-            'method': 'Kombiniere',
-            'inputs': {
-                'objektEins': 'start',
-                'objektZwei': 'gut'
-            },
-            'outputs': {
-                'optionEins': {
-                    'objektDrei': 'loesung1'
-                }
-            }
-        },
-        {
-            'method': 'Korrigiere',
-            'inputs': {
-                'objektZwei': 'schlecht'
-            },
-            'outputs': {
-                'optionEins': {
-                    'objektZwei': 'korrigiert'
-                }
-            }
-        },
-        {
-            'method': 'Kombiniere',
-            'inputs': {
-                'objektEins': 'start',
-                'objektZwei': 'korrigiert'
-            },
-            'outputs': {
-                'optionEins': {
-                    'objektDrei': 'loesung2'
-                }
-            }
-        }
-    ]
-
-    # object_instances, method_instances = build_solution(graph, start_ao_spec, call_spec)
-    # object_instances['loesung1'].output_of.propagate()
-    # object_instances['loesung2'].output_of.propagate()
-    # print(object_instances['loesung1'])
-
     start_object = RTObjectInstance('start', graph.types['TypEins'], {}, {
         'WertEins': 42
     }, None)
 
     end_spec = RTMethodInput(graph.types['TypDrei'], {'WertDrei': 42})
 
-    #object_instances, method_instances = brute_force_solution(graph, {'start': start_object}, end_spec)
     solution_graph = RTSolutionGraph(end_spec)
     solution_graph.object_instances['start'] = start_object
     flood_fill(solution_graph, graph, {}, [start_object])

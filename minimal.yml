@@ -36,6 +36,8 @@ methods:
     inputs:
       objektZwei:
         type: TypZwei
+        params:
+          WertEnum: unset
     outputs:
       optionGut:
         objektZwei:

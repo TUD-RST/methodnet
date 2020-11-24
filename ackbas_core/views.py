@@ -9,7 +9,7 @@ import json
 
 from typing import Dict
 
-from ackbas_core.solution_sketch import build_solution, RTObjectInstance, brute_force_solution
+from ackbas_core.solution_sketch import RTObjectInstance, RTSolutionGraph, flood_fill
 
 
 class LandingPageView(View):
@@ -33,89 +33,18 @@ class GraphEditorView(View):
 
         rtgraph = kg.RTGraph('minimal.yml')
 
-        start_ao_spec = {
-            'start': {
-                'type': 'TypEins',
-                'params': {
-                    'WertEins': 42
-                }
-            }
-        }
-
-        call_spec = [
-            {
-                'method': 'Konvertiere',
-                'inputs': {
-                    'in': 'start'
-                },
-                'outputs': {
-                    'optionEins': {
-                        'out': 'konvertiert'
-                    }
-                }
-            },
-            {
-                'method': 'Teste',
-                'inputs': {
-                    'objektZwei': 'konvertiert'
-                },
-                'outputs': {
-                    'optionGut': {
-                        'objektZwei': 'gut'
-                    },
-                    'optionSchlecht': {
-                        'objektZwei': 'schlecht'
-                    }
-                }
-            },
-            {
-                'method': 'Kombiniere',
-                'inputs': {
-                    'objektEins': 'start',
-                    'objektZwei': 'gut'
-                },
-                'outputs': {
-                    'optionEins': {
-                        'objektDrei': 'loesung1'
-                    }
-                }
-            },
-            {
-                'method': 'Korrigiere',
-                'inputs': {
-                    'objektZwei': 'schlecht'
-                },
-                'outputs': {
-                    'optionEins': {
-                        'objektZwei': 'korrigiert'
-                    }
-                }
-            },
-            {
-                'method': 'Kombiniere',
-                'inputs': {
-                    'objektEins': 'start',
-                    'objektZwei': 'korrigiert'
-                },
-                'outputs': {
-                    'optionEins': {
-                        'objektDrei': 'loesung2'
-                    }
-                }
-            }
-        ]
-
-        # object_instances, method_instances = build_solution(rtgraph, start_ao_spec, call_spec)
-        # object_instances['loesung1'].output_of.propagate()
-        # object_instances['loesung2'].output_of.propagate()
-
-        start_object = RTObjectInstance('start', rtgraph.types['TypEins'], {
+        start_object = RTObjectInstance('start', rtgraph.types['TypEins'], {}, {
             'WertEins': 42
         }, None)
 
         end_spec = kg.RTMethodInput(rtgraph.types['TypDrei'], {'WertDrei': 42})
 
-        object_instances, method_instances = brute_force_solution(rtgraph, {'start': start_object}, end_spec)
+        solution_graph = RTSolutionGraph(end_spec)
+        solution_graph.object_instances['start'] = start_object
+        flood_fill(solution_graph, rtgraph, {}, [start_object])
+
+        object_instances = solution_graph.object_instances
+        method_instances = solution_graph.method_instances
 
         id = 1
         ao_name_to_id: Dict[str, int] = {}
@@ -132,7 +61,7 @@ class GraphEditorView(View):
             ao_name_to_id[ao.name] = id
             id += 1
 
-        for mc in method_instances:
+        for mc in method_instances.values():
             inputs = []
             for port_name, port in mc.method.inputs.items():
                 port_dict = {

@@ -26,6 +26,11 @@ class RTParamPlaceholder:
 
 
 @dataclass
+class RTParamUnset:
+    pass
+
+
+@dataclass
 class RTEnumType(RTParamType):
     values: List[str]
 
@@ -51,16 +56,19 @@ class RTTypeDefinition:
     params: Dict[str, RTParamDefinition]
 
 
+RTParamValue = Union[int, RTEnumValue, RTParamPlaceholder, RTParamUnset]
+
+
 @dataclass
 class RTMethodInput:
     type: RTTypeDefinition
-    param_constraints: Dict[str, Union[int, RTEnumValue, RTParamPlaceholder]]
+    param_constraints: Dict[str, RTParamValue]
 
 
 @dataclass
 class RTMethodOutput:
     type: RTTypeDefinition
-    param_statements: Dict[str, Union[int, RTEnumValue, RTParamPlaceholder]]  # does not support integer expressions
+    param_statements: Dict[str, RTParamValue]  # does not support integer expressions
 
 
 @dataclass
@@ -112,22 +120,7 @@ class RTGraph:
                 param_constraints = {}
                 if 'params' in input_yaml:
                     for param_name, param_val in input_yaml['params'].items():
-                        # the following matching should actually be done based on the expected type
-                        if isinstance(param_val, int):  # integer constant
-                            param_constraints[param_name] = param_val
-                        elif isinstance(param_val, str):
-                            if param_val[0].isupper():  # Enum literal
-                                enum_type: RTEnumType = type_def.params[param_name].type
-                                for i, enum_val in enumerate(enum_type.values):
-                                    if param_val == enum_val:
-                                        param_constraints[param_name] = RTEnumValue(enum_type, i)
-                                        break
-                                else:
-                                    raise RTLoadError(param_val + " is not valid for enum " + enum_type.name)
-                            else:  # placeholder
-                                param_constraints[param_name] = RTParamPlaceholder(param_val)
-                        else:
-                            raise RTLoadError(param_val + " of type " + type(param_val) + " is not a valid constraint")
+                        param_constraints[param_name] = self.instantiate_param(type_def.params[param_name].type, param_val)
 
                 inputs[input_name] = RTMethodInput(type_def, param_constraints)
 
@@ -151,12 +144,14 @@ class RTGraph:
         return self.node_id - 1
 
     @staticmethod
-    def instantiate_param(param_type: RTParamType, literal_val: Union[int, str]):
+    def instantiate_param(param_type: RTParamType, literal_val: Union[int, str]) -> RTParamValue:
         # the following matching should actually be done based on the expected type
         if isinstance(literal_val, int):  # integer constant
             return literal_val
         elif isinstance(literal_val, str):
-            if literal_val[0].isupper():  # Enum literal
+            if literal_val == 'unset':
+                return RTParamUnset()
+            elif literal_val[0].isupper():  # Enum literal
                 enum_type: RTEnumType = param_type
                 for i, enum_val in enumerate(enum_type.values):
                     if literal_val == enum_val:
