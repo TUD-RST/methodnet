@@ -63,6 +63,7 @@ RTParamValue = Union[int, RTEnumValue, RTParamPlaceholder, RTParamUnset]
 class RTMethodInput:
     type: RTTypeDefinition
     param_constraints: Dict[str, RTParamValue]
+    tune: bool = False
 
 
 @dataclass
@@ -122,8 +123,9 @@ class RTGraph:
                 if 'params' in input_yaml:
                     for param_name, param_val in input_yaml['params'].items():
                         param_constraints[param_name] = self.instantiate_param(type_def.params[param_name].type, param_val)
+                tune = input_yaml.get('tune', False)
 
-                inputs[input_name] = RTMethodInput(type_def, param_constraints)
+                inputs[input_name] = RTMethodInput(type_def, param_constraints, tune=tune)
 
             outputs: Dict[str, Dict[str, RTMethodOutput]] = {}
             for output_option, option_yaml in method_yaml['outputs'].items():

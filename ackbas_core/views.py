@@ -71,7 +71,8 @@ class GraphEditorView(View):
                     'name': port_name,
                     'constraints': {
                         param_name: str(param_val) for param_name, param_val in port.param_constraints.items()
-                    }
+                    },
+                    'tune': port.tune
                 }
                 if port_name in mc.inputs:
                     ao = mc.inputs[port_name]

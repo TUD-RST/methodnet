@@ -212,12 +212,15 @@ def flood_fill(solution_graph: RTSolutionGraph, knowledge_graph: RTGraph, choice
 
             for method_name, method_def in knowledge_graph.methods.items():
                 for input_name, input_spec in method_def.inputs.items():
+                    if input_spec.tune:
+                        continue
+
                     if object_matches_input_spec(fresh_object, input_spec):
                         # this input on this method would accept this fresh object
                         # now find all combinations of how the other inputs could be filled
                         dict_of_lists = {input_name: [fresh_object]}
                         for other_input_name, other_input_spec in method_def.inputs.items():
-                            if other_input_name == input_name:
+                            if other_input_name == input_name or other_input_spec.tune:
                                 continue
 
                             dict_of_lists[other_input_name] = [obj

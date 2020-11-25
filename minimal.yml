@@ -58,6 +58,9 @@ methods:
         type: TypZwei
         params:
           WertEnum: Zwei
+      designParameter:
+        type: TypOhneParameter
+        tune: true
     outputs:
       optionEins:
         objektZwei:

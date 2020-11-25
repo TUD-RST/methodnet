@@ -110,13 +110,13 @@ function dictToTooltip(dict) {
     return tooltip;
 }
 function initGraph(graphData) {
-    var _a;
+    var _a, _b;
     // create an array with nodes
     var nodes = [];
     // create an array with edges
     var edges = [];
-    for (var _i = 0, _b = graphData.objects; _i < _b.length; _i++) {
-        var ao = _b[_i];
+    for (var _i = 0, _c = graphData.objects; _i < _c.length; _i++) {
+        var ao = _c[_i];
         var color = void 0;
         if (ao.is_start) {
             color = {
@@ -147,8 +147,8 @@ function initGraph(graphData) {
     }
     // fix first object for physics
     nodes[0].fixed = true;
-    for (var _c = 0, _d = graphData.methods; _c < _d.length; _c++) {
-        var method = _d[_c];
+    for (var _d = 0, _e = graphData.methods; _d < _e.length; _d++) {
+        var method = _e[_d];
         var methodNode = {
             id: method.id,
             label: method.name,
@@ -159,15 +159,18 @@ function initGraph(graphData) {
             title: (_a = method.description) !== null && _a !== void 0 ? _a : undefined
         };
         nodes.push(methodNode);
-        for (var _e = 0, _f = method.inputs; _e < _f.length; _e++) {
-            var port = _f[_e];
+        for (var _f = 0, _g = method.inputs; _f < _g.length; _f++) {
+            var port = _g[_f];
             var portNode = {
                 id: port.id,
                 label: port.name,
                 title: dictToTooltip(port.constraints),
                 shape: "dot",
                 size: 4,
-                color: {
+                color: ((_b = port.tune) !== null && _b !== void 0 ? _b : false) ? {
+                    border: '#a770b3',
+                    background: '#ed9eff'
+                } : {
                     border: '#b6be77',
                     background: '#f4ff9e'
                 }
@@ -180,8 +183,8 @@ function initGraph(graphData) {
                 arrows: 'to'
             });
         }
-        for (var _g = 0, _h = method.outputs; _g < _h.length; _g++) {
-            var output_option = _h[_g];
+        for (var _h = 0, _j = method.outputs; _h < _j.length; _h++) {
+            var output_option = _j[_h];
             var demux_id = void 0;
             if (method.outputs.length > 1) {
                 var demux = {
@@ -206,8 +209,8 @@ function initGraph(graphData) {
             else {
                 demux_id = method.id;
             }
-            for (var _j = 0, output_option_1 = output_option; _j < output_option_1.length; _j++) {
-                var port = output_option_1[_j];
+            for (var _k = 0, output_option_1 = output_option; _k < output_option_1.length; _k++) {
+                var port = output_option_1[_k];
                 var portNode = {
                     id: port.id,
                     label: port.name,
@@ -229,8 +232,8 @@ function initGraph(graphData) {
             }
         }
     }
-    for (var _k = 0, _l = graphData.connections; _k < _l.length; _k++) {
-        var con = _l[_k];
+    for (var _l = 0, _m = graphData.connections; _l < _m.length; _l++) {
+        var con = _m[_l];
         var newEdge = {
             //id: edge.id,
             from: con.fromId,

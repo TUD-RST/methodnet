@@ -6,6 +6,7 @@ interface Port {
     id: number
     name: string
     constraints: object
+    tune?: boolean
 }
 
 interface GraphData {
@@ -101,7 +102,10 @@ function initGraph(graphData: GraphData) {
                 title: dictToTooltip(port.constraints),
                 shape: "dot",
                 size: 4,
-                color: {
+                color: (port.tune ?? false) ? {
+                    border: '#a770b3',
+                    background: '#ed9eff'
+                } : {
                     border: '#b6be77',
                     background: '#f4ff9e'
                 }
