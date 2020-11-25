@@ -116,24 +116,32 @@ function initGraph(graphData: GraphData) {
         }
 
         for (let output_option of method.outputs) {
-            let demux: vis.Node = {
-                id: graphData.nextId,
-                shape: "square",
-                color: {
-                    background: "black",
-                    border: "black"
-                },
-                size: 10
-            }
-            nodes.push(demux)
-            graphData.nextId++
+            let demux_id
 
-            edges.push({
-                from: method.id,
-                to: demux.id,
-                color: 'black',
-                arrows: 'to'
-            })
+            if (method.outputs.length > 1) {
+                let demux: vis.Node = {
+                    id: graphData.nextId,
+                    shape: "square",
+                    color: {
+                        background: "black",
+                        border: "black"
+                    },
+                    size: 10
+                }
+                nodes.push(demux)
+                graphData.nextId++
+
+                edges.push({
+                    from: method.id,
+                    to: demux.id,
+                    color: 'black',
+                    arrows: 'to'
+                })
+
+                demux_id = demux.id
+            } else {
+                demux_id = method.id
+            }
 
             for (let port of output_option) {
                 let portNode: vis.Node = {
@@ -151,7 +159,7 @@ function initGraph(graphData: GraphData) {
                 nodes.push(portNode)
 
                 edges.push({
-                    from: demux.id,
+                    from: demux_id,
                     to: port.id,
                     color: 'black',
                     arrows: 'to'

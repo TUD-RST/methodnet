@@ -180,23 +180,30 @@ function initGraph(graphData) {
         }
         for (var _f = 0, _g = method.outputs; _f < _g.length; _f++) {
             var output_option = _g[_f];
-            var demux = {
-                id: graphData.nextId,
-                shape: "square",
-                color: {
-                    background: "black",
-                    border: "black"
-                },
-                size: 10
-            };
-            nodes.push(demux);
-            graphData.nextId++;
-            edges.push({
-                from: method.id,
-                to: demux.id,
-                color: 'black',
-                arrows: 'to'
-            });
+            var demux_id = void 0;
+            if (method.outputs.length > 1) {
+                var demux = {
+                    id: graphData.nextId,
+                    shape: "square",
+                    color: {
+                        background: "black",
+                        border: "black"
+                    },
+                    size: 10
+                };
+                nodes.push(demux);
+                graphData.nextId++;
+                edges.push({
+                    from: method.id,
+                    to: demux.id,
+                    color: 'black',
+                    arrows: 'to'
+                });
+                demux_id = demux.id;
+            }
+            else {
+                demux_id = method.id;
+            }
             for (var _h = 0, output_option_1 = output_option; _h < output_option_1.length; _h++) {
                 var port = output_option_1[_h];
                 var portNode = {
@@ -212,7 +219,7 @@ function initGraph(graphData) {
                 };
                 nodes.push(portNode);
                 edges.push({
-                    from: demux.id,
+                    from: demux_id,
                     to: port.id,
                     color: 'black',
                     arrows: 'to'
