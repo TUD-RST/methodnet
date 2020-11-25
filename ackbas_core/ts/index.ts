@@ -14,6 +14,7 @@ interface GraphData {
         name: string
         inputs: Port[]
         outputs: Port[][]
+        description: string | null
     }[]
     objects: {
         id: number
@@ -87,7 +88,8 @@ function initGraph(graphData: GraphData) {
             shape: "box",
             color: {
                 background: '#e6f0ff'
-            }
+            },
+            title: method.description ?? undefined
         }
 
         nodes.push(methodNode)

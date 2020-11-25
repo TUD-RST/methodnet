@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import yaml
-from typing import List, Dict, Union
+from typing import List, Dict, Union, Optional
 import os
 from dataclasses import dataclass, field
 import jsonschema
@@ -76,6 +76,7 @@ class RTMethod:
     name: str
     inputs: Dict[str, RTMethodInput]
     outputs: Dict[str, Dict[str, RTMethodOutput]]
+    description: Optional[str] = None
 
 
 class RTGraph:
@@ -137,7 +138,9 @@ class RTGraph:
                     option_dict[output_name] = RTMethodOutput(type_def, param_statements)
                 outputs[output_option] = option_dict
 
-            self.methods[method_name] = RTMethod(method_name, inputs, outputs)
+            description = method_yaml.get('description', None)
+
+            self.methods[method_name] = RTMethod(method_name, inputs, outputs, description=description)
 
     def next_id(self):
         self.node_id += 1

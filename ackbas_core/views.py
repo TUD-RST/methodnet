@@ -112,7 +112,8 @@ class GraphEditorView(View):
                 'id': id,
                 'name': mc.method.name,
                 'inputs': inputs,
-                'outputs': outputs
+                'outputs': outputs,
+                'description': mc.method.description
             })
             id += 1
 

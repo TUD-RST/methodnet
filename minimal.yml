@@ -21,6 +21,7 @@ types:
 
 methods:
   Konvertiere:
+    description: "Konvertiert einen Typ in einen anderen"
     inputs:
       in:
         type: TypEins
@@ -33,6 +34,7 @@ methods:
           params:
             WertZwei: n
   Teste:
+    description: "Testet ein Objekt auf eine Eigenschaft"
     inputs:
       objektZwei:
         type: TypZwei
@@ -50,6 +52,7 @@ methods:
           params:
             WertEnum: Zwei
   Korrigiere:
+    description: "Korrigiert eine Eigenschaft, wenn sie nicht den Anforderungen entspricht"
     inputs:
       objektZwei:
         type: TypZwei
@@ -62,6 +65,7 @@ methods:
           params:
             WertEnum: Eins
   Kombiniere:
+    description: "Kombiniert zwei Objekte zu einem"
     inputs:
       objektEins:
         type: TypEins
