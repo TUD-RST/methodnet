@@ -19,6 +19,8 @@ interface GraphData {
         id: number
         type: string
         name: string
+        is_start: boolean
+        is_end: boolean
         params: object
     }[]
     connections: {
@@ -47,15 +49,30 @@ function initGraph(graphData: GraphData) {
     let edges: vis.Edge[] = []
 
     for (let ao of graphData.objects) {
+        let color
+        if (ao.is_start) {
+            color = {
+                border: '#b6be77',
+                background: '#f4ff9e'
+            }
+        } else if (ao.is_end) {
+            color = {
+                border: '#42cb52',
+                background: '#bef7c5'
+            }
+        } else {
+            color = {
+                border: '#8bdde3',
+                background: '#9af9ff'
+            }
+        }
+
         let newNode: vis.Node = {
             id: ao.id,
             label: "     " + ao.name + "     ",
             title: '<b>' + ao.type + '</b><br>' + dictToTooltip(ao.params),
             shape: "ellipse",
-            color: {
-                border: '#42cb52',
-                background: '#bef7c5'
-            }
+            color: color
         }
         nodes.push(newNode)
     }

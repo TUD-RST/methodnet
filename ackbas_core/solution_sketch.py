@@ -10,10 +10,12 @@ RTChoiceSpace = Dict[str, str]
 
 
 class RTSolutionGraph:
-    def __init__(self, target_spec: RTMethodInput):
+    def __init__(self, start_objects: List[RTObjectInstance], target_spec: RTMethodInput):
         self.target_spec = target_spec
         self.method_instances: Dict[str, RTMethodInstance] = {}
-        self.object_instances: Dict[str, RTObjectInstance] = {}
+        self.object_instances: Dict[str, RTObjectInstance] = {obj.name: obj for obj in start_objects}
+        for obj in start_objects:
+            obj.is_start = True
 
         self._auto_id = 1
 
@@ -42,6 +44,8 @@ class RTObjectInstance:
     choice_space: RTChoiceSpace  # method instance name -> output option
     param_values: Dict[str, Union[int, RTEnumValue]]
     output_of: Optional[RTMethodInstance]
+    is_start = False
+    is_end = False
 
     def in_choice_space(self, other_choice_space: RTChoiceSpace):
         for method_name, option in self.choice_space.items():
@@ -201,6 +205,7 @@ def flood_fill(solution_graph: RTSolutionGraph, knowledge_graph: RTGraph, choice
     while fresh_objects:
         for fresh_object in fresh_objects:
             if object_matches_input_spec(fresh_object, solution_graph.target_spec):
+                fresh_object.is_end = True
                 if fresh_object.output_of:
                     fresh_object.output_of.color_as_on_solution_path()
                 return
@@ -337,6 +342,5 @@ if __name__ == '__main__':
 
     end_spec = RTMethodInput(graph.types['TypDrei'], {'WertDrei': 42})
 
-    solution_graph = RTSolutionGraph(end_spec)
-    solution_graph.object_instances['start'] = start_object
+    solution_graph = RTSolutionGraph([start_object], end_spec)
     flood_fill(solution_graph, graph, {}, [start_object])

@@ -39,8 +39,7 @@ class GraphEditorView(View):
 
         end_spec = kg.RTMethodInput(rtgraph.types['TypDrei'], {'WertDrei': 42})
 
-        solution_graph = RTSolutionGraph(end_spec)
-        solution_graph.object_instances['start'] = start_object
+        solution_graph = RTSolutionGraph([start_object], end_spec)
         flood_fill(solution_graph, rtgraph, {}, [start_object])
         solution_graph.prune()
 
@@ -55,6 +54,8 @@ class GraphEditorView(View):
                 "id": id,
                 "type": ao.type.name,
                 "name": ao.name,
+                "is_start": ao.is_start,
+                "is_end": ao.is_end,
                 "params": {
                     param_name: str(param_val) for param_name, param_val in ao.param_values.items()
                 }

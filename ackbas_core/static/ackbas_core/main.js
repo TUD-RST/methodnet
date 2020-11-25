@@ -116,15 +116,31 @@ function initGraph(graphData) {
     var edges = [];
     for (var _i = 0, _a = graphData.objects; _i < _a.length; _i++) {
         var ao = _a[_i];
+        var color = void 0;
+        if (ao.is_start) {
+            color = {
+                border: '#b6be77',
+                background: '#f4ff9e'
+            };
+        }
+        else if (ao.is_end) {
+            color = {
+                border: '#42cb52',
+                background: '#bef7c5'
+            };
+        }
+        else {
+            color = {
+                border: '#8bdde3',
+                background: '#9af9ff'
+            };
+        }
         var newNode = {
             id: ao.id,
             label: "     " + ao.name + "     ",
             title: '<b>' + ao.type + '</b><br>' + dictToTooltip(ao.params),
             shape: "ellipse",
-            color: {
-                border: '#42cb52',
-                background: '#bef7c5'
-            }
+            color: color
         };
         nodes.push(newNode);
     }
