@@ -164,7 +164,11 @@ function initGraph(graphData) {
                 label: port.name,
                 title: dictToTooltip(port.constraints),
                 shape: "dot",
-                size: 4
+                size: 4,
+                color: {
+                    border: '#b6be77',
+                    background: '#f4ff9e'
+                }
             };
             nodes.push(portNode);
             edges.push({
@@ -200,7 +204,11 @@ function initGraph(graphData) {
                     label: port.name,
                     title: dictToTooltip(port.constraints),
                     shape: "dot",
-                    size: 4
+                    size: 4,
+                    color: {
+                        border: '#42cb52',
+                        background: '#bef7c5'
+                    }
                 };
                 nodes.push(portNode);
                 edges.push({
