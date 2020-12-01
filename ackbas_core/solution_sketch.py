@@ -279,7 +279,8 @@ def flood_fill(solution_graph: RTSolutionGraph, knowledge_graph: RTGraph, choice
         for method_name, option in obj.choice_space.items():
             if method_name not in choice_space_of_lists:
                 choice_space_of_lists[method_name] = []
-            choice_space_of_lists[method_name].append(option)
+            if option not in choice_space_of_lists[method_name]:
+                choice_space_of_lists[method_name].append(option)
 
     subsequent_choice_spaces = dict_cartesian(choice_space_of_lists)
     for subsequent_choice_space in subsequent_choice_spaces:
