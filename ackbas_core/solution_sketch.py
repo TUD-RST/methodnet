@@ -119,11 +119,15 @@ class RTMethodInstance:
                                 if isinstance(param_constraint, RTParamPlaceholder) and param_constraint.name == param_statement.name:
                                     # we found the matching placeholder
                                     # now find the input object
+                                    if input_name not in self.inputs:
+                                        continue
                                     input_obj = self.inputs[input_name]
                                     assert input_obj is not None, "Cannot infer parameter " + param_name + " for " + output_obj.name + " because input " + input_name + " is not connected"
-                                    output_obj.param_values[param_name] = input_obj.param_values[in_param_name]
-                                    # now we need to break out of these loops
-                                    break
+                                    # copy value from input object if param is set there
+                                    if in_param_name in input_obj.param_values:
+                                        output_obj.param_values[param_name] = input_obj.param_values[in_param_name]
+                                        # now we need to break out of these loops
+                                        break
                             else:
                                 continue
                             break
@@ -201,6 +205,7 @@ def flood_fill(solution_graph: RTSolutionGraph, knowledge_graph: RTGraph, choice
     fresh_objects = start_objects
     new_fresh_objects = []
     future_objects = []
+    subsequent_choice_spaces = []
 
     while fresh_objects:
         for fresh_object in fresh_objects:
@@ -254,6 +259,8 @@ def flood_fill(solution_graph: RTSolutionGraph, knowledge_graph: RTGraph, choice
 
                                     if not object_is_redundant:
                                         method_adds_new_object = True
+                                        if len(outputs) > 1 and output_obj.choice_space not in subsequent_choice_spaces:
+                                            subsequent_choice_spaces.append(output_obj.choice_space)
 
                             if method_adds_new_object:
                                 # add new method and objects to graph
@@ -274,15 +281,6 @@ def flood_fill(solution_graph: RTSolutionGraph, knowledge_graph: RTGraph, choice
     if not future_objects:
         return
 
-    choice_space_of_lists = {}
-    for obj in future_objects:
-        for method_name, option in obj.choice_space.items():
-            if method_name not in choice_space_of_lists:
-                choice_space_of_lists[method_name] = []
-            if option not in choice_space_of_lists[method_name]:
-                choice_space_of_lists[method_name].append(option)
-
-    subsequent_choice_spaces = dict_cartesian(choice_space_of_lists)
     for subsequent_choice_space in subsequent_choice_spaces:
         subsequent_start_objects = [obj for obj in future_objects if obj.in_choice_space(subsequent_choice_space)]
         flood_fill(solution_graph, knowledge_graph, subsequent_choice_space, subsequent_start_objects)
@@ -293,7 +291,9 @@ def object_matches_input_spec(o: RTObjectInstance, input_spec: RTMethodInput):
         return False
 
     for param_name, constraint in input_spec.param_constraints.items():
-        if isinstance(constraint, RTParamUnset):
+        if isinstance(constraint, RTParamPlaceholder):
+            continue
+        elif isinstance(constraint, RTParamUnset):
             if param_name in o.param_values:
                 return False
         else:
@@ -338,13 +338,13 @@ def dict_diff(a, b):
 
 
 if __name__ == '__main__':
-    graph = RTGraph('../minimal.yml')
+    graph = RTGraph('../new_types.yml')
 
-    start_object = RTObjectInstance('start', graph.types['TypEins'], {}, {
-        'WertEins': 42
+    start_object = RTObjectInstance('start', graph.types['DGL'], {}, {
+        'Linear': graph.instantiate_param(graph.param_types['Linear'], 'NichtLinear')
     }, None)
 
-    end_spec = RTMethodInput(graph.types['TypDrei'], {'WertDrei': 42})
+    end_spec = RTMethodInput(graph.types['Trajektorienfolgeregler'], {})
 
     solution_graph = RTSolutionGraph([start_object], end_spec)
     flood_fill(solution_graph, graph, {}, [start_object])

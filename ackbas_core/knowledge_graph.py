@@ -170,5 +170,5 @@ class RTGraph:
 
 
 if __name__ == '__main__':
-    graph = RTGraph('../minimal.yml')
+    graph = RTGraph('../new_types.yml')
     print(graph.methods)

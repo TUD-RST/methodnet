@@ -31,13 +31,13 @@ class GraphEditorView(View):
             'nextId': 0
         }
 
-        rtgraph = kg.RTGraph('minimal.yml')
+        rtgraph = kg.RTGraph('new_types.yml')
 
-        start_object = RTObjectInstance('start', rtgraph.types['TypEins'], {}, {
-            'WertEins': 42
+        start_object = RTObjectInstance('start', rtgraph.types['DGL'], {}, {
+            'Linear': rtgraph.instantiate_param(rtgraph.param_types['Linear'], 'NichtLinear')
         }, None)
 
-        end_spec = kg.RTMethodInput(rtgraph.types['TypDrei'], {'WertDrei': 42})
+        end_spec = kg.RTMethodInput(rtgraph.types['Trajektorienfolgeregler'], {})
 
         solution_graph = RTSolutionGraph([start_object], end_spec)
         flood_fill(solution_graph, rtgraph, {}, [start_object])

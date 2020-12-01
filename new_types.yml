@@ -386,13 +386,16 @@ methods:
         params:
           Zeilen: n
           Spalten: 1
+        tune: true
       xend:
         type: Matrix
         params:
           Zeilen: n
           Spalten: 1
+        tune: true
       tend:
         type: Real
+        tune: true
     outputs:
       o:
         xtraj:
