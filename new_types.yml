@@ -106,7 +106,8 @@ methods:
         params:
           Zustandsdimension: n
     outputs:
-      - linearisiertesSystem:
+      o:
+        linearisiertesSystem:
           type: SSLTI
           params:
             Zustandsdimension: n
@@ -117,7 +118,8 @@ methods:
         params:
           Steuerbarkeit: Steuerbar
     outputs:
-      - ltiss:
+      o:
+        ltiss:
           type: SSLTI
           params:
             Normalform: Regelungsnormalform
@@ -128,7 +130,8 @@ methods:
         params:
           Beobachtbarkeit: Beobachtbar
     outputs:
-      - ltiss:
+      o:
+        ltiss:
           type: SSLTI
           params:
             Normalform: Beobachtungsnormalform
@@ -136,12 +139,16 @@ methods:
     inputs:
       ltiss:
         type: SSLTI
+        params:
+          Steuerbarkeit: unset
     outputs:
-      - ltiss:
+      steuerbar:
+        ltiss:
           type: SSLTI
           params:
             Steuerbarkeit: Steuerbar
-      - ltiss:
+      nichtSteuerbar:
+        ltiss:
           type: SSLTI
           params:
             Steuerbarkeit: NichtSteuerbar
@@ -149,12 +156,16 @@ methods:
     inputs:
       ltiss:
         type: SSLTI
+        params:
+          Beobachtbarkeit: unset
     outputs:
-      - ltiss:
+      beobachtbar:
+        ltiss:
           type: SSLTI
           params:
             Beobachtbarkeit: Beobachtbar
-      - ltiss:
+      nichtBeobachtbar:
+        ltiss:
           type: SSLTI
           params:
             Beobachtbarkeit: NichtBeobachtbar
@@ -162,12 +173,16 @@ methods:
     inputs:
       ssltv:
         type: SSLTV
+        params:
+          Steuerbarkeit: unset
     outputs:
-      - ssltv:
+      steuerbar:
+        ssltv:
           type: SSLTV
           params:
             Steuerbarkeit: Steuerbar
-      - ssltv:
+      nichtSteuerbar:
+        ssltv:
           type: SSLTV
           params:
             Steuerbarkeit: NichtSteuerbar
@@ -175,12 +190,16 @@ methods:
     inputs:
       ssltv:
         type: SSLTV
+        params:
+          Beobachtbarkeit: unset
     outputs:
-      - ssltv:
+      beobachtbar:
+        ssltv:
           type: SSLTV
           params:
             Beobachtbarkeit: Beobachtbar
-      - ssltv:
+      nichtBeobachtbar:
+        ssltv:
           type: SSLTV
           params:
             Beobachtbarkeit: NichtBeobachtbar
@@ -188,32 +207,46 @@ methods:
     inputs:
       ss:
         type: SSNichtlinear
+        params:
+          Steuerbarkeit: unset
     outputs:
-      - ss:
+      steuerbar:
+        ss:
           type: SSNichtlinear
           params:
             Steuerbarkeit: Steuerbar
-      - ss:
+      nichtSteuerbar:
+        ss:
           type: SSNichtlinear
           params:
             Steuerbarkeit: NichtSteuerbar
-      - ss:  # keine Aussage möglich
+      keineAussage:
+        ss:  # keine Aussage möglich
           type: SSNichtlinear
+          params:
+            Steuerbarkeit: unset
   TesteBeobachtbarkeitNichtlinear:
     inputs:
       ss:
         type: SSNichtlinear
+        params:
+          Beobachtbarkeit: unset
     outputs:
-      - ss:
+      beobachtbar:
+        ss:
           type: SSNichtlinear
           params:
             Beobachtbarkeit: Beobachtbar
-      - ss:
+      nichtBeobachtbar:
+        ss:
           type: SSNichtlinear
           params:
             Beobachtbarkeit: NichtBeobachtbar
-      - ss:  # keine Aussage möglich
+      keineAussage:
+        ss:  # keine Aussage möglich
           type: SSNichtlinear
+          params:
+            Beobachtbarkeit: unset
   ÜTFzuSS:
     inputs:
       tf:
@@ -222,7 +255,8 @@ methods:
           Proper: Proper
           Ordnung: n
     outputs:
-      - ltiss:
+      o:
+        ltiss:
           type: SSLTI
           params:
             Steuerbarkeit: Steuerbar
@@ -235,7 +269,8 @@ methods:
         params:
           Zustandsdimension: n
     outputs:
-      - tf:
+      o:
+        tf:
           type: ÜTF
           params:
             Ordnung: n
@@ -243,12 +278,16 @@ methods:
     inputs:
       tf:
         type: ÜTF
+        params:
+          Stabilität: unset
     outputs:
-      - tf:
+      stabil:
+        tf:
           type: ÜTF
           params:
             Stabilität: Stabil
-      - tf:
+      instabil:
+        tf:
           type: ÜTF
           params:
             Stabilität: Instabil
@@ -256,12 +295,16 @@ methods:
     inputs:
       tf:
         type: ÜTF
+        params:
+          Proper: unset
     outputs:
-      - tf:
+      proper:
+        tf:
           type: ÜTF
           params:
             Proper: Proper
-      - tf:
+      improper:
+        tf:
           type: ÜTF
           params:
             Proper: NichtProper
@@ -269,12 +312,16 @@ methods:
     inputs:
       tf:
         type: ÜTF
+        params:
+          Teilerfremd: unset
     outputs:
-      - tf:
+      teilerfremd:
+        tf:
           type: ÜTF
           params:
             Teilerfremd: Teilerfremd
-      - tf:
+      nichtTeilerfremd:
+        tf:
           type: ÜTF
           params:
             Teilerfremd: NichtTeilerfremd
@@ -291,7 +338,8 @@ methods:
           Länge: n
         tune: true
     outputs:
-      - k:
+      o:
+        k:
           type: Matrix
           params:
             Zeilen: 1
@@ -310,7 +358,8 @@ methods:
           Länge: n
         tune: true
     outputs:
-      - k:
+      o:
+        k:
           type: Matrix
           params:
             Zeilen: n
@@ -321,7 +370,8 @@ methods:
       dgl:
         type: DGL
     outputs:
-      - ss:
+      o:
+        ss:
           type: SSNichtlinear
   Trajektorienplanung:
     inputs:
@@ -344,7 +394,8 @@ methods:
       tend:
         type: Real
     outputs:
-      - xtraj:
+      o:
+        xtraj:
           type: Zeitfunktion
           params:
             Zeilen: n
@@ -377,7 +428,8 @@ methods:
           Spalten: 1
           Rolle: Eingangstrajektorie
     outputs:
-      - ssltv:
+      o:
+        ssltv:
           type: SSLTV
           params:
             Zustandsdimension: n
@@ -404,7 +456,8 @@ methods:
           Spalten: m
         tune: true
     outputs:
-      - k:
+      o:
+        k:
           type: Zeitfunktion
           params:
             Zeilen: m
@@ -431,7 +484,8 @@ methods:
           Spalten: m
         tune: true
     outputs:
-      - obs:
+      o:
+        obs:
           type: Beobachterfunktion
           params:
             Zustandsdimension: n
@@ -462,7 +516,8 @@ methods:
           Eingangsdimension: m
           Zustandsdimension: n
     outputs:
-      - controller:
+      o:
+        controller:
           type: Trajektorienfolgeregler
           params:
             Zustandsdimension: n
