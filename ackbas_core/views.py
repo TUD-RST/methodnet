@@ -56,6 +56,7 @@ class GraphEditorView(View):
                 "name": ao.name,
                 "is_start": ao.is_start,
                 "is_end": ao.is_end,
+                "distance_to_start": ao.distance_to_start,
                 "params": {
                     param_name: str(param_val) for param_name, param_val in ao.param_values.items()
                 }

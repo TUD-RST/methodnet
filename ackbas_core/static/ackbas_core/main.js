@@ -115,38 +115,48 @@ function initGraph(graphData) {
     var nodes = [];
     // create an array with edges
     var edges = [];
+    var nr_start_nodes = graphData.objects.filter(function (it) { return it.is_start; }).length;
+    var nr_end_nodes = graphData.objects.filter(function (it) { return !it.is_start && it.is_end; }).length;
+    var start_i = 0;
+    var end_i = 0;
+    var H_SPACE = 1000;
+    var V_SPACE = 300;
     for (var _i = 0, _c = graphData.objects; _i < _c.length; _i++) {
         var ao = _c[_i];
-        var color = void 0;
-        if (ao.is_start) {
-            color = {
-                border: '#b6be77',
-                background: '#f4ff9e'
-            };
-        }
-        else if (ao.is_end) {
-            color = {
-                border: '#42cb52',
-                background: '#bef7c5'
-            };
-        }
-        else {
-            color = {
-                border: '#8bdde3',
-                background: '#9af9ff'
-            };
-        }
         var newNode = {
             id: ao.id,
             label: "     " + ao.name + "     ",
             title: '<b>' + ao.type + '</b><br>' + dictToTooltip(ao.params),
-            shape: "ellipse",
-            color: color
+            shape: "ellipse"
         };
+        if (ao.is_start) {
+            newNode.color = {
+                border: '#b6be77',
+                background: '#f4ff9e'
+            };
+            newNode.fixed = true;
+            newNode.x = (start_i - (nr_start_nodes - 1) / 2) * H_SPACE;
+            start_i++;
+            newNode.y = 0;
+        }
+        else if (ao.is_end) {
+            newNode.color = {
+                border: '#42cb52',
+                background: '#bef7c5'
+            };
+            newNode.fixed = true;
+            newNode.x = (end_i - (nr_end_nodes - 1) / 2) * H_SPACE;
+            end_i++;
+            newNode.y = ao.distance_to_start * V_SPACE;
+        }
+        else {
+            newNode.color = {
+                border: '#8bdde3',
+                background: '#9af9ff'
+            };
+        }
         nodes.push(newNode);
     }
-    // fix first object for physics
-    nodes[0].fixed = true;
     for (var _d = 0, _e = graphData.methods; _d < _e.length; _d++) {
         var method = _e[_d];
         var methodNode = {
@@ -258,7 +268,7 @@ function initGraph(graphData) {
             },
             wind: {
                 x: 0,
-                y: 0.5
+                y: 0
             }
         },
         autoResize: true,

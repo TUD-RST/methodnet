@@ -23,6 +23,7 @@ interface GraphData {
         name: string
         is_start: boolean
         is_end: boolean
+        distance_to_start: number
         params: object
     }[]
     connections: {
@@ -50,37 +51,50 @@ function initGraph(graphData: GraphData) {
     // create an array with edges
     let edges: vis.Edge[] = []
 
+    let nr_start_nodes = graphData.objects.filter(it => it.is_start).length
+    let nr_end_nodes = graphData.objects.filter(it => !it.is_start && it.is_end).length
+
+    let start_i = 0
+    let end_i = 0
+
+    let H_SPACE = 1000
+    let V_SPACE = 300
+
     for (let ao of graphData.objects) {
-        let color
+        let newNode: vis.Node = {
+            id: ao.id,
+            label: "     " + ao.name + "     ",
+            title: '<b>' + ao.type + '</b><br>' + dictToTooltip(ao.params),
+            shape: "ellipse"
+        }
+
         if (ao.is_start) {
-            color = {
+            newNode.color = {
                 border: '#b6be77',
                 background: '#f4ff9e'
             }
+            newNode.fixed = true
+            newNode.x = (start_i - (nr_start_nodes - 1)/2)*H_SPACE
+            start_i++
+            newNode.y = 0
         } else if (ao.is_end) {
-            color = {
+            newNode.color = {
                 border: '#42cb52',
                 background: '#bef7c5'
             }
+            newNode.fixed = true
+            newNode.x = (end_i - (nr_end_nodes - 1)/2)*H_SPACE
+            end_i++
+            newNode.y = ao.distance_to_start*V_SPACE
         } else {
-            color = {
+            newNode.color = {
                 border: '#8bdde3',
                 background: '#9af9ff'
             }
         }
 
-        let newNode: vis.Node = {
-            id: ao.id,
-            label: "     " + ao.name + "     ",
-            title: '<b>' + ao.type + '</b><br>' + dictToTooltip(ao.params),
-            shape: "ellipse",
-            color: color
-        }
         nodes.push(newNode)
     }
-
-    // fix first object for physics
-    nodes[0].fixed = true
 
     for (let method of graphData.methods) {
         let methodNode: vis.Node = {
@@ -201,7 +215,7 @@ function initGraph(graphData: GraphData) {
             },
             wind: {
                 x: 0,
-                y: 0.5
+                y: 0
             }
 
         },

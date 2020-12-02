@@ -46,6 +46,7 @@ class RTObjectInstance:
     output_of: Optional[RTMethodInstance]
     is_start = False
     is_end = False
+    distance_to_start = 0
 
     def in_choice_space(self, other_choice_space: RTChoiceSpace):
         for method_name, option in self.choice_space.items():
@@ -85,6 +86,9 @@ class RTMethodInstance:
                 else:
                     common_choice_space[method_name] = option
 
+        # calculate distance from start
+        output_distance_to_start = max(i.distance_to_start for i in self.inputs.values() if i is not None) + 1
+
         for option_name, output_option in self.outputs.items():
             # the choice space for all output objects on this branch
             new_choice_space = common_choice_space.copy()
@@ -99,6 +103,7 @@ class RTMethodInstance:
                 output_def = self.method.outputs[option_name][output_name]
                 output_obj.type = output_def.type
                 output_obj.choice_space = new_choice_space
+                output_obj.distance_to_start = output_distance_to_start
 
                 # copy parameters from matching input object if it exists
                 for input_name, input_obj in self.inputs.items():
@@ -141,50 +146,6 @@ class RTMethodInstance:
                 if predecessor_method is not None:
                     if not predecessor_method.on_solution_path:
                         predecessor_method.color_as_on_solution_path()
-
-
-def build_solution(graph, start_ao_spec, call_spec):
-    abstract_objects: Dict[str, RTObjectInstance] = {}
-    method_calls = []
-
-    def get_ao(name):
-        if name not in abstract_objects:
-            abstract_objects[name] = RTObjectInstance(name, None, {}, None)
-
-        return abstract_objects[name]
-
-    for ao_name, ao_spec in start_ao_spec.items():
-        ao = get_ao(ao_name)
-        ao.type = graph.types[ao_spec['type']]
-
-        for param_name, param_val in ao_spec['params'].items():
-            ao.param_values[param_name] = graph.instantiate_param(ao.type.params[param_name].type, param_val)
-
-    for method_call_descr in call_spec:
-        method_def = graph.methods[method_call_descr['method']]
-
-        inputs = {}
-        for port_name, ao_name in method_call_descr['inputs'].items():
-            inputs[port_name] = get_ao(ao_name)
-
-        outputs = {}
-        for option_name, output_option in method_call_descr['outputs'].items():
-            for port_name, ao_name in output_option.items():
-                if option_name not in outputs:
-                    outputs[option_name] = {}
-
-                output_obj = get_ao(ao_name)
-                outputs[option_name][port_name] = output_obj
-
-        method_call = RTMethodInstance(method_def, inputs, outputs)
-
-        for output_option in method_call.outputs.values():
-            for output_obj in output_option.values():
-                output_obj.output_of = method_call
-
-        method_calls.append(method_call)
-
-    return abstract_objects, method_calls
 
 
 def flood_fill(solution_graph: RTSolutionGraph, knowledge_graph: RTGraph, choice_space: RTChoiceSpace, start_objects: List[RTObjectInstance]):
