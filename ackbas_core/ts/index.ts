@@ -1,6 +1,7 @@
 import * as vis from "vis-network/standalone";
 import "bootstrap";
 import "bootstrap/dist/css/bootstrap.min.css";
+import * as monaco from "monaco-editor"
 
 interface Port {
     id: number
@@ -45,7 +46,20 @@ function dictToTooltip(dict: object): string {
     return tooltip
 }
 
-function initGraph(graphData: GraphData) {
+function init(graphData: GraphData) {
+    monaco.editor.create(document.getElementById("start-editor"), {
+        automaticLayout: true,
+        language: "yaml"
+    })
+
+    monaco.editor.create(document.getElementById("target-editor"), {
+        automaticLayout: true,
+        language: "yaml"
+    })
+
+    // create a network
+    let container = document.getElementById('solution-graph')
+
     // create an array with nodes
     let nodes: vis.Node[] = []
 
@@ -208,8 +222,6 @@ function initGraph(graphData: GraphData) {
         edges.push(newEdge)
     }
 
-    // create a network
-    let container = document.getElementById('mynetwork')
     let data = {
         nodes: nodes,
         edges: edges
@@ -251,6 +263,6 @@ function startPhysics() {
 
 // make function globally available
 // https://stackoverflow.com/questions/12709074/how-do-you-explicitly-set-a-new-property-on-window-in-typescript
-(<any>window).initGraph = initGraph;
+(<any>window).init = init;
 (<any>window).stopPhysics = stopPhysics;
 (<any>window).startPhysics = startPhysics;
