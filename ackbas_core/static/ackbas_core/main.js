@@ -150,10 +150,18 @@ function initGraph(graphData) {
             newNode.y = ao.distance_to_start * V_SPACE;
         }
         else {
-            newNode.color = {
-                border: '#8bdde3',
-                background: '#9af9ff'
-            };
+            if (ao.on_solution_path) {
+                newNode.color = {
+                    border: '#8bdde3',
+                    background: '#9af9ff'
+                };
+            }
+            else {
+                newNode.color = {
+                    border: '#b86c6c',
+                    background: '#fc9393'
+                };
+            }
         }
         nodes.push(newNode);
     }

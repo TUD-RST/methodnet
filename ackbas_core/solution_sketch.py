@@ -47,6 +47,7 @@ class RTObjectInstance:
     is_start = False
     is_end = False
     distance_to_start = 0
+    on_solution_path = False
 
     def in_choice_space(self, other_choice_space: RTChoiceSpace):
         for method_name, option in self.choice_space.items():
@@ -142,6 +143,7 @@ class RTMethodInstance:
 
         for input_obj in self.inputs.values():
             if input_obj is not None:
+                input_obj.on_solution_path = True
                 predecessor_method = input_obj.output_of
                 if predecessor_method is not None:
                     if not predecessor_method.on_solution_path:
