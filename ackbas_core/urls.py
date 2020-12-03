@@ -5,6 +5,7 @@ from . import views
 urlpatterns = [
   url(r'^$', views.LandingPageView.as_view(), name='landing-page'),
   path('g/<slug:graph>', views.GraphEditorView.as_view(), name='graph-editor'),
-  path('s', views.GetSolutionGraphView.as_view(), name='get-solution')
+  path('s', views.GetSolutionGraphView.as_view(), name='get-solution'),
+  path('kg/<slug:graph_name>', views.GetKnowledgeGraphView.as_view(), name='get-knowledge-graph')
 ]
 
