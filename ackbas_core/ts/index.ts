@@ -10,7 +10,7 @@ interface Port {
     tune?: boolean
 }
 
-interface GraphData {
+interface SolutionGraphData {
     methods: {
         id: number
         name: string
@@ -35,11 +35,33 @@ interface GraphData {
     nextId: number
 }
 
-let network: vis.Network
-let networkData: {
+interface KnowledgeGraphData {
+    types: {
+        name: string
+    }[]
+    methods: {
+        name: string
+        description: string | null
+    }[]
+    connections: [string, string][]
+}
+
+let typeToId: Record<string, number> = {}
+let methodToId: Record<string, number> = {}
+let edgeIds: [string, string, number][] = []
+
+let solutionGraphNetwork: vis.Network
+let solutionGraphNetworkData: {
     nodes: vis.DataSetNodes,
     edges: vis.DataSetEdges
 }
+
+let knowledgeGraphNetwork: vis.Network
+let knowledgeGraphNetworkData: {
+    nodes: vis.DataSetNodes,
+    edges: vis.DataSetEdges
+}
+
 let startEditor: monaco.editor.IStandaloneCodeEditor
 let targetEditor: monaco.editor.IStandaloneCodeEditor
 
@@ -80,29 +102,87 @@ function init() {
     })
 
     // create a network
-    let container = document.getElementById('solution-graph')
-
-    networkData = {
-        nodes: new vis.DataSet([]) as vis.DataSetNodes,
-        edges: new vis.DataSet([]) as vis.DataSetEdges
-    }
-    let options: vis.Options = {
+    let solutionGraphOptions: vis.Options = {
         physics: {
             barnesHut: {
                 avoidOverlap: 0.1, // default 0
                 springConstant: 0.2,  // default 0.04
                 springLength: 20 // default 95
-            },
-            wind: {
-                x: 0,
-                y: 0
+            }
+        },
+        autoResize: true,
+        height: "100%"
+    }
+    let knowledgeGraphOptions: vis.Options = {
+        physics: {
+            barnesHut: {
+                avoidOverlap: 0.1, // default 0
+                springConstant: 0.01,  // default 0.04
+                springLength: 50 // default 95
             }
         },
         autoResize: true,
         height: "100%"
     }
 
-    network = new vis.Network(container, networkData, options)
+    let solutionGraphContainer = document.getElementById('solution-graph')
+    solutionGraphNetworkData = {
+        nodes: new vis.DataSet([]) as vis.DataSetNodes,
+        edges: new vis.DataSet([]) as vis.DataSetEdges
+    }
+    solutionGraphNetwork = new vis.Network(solutionGraphContainer, solutionGraphNetworkData, solutionGraphOptions)
+
+    let knowledgeGraphContainer = document.getElementById('knowledge-graph')
+    knowledgeGraphNetworkData = {
+        nodes: new vis.DataSet([]) as vis.DataSetNodes,
+        edges: new vis.DataSet([]) as vis.DataSetEdges
+    }
+    knowledgeGraphNetwork = new vis.Network(knowledgeGraphContainer, knowledgeGraphNetworkData, knowledgeGraphOptions)
+
+    loadKnowledgeGraph()
+}
+
+async function loadKnowledgeGraph() {
+    let path_components = window.location.pathname.split('/')
+    let graphName = path_components[2]
+    let url = new URL('http://127.0.0.1:8000/kg/' + graphName)
+    let response = await fetch(url as any)
+
+    let graphData = await response.json() as KnowledgeGraphData
+
+    let nodes = knowledgeGraphNetworkData.nodes
+    let edges = knowledgeGraphNetworkData.edges
+
+    for (let type of graphData.types) {
+        let newNode: vis.Node = {
+            label: type.name,
+            shape: "ellipse"
+        }
+        let [id] = nodes.add(newNode)
+        typeToId[type.name] = id as number
+    }
+
+    for (let method of graphData.methods) {
+        let newNode: vis.Node = {
+            label: method.name,
+            shape: "box"
+        }
+        let [id] = nodes.add(newNode)
+        methodToId[method.name] = id as number
+    }
+
+    for (let [name1, name2] of graphData.connections) {
+        let fromId = typeToId[name1] ?? methodToId[name1]
+        let toId = typeToId[name2] ?? methodToId[name2]
+
+        let newEdge: vis.Edge = {
+            from: fromId,
+            to: toId,
+            arrows: "to"
+        }
+        let [id] = edges.add(newEdge)
+        edgeIds.push([name1, name2, id as number])
+    }
 }
 
 async function update() {
@@ -125,14 +205,14 @@ async function update() {
         })
     })
 
-    let graphData = await response.json() as GraphData
+    let graphData = await response.json() as SolutionGraphData
 
     setNetworkData(graphData)
 }
 
-function setNetworkData(graphData: GraphData) {
-    let nodes = networkData.nodes
-    let edges = networkData.edges
+function setNetworkData(graphData: SolutionGraphData) {
+    let nodes = solutionGraphNetworkData.nodes
+    let edges = solutionGraphNetworkData.edges
 
     edges.clear()
     nodes.clear()
@@ -295,7 +375,12 @@ function setNetworkData(graphData: GraphData) {
 }
 
 function stopPhysics() {
-    network.setOptions({
+    solutionGraphNetwork.setOptions({
+        physics: {
+            enabled: false
+        }
+    })
+    knowledgeGraphNetwork.setOptions({
         physics: {
             enabled: false
         }
@@ -303,7 +388,12 @@ function stopPhysics() {
 }
 
 function startPhysics() {
-    network.setOptions({
+    solutionGraphNetwork.setOptions({
+        physics: {
+            enabled: true
+        }
+    })
+    knowledgeGraphNetwork.setOptions({
         physics: {
             enabled: true
         }
