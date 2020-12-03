@@ -155,3 +155,43 @@ class GetSolutionGraphView(View):
         graph_data['nextId'] = id
 
         return graph_data
+
+
+class GetKnowledgeGraphView(View):
+    @staticmethod
+    def get(request, graph_name):
+        rtgraph = kg.RTGraph(graph_name + '.yml')
+
+        types = [{
+            'name': type_def.name
+        } for type_def in rtgraph.types.values()]
+
+        methods = [{
+            'name': method_def.name,
+            'description': method_def.description
+        } for method_def in rtgraph.methods.values()]
+
+        connections = []
+        for type_name, type_def in rtgraph.types.items():
+            for method_name, method_def in rtgraph.methods.items():
+                # check connections type -> method
+                for input_def in method_def.inputs.values():
+                    if input_def.type == type_def:
+                        connections.append((type_name, method_name))
+                        break
+
+                # check connections method -> type
+                for outputs in method_def.outputs.values():
+                    for output_def in outputs.values():
+                        if output_def.type == type_def:
+                            connections.append((method_name, type_name))
+                            break
+                    else:
+                        continue
+                    break
+
+        return JsonResponse({
+            'types': types,
+            'methods': methods,
+            'connections': connections
+        })
