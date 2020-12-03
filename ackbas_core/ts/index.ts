@@ -36,6 +36,12 @@ interface GraphData {
 }
 
 let network: vis.Network
+let networkData: {
+    nodes: vis.DataSetNodes,
+    edges: vis.DataSetEdges
+}
+let startEditor: monaco.editor.IStandaloneCodeEditor
+let targetEditor: monaco.editor.IStandaloneCodeEditor
 
 function dictToTooltip(dict: object): string {
     let tooltip = ""
@@ -46,25 +52,90 @@ function dictToTooltip(dict: object): string {
     return tooltip
 }
 
-function init(graphData: GraphData) {
-    monaco.editor.create(document.getElementById("start-editor"), {
+function init() {
+    startEditor = monaco.editor.create(document.getElementById("start-editor"), {
         automaticLayout: true,
-        language: "yaml"
+        minimap: {
+            enabled: false
+        },
+        language: "yaml",
+        value:
+`start:
+  type: DGL
+  params:
+    Linear: NichtLinear
+`
     })
 
-    monaco.editor.create(document.getElementById("target-editor"), {
+    targetEditor = monaco.editor.create(document.getElementById("target-editor"), {
         automaticLayout: true,
-        language: "yaml"
+        minimap: {
+            enabled: false
+        },
+        language: "yaml",
+        value:
+`target:
+  type: Trajektorienfolgeregler
+`
     })
 
     // create a network
     let container = document.getElementById('solution-graph')
 
-    // create an array with nodes
-    let nodes: vis.Node[] = []
+    networkData = {
+        nodes: new vis.DataSet([]) as vis.DataSetNodes,
+        edges: new vis.DataSet([]) as vis.DataSetEdges
+    }
+    let options: vis.Options = {
+        physics: {
+            barnesHut: {
+                avoidOverlap: 0.1, // default 0
+                springConstant: 0.2,  // default 0.04
+                springLength: 20 // default 95
+            },
+            wind: {
+                x: 0,
+                y: 0
+            }
+        },
+        autoResize: true,
+        height: "100%"
+    }
 
-    // create an array with edges
-    let edges: vis.Edge[] = []
+    network = new vis.Network(container, networkData, options)
+}
+
+async function update() {
+    let path_components = window.location.pathname.split('/')
+    let graphName = path_components[2]
+    let startYML = startEditor.getValue()
+    let targetYML = targetEditor.getValue()
+
+    // TODO: Make URL relative
+    let url = new URL('http://127.0.0.1:8000/s')
+    let response = await fetch(url as any, {
+        method: "POST",
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            "graph_name": graphName,
+            "start": startYML,
+            "target": targetYML
+        })
+    })
+
+    let graphData = await response.json() as GraphData
+
+    setNetworkData(graphData)
+}
+
+function setNetworkData(graphData: GraphData) {
+    let nodes = networkData.nodes
+    let edges = networkData.edges
+
+    edges.clear()
+    nodes.clear()
 
     let nr_start_nodes = graphData.objects.filter(it => it.is_start).length
     let nr_end_nodes = graphData.objects.filter(it => !it.is_start && it.is_end).length
@@ -73,7 +144,7 @@ function init(graphData: GraphData) {
     let end_i = 0
 
     let H_SPACE = 1000
-    let V_SPACE = 300
+    let V_SPACE = 350
 
     for (let ao of graphData.objects) {
         let newNode: vis.Node = {
@@ -85,8 +156,8 @@ function init(graphData: GraphData) {
 
         if (ao.is_start) {
             newNode.color = {
-                border: '#b6be77',
-                background: '#f4ff9e'
+                border: '#754fa7',
+                background: '#b37aff'
             }
             newNode.fixed = true
             newNode.x = (start_i - (nr_start_nodes - 1)/2)*H_SPACE
@@ -95,7 +166,7 @@ function init(graphData: GraphData) {
         } else if (ao.is_end) {
             newNode.color = {
                 border: '#42cb52',
-                background: '#bef7c5'
+                background: '#66db47'
             }
             newNode.fixed = true
             newNode.x = (end_i - (nr_end_nodes - 1)/2)*H_SPACE
@@ -109,13 +180,13 @@ function init(graphData: GraphData) {
                 }
             } else {
                 newNode.color = {
-                    border: '#b86c6c',
-                    background: '#fc9393'
+                    border: '#b7b1b1',
+                    background: '#e5d7d7'
                 }
             }
         }
 
-        nodes.push(newNode)
+        nodes.add(newNode)
     }
 
     for (let method of graphData.methods) {
@@ -129,7 +200,7 @@ function init(graphData: GraphData) {
             title: method.description ?? undefined
         }
 
-        nodes.push(methodNode)
+        nodes.add(methodNode)
 
         for (let port of method.inputs) {
             let portNode: vis.Node = {
@@ -147,9 +218,9 @@ function init(graphData: GraphData) {
                 }
             }
 
-            nodes.push(portNode)
+            nodes.add(portNode)
 
-            edges.push({
+            edges.add({
                 from: port.id,
                 to: method.id,
                 color: 'black',
@@ -170,10 +241,10 @@ function init(graphData: GraphData) {
                     },
                     size: 10
                 }
-                nodes.push(demux)
+                nodes.add(demux)
                 graphData.nextId++
 
-                edges.push({
+                edges.add({
                     from: method.id,
                     to: demux.id,
                     color: 'black',
@@ -198,9 +269,9 @@ function init(graphData: GraphData) {
                     }
                 }
 
-                nodes.push(portNode)
+                nodes.add(portNode)
 
-                edges.push({
+                edges.add({
                     from: demux_id,
                     to: port.id,
                     color: 'black',
@@ -219,30 +290,8 @@ function init(graphData: GraphData) {
             color: 'black',
             arrows: 'to'
         }
-        edges.push(newEdge)
+        edges.add(newEdge)
     }
-
-    let data = {
-        nodes: nodes,
-        edges: edges
-    }
-    let options: vis.Options = {
-        physics: {
-            barnesHut: {
-                avoidOverlap: 0.1, // default 0
-                springConstant: 0.2,  // default 0.04
-                springLength: 40 // default 95
-            },
-            wind: {
-                x: 0,
-                y: 0
-            }
-
-        },
-        autoResize: true,
-        height: "100%"
-    }
-    network = new vis.Network(container, data, options)
 }
 
 function stopPhysics() {
@@ -264,5 +313,6 @@ function startPhysics() {
 // make function globally available
 // https://stackoverflow.com/questions/12709074/how-do-you-explicitly-set-a-new-property-on-window-in-typescript
 (<any>window).init = init;
+(<any>window).update = update;
 (<any>window).stopPhysics = stopPhysics;
 (<any>window).startPhysics = startPhysics;
