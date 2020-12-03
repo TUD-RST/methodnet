@@ -27,7 +27,6 @@
 
     .editor-container {
         height: 100%;
-        overflow: hidden;
     }
 
     #solution-graph {
@@ -73,10 +72,8 @@
 {% block content %}
 
 <script type="text/javascript">
-  graphData = {{ graph_data }}
-
   window.onload = function() {
-      init(graphData);
+      init();
   }
 </script>
 
@@ -89,6 +86,7 @@
     <div id="knowledge-graph" class="graph-container nice-border">Graph could not be loaded</div>
 
     <div id="button-row" class="nice-border">
+        <button type="button" class="btn btn-outline-primary" onclick="update()">Update</button>
         <button type="button" class="btn btn-outline-success" onclick="startPhysics()">Start Physics</button>
         <button type="button" class="btn btn-outline-danger" onclick="stopPhysics()">Stop Physics</button>
     </div>

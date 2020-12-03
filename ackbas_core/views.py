@@ -1,29 +1,45 @@
-from django.shortcuts import render
-from django.views import View
-from django.template.response import TemplateResponse
-from django.utils.safestring import SafeString
-
-import ackbas_core.knowledge_graph as kg
-
 import json
-
 from typing import Dict
 
+import yaml
+from django.http import JsonResponse
+from django.template.response import TemplateResponse
+from django.views import View
+
+import ackbas_core.knowledge_graph as kg
 from ackbas_core.solution_sketch import RTObjectInstance, RTSolutionGraph, flood_fill
 
 
 class LandingPageView(View):
-
-    # noinspection PyMethodMayBeStatic
-    def get(self, request):
-
+    @staticmethod
+    def get(request):
         context = {"title": "Landing Page"}
 
         return TemplateResponse(request, "ackbas_core/landing.html", context)
 
 
 class GraphEditorView(View):
-    def get(self, request, graph):
+    @staticmethod
+    def get(request, graph):
+        context = {}
+
+        return TemplateResponse(request, "ackbas_core/graph_editor.html", context)
+
+
+class GetSolutionGraphView(View):
+    @staticmethod
+    def post(request):
+        request_json = json.loads(request.body)
+        graph_name = request_json['graph_name']
+        start_dict = yaml.safe_load(request_json['start'])
+        target_dict = yaml.safe_load(request_json['target'])
+
+        response_dict = GetSolutionGraphView.get_solution(graph_name, start_dict, target_dict)
+
+        return JsonResponse(response_dict)
+
+    @staticmethod
+    def get_solution(graph_name: str, start_dict: Dict, target_dict: Dict) -> Dict:
         graph_data = {
             'methods': [],
             'objects': [],
@@ -31,16 +47,32 @@ class GraphEditorView(View):
             'nextId': 0
         }
 
-        rtgraph = kg.RTGraph('new_types.yml')
+        rtgraph = kg.RTGraph(graph_name + '.yml')
 
-        start_object = RTObjectInstance('start', rtgraph.types['DGL'], {}, {
-            'Linear': rtgraph.instantiate_param(rtgraph.param_types['Linear'], 'NichtLinear')
-        }, None)
+        start_objects = []
+        for obj_name, obj_dict in start_dict.items():
+            obj_type = rtgraph.types[obj_dict['type']]
+            obj_params = {}
+            for param_name, param_val in obj_dict.get('params', {}).items():
+                param_type = obj_type.params[param_name].type
+                param_instance = rtgraph.instantiate_param(param_type, param_val)
+                obj_params[param_name] = param_instance
 
-        end_spec = kg.RTMethodInput(rtgraph.types['Trajektorienfolgeregler'], {})
+            obj = RTObjectInstance(obj_name, obj_type, {}, obj_params, None)
+            start_objects.append(obj)
 
-        solution_graph = RTSolutionGraph([start_object], end_spec)
-        flood_fill(solution_graph, rtgraph, {}, [start_object])
+        target_dict = target_dict['target']
+        target_type = rtgraph.types[target_dict['type']]
+        target_params = {}
+        for param_name, param_val in target_dict.get('params', {}).items():
+            param_type = target_type.params[param_name].type
+            param_instance = rtgraph.instantiate_param(param_type, param_val)
+            target_params[param_name] = param_instance
+
+        end_spec = kg.RTMethodInput(target_type, target_params)
+
+        solution_graph = RTSolutionGraph(start_objects, end_spec)
+        flood_fill(solution_graph, rtgraph, {}, start_objects)
         solution_graph.prune()
 
         object_instances = solution_graph.object_instances
@@ -122,8 +154,4 @@ class GraphEditorView(View):
 
         graph_data['nextId'] = id
 
-        graph_data_json = json.dumps(graph_data)
-
-        context = {'graph_data': SafeString(graph_data_json)}
-
-        return TemplateResponse(request, "ackbas_core/graph_editor.html", context)
+        return graph_data
