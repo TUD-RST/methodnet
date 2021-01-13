@@ -1,0 +1,129 @@
+---
+
+# This yml-file models (part of) the knowledge which is represented by method network
+# The classes which are SubClassOf owl:Thing will probably become subclasses of BFO or some other Upper Ontology in the future
+
+- iri: "https://w3id.org/yet/undefined/control-systems-knowledge_draft#"
+
+- multiple_owl_classes:
+    - MathematicalConcept:
+        SubClassOf: "owl:Thing"
+    - BooleanValue:
+        SubClassOf: MathematicalConcept
+    - MathematicalMapping:
+        SubClassOf: MathematicalConcept
+    - Matrix:
+        SubClassOf: MathematicalConcept
+    - Function:
+        SubClassOf: MathematicalMapping
+    # --
+    - DynamicalSystemRepresentation:
+        SubClassOf: "owl:Thing"
+    - DiffenrentialEquationSystemIO:
+        SubClassOf: DynamicalSystemRepresentation
+        # IO means including information what is the input and output (mapping)
+    - GeneralStateSpaceSystem:
+        SubClassOf: DiffenrentialEquationSystemIO
+    - LinearStateSpaceSystem:
+        SubClassOf: GeneralStateSpaceSystem
+        # might be time-variant
+    - LTIStateSpaceSystem:
+        SubClassOf: LinearStateSpaceSystem
+    # --
+    - SystemProperty:
+        SubClassOf: "owl:Thing"
+    - ControllabilityProperty:
+        SubClassOf: SystemProperty
+    - ObservabilityProperty:
+        SubClassOf: SystemProperty
+    - AsymptoticStabilityProperty:
+        SubClassOf: SystemProperty
+    - LinearityProperty:
+        SubClassOf: SystemProperty
+    - TimeVarianceProperty:
+        SubClassOf: SystemProperty
+    # ----
+    - MethodNetworkEntity:
+        SubClassOf: "owl:Thing"
+    - TypeEntity:
+        SubClassOf: MethodNetworkEntity
+    - MethodEntity:
+        SubClassOf: MethodNetworkEntity
+    - MethodInputEntity:
+        SubClassOf: MethodNetworkEntity
+    - MethodOutputEntity:
+        SubClassOf: MethodNetworkEntity
+    - ParameterEntity:
+        SubClassOf: MethodNetworkEntity
+    # ---
+    - X_RelationConcept:
+        # magic base class for all RelationConcepts
+        # !! this should be a hardcoded concept provided by yamlpyowl
+        SubClassOf: "owl:Thing"
+
+    - X_MethodRelations_RC:
+        # !! drop required `X_` in the parser
+
+        SubClassOf: X_RelationConcept
+        X_associatedWithClasses:
+            - MethodEntity
+
+
+- owl_object_property:
+    hasForInput:
+        Domain: X_MethodRelations_RC
+        Range: MethodInputEntity
+
+- owl_object_property:
+    hasForOutput:
+        Domain: X_MethodRelations_RC
+        Range: MethodOutputEntity
+
+
+- owl_individual:
+    i_testeSteuerbarkeitLTI:
+      types:
+        - MethodEntity
+
+- relation_concept_facts:
+    i_testeSteuerbarkeitLTI:
+        X_MethodRelations_RC:
+            - hasForInput:
+                some: LTIStateSpaceSystem
+              hasForOutput:
+                some: ControllabilityProperty
+
+# Define some axiomatic terms which will be later used to construct classes
+- owl_multiple_individuals:
+      names:
+          - ControllabilityTrue
+          - NonControllabilityFalse
+          # --
+          - ObservabilityTrue
+          - ObservabilityFalse
+          # --
+          - AsymptoticStabilityTrue
+          - AsymptoticStabilityFalse
+          # --
+          - LinearityTrue
+          - LinearityFalse
+          # --
+          - TimeVarianceTrue
+          - TimeVarianceFalse
+          # --
+          - ControllerCanonicalFormTrue
+          - ControllerCanonicalFormFalse
+          # --
+          - ObserverCanonicalFormTrue
+          - ObserverCanonicalFormFalse
+          # --
+      types:
+          - BooleanValue
+
+- owl_class:
+      ControllabilityProperty:
+          EquivalentTo:
+              OneOf: [ControllabilityTrue, ControllabilityFalse]
+
+- different_individuals:
+    - __all__
