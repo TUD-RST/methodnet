@@ -85,15 +85,15 @@
       types:
         - MethodEntity
 
-- relation_concept_facts:
-    i_testeSteuerbarkeitLTI:
-        X_MethodRelations_RC:
-            - hasForInput:
-                some: LTIStateSpaceSystem
-              hasForOutput:
-                some: ControllabilityProperty
+#- relation_concept_facts:
+#    i_testeSteuerbarkeitLTI:
+#        X_MethodRelations_RC:
+#            - hasForInput:
+#                some: LTIStateSpaceSystem
+#              hasForOutput:
+#                some: ControllabilityProperty
 
-# Define some axiomatic terms which will be later used to construct classes
+# Define some axiomatic terms which will be later used to construct classes (not yet used)
 - owl_multiple_individuals:
       names:
           - ControllabilityTrue
@@ -120,10 +120,10 @@
       types:
           - BooleanValue
 
-- owl_class:
-      ControllabilityProperty:
-          EquivalentTo:
-              OneOf: [ControllabilityTrue, ControllabilityFalse]
+#- owl_class:
+#      ControllabilityProperty:
+#          EquivalentTo:
+#              OneOf: [ControllabilityTrue, ControllabilityFalse]
 
 - different_individuals:
     - __all__

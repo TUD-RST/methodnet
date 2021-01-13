@@ -85,15 +85,15 @@
       types:
         - MethodEntity
 
-- relation_concept_facts:
-    i_testeSteuerbarkeitLTI:
-        X_MethodRelations_RC:
-            - hasForInput:
-                some: LTIStateSpaceSystem
-              hasForOutput:
-                some: ControllabilityProperty
+#- relation_concept_facts:
+#    i_testeSteuerbarkeitLTI:
+#        X_MethodRelations_RC:
+#            - hasForInput:
+#                some: LTIStateSpaceSystem
+#              hasForOutput:
+#                some: ControllabilityProperty
 
-# Define some axiomatic terms which will be later used to construct classes
+# Define some axiomatic terms which will be later used to construct classes (not yet used)
 - owl_multiple_individuals:
       names:
           - ControllabilityTrue
@@ -120,85 +120,149 @@
       types:
           - BooleanValue
 
-- owl_class:
-      ControllabilityProperty:
-          EquivalentTo:
-              OneOf: [ControllabilityTrue, ControllabilityFalse]
+#- owl_class:
+#      ControllabilityProperty:
+#          EquivalentTo:
+#              OneOf: [ControllabilityTrue, ControllabilityFalse]
 
 - different_individuals:
     - __all__
 
 #####
-- multiple_owl_classes:
-  - MN_Real:
-      SubClassOf: MN_Type
-  - MN_SSNichtlinear:
-      SubClassOf: MN_Type
-  - MN_SSLTV:
-      SubClassOf: MN_Type
-  - MN_SSLTI:
-      SubClassOf: MN_Type
-  - MN_DGL:
-      SubClassOf: MN_Type
-  - MN_ÜTF:
-      SubClassOf: MN_Type
-  - MN_ListeEigenwerte:
-      SubClassOf: MN_Type
-  - MN_Matrix:
-      SubClassOf: MN_Type
-  - MN_Zeitfunktion:
-      SubClassOf: MN_Type
-  - MN_Beobachterfunktion:
-      SubClassOf: MN_Type
-  - MN_Trajektorienfolgeregler:
-      SubClassOf: MN_Type
-- '
+- owl_individual:
+    iMN_Real:
+      types:
+      - TypeEntity
+- owl_individual:
+    iMN_SSNichtlinear:
+      types:
+      - TypeEntity
+- owl_individual:
+    iMN_SSLTV:
+      types:
+      - TypeEntity
+- owl_individual:
+    iMN_SSLTI:
+      types:
+      - TypeEntity
+- owl_individual:
+    iMN_DGL:
+      types:
+      - TypeEntity
+- owl_individual:
+    iMN_ÜTF:
+      types:
+      - TypeEntity
+- owl_individual:
+    iMN_ListeEigenwerte:
+      types:
+      - TypeEntity
+- owl_individual:
+    iMN_Matrix:
+      types:
+      - TypeEntity
+- owl_individual:
+    iMN_Zeitfunktion:
+      types:
+      - TypeEntity
+- owl_individual:
+    iMN_Beobachterfunktion:
+      types:
+      - TypeEntity
+- owl_individual:
+    iMN_Trajektorienfolgeregler:
+      types:
+      - TypeEntity
+- annotation: '
 
-  #####
+    #####
 
-  '
-- multiple_owl_classes:
-  - MN_Linearisieren:
-      SubClassOf: MN_Method
-  - MN_ZuRegelungsnormalform:
-      SubClassOf: MN_Method
-  - MN_ZuBeobachtungsnormalform:
-      SubClassOf: MN_Method
-  - MN_TesteSteuerbarkeitLTI:
-      SubClassOf: MN_Method
-  - MN_TesteBeobachtbarkeitLTI:
-      SubClassOf: MN_Method
-  - MN_TesteSteuerbarkeitLTV:
-      SubClassOf: MN_Method
-  - MN_TesteBeobachtbarkeitLTV:
-      SubClassOf: MN_Method
-  - MN_TesteSteuerbarkeitNichtlinear:
-      SubClassOf: MN_Method
-  - MN_TesteBeobachtbarkeitNichtlinear:
-      SubClassOf: MN_Method
-  - MN_ÜTFzuSS:
-      SubClassOf: MN_Method
-  - MN_SSzuÜTF:
-      SubClassOf: MN_Method
-  - MN_ÜTFistStabil:
-      SubClassOf: MN_Method
-  - MN_ÜTFistProper:
-      SubClassOf: MN_Method
-  - MN_ÜTFistTeilerfremd:
-      SubClassOf: MN_Method
-  - MN_Polplatzierung:
-      SubClassOf: MN_Method
-  - MN_LuenbergerEntwurf:
-      SubClassOf: MN_Method
-  - MN_DGLzuSS:
-      SubClassOf: MN_Method
-  - MN_Trajektorienplanung:
-      SubClassOf: MN_Method
-  - MN_LinearisierungAnTrajektorie:
-      SubClassOf: MN_Method
-  - MN_LTVLQREntwurf:
-      SubClassOf: MN_Method
-  - MN_ZeitdiskreterEKFEntwurf:
-      SubClassOf: MN_Method
-  - MN_BaueTrajektorienfolgeregler:
-      SubClassOf: MN_Method
+    '
+- owl_individual:
+    iMN_Linearisieren:
+      types:
+      - MethodEntity
+- owl_individual:
+    iMN_ZuRegelungsnormalform:
+      types:
+      - MethodEntity
+- owl_individual:
+    iMN_ZuBeobachtungsnormalform:
+      types:
+      - MethodEntity
+- owl_individual:
+    iMN_TesteSteuerbarkeitLTI:
+      types:
+      - MethodEntity
+- owl_individual:
+    iMN_TesteBeobachtbarkeitLTI:
+      types:
+      - MethodEntity
+- owl_individual:
+    iMN_TesteSteuerbarkeitLTV:
+      types:
+      - MethodEntity
+- owl_individual:
+    iMN_TesteBeobachtbarkeitLTV:
+      types:
+      - MethodEntity
+- owl_individual:
+    iMN_TesteSteuerbarkeitNichtlinear:
+      types:
+      - MethodEntity
+- owl_individual:
+    iMN_TesteBeobachtbarkeitNichtlinear:
+      types:
+      - MethodEntity
+- owl_individual:
+    iMN_ÜTFzuSS:
+      types:
+      - MethodEntity
+- owl_individual:
+    iMN_SSzuÜTF:
+      types:
+      - MethodEntity
+- owl_individual:
+    iMN_ÜTFistStabil:
+      types:
+      - MethodEntity
+- owl_individual:
+    iMN_ÜTFistProper:
+      types:
+      - MethodEntity
+- owl_individual:
+    iMN_ÜTFistTeilerfremd:
+      types:
+      - MethodEntity
+- owl_individual:
+    iMN_Polplatzierung:
+      types:
+      - MethodEntity
+- owl_individual:
+    iMN_LuenbergerEntwurf:
+      types:
+      - MethodEntity
+- owl_individual:
+    iMN_DGLzuSS:
+      types:
+      - MethodEntity
+- owl_individual:
+    iMN_Trajektorienplanung:
+      types:
+      - MethodEntity
+- owl_individual:
+    iMN_LinearisierungAnTrajektorie:
+      types:
+      - MethodEntity
+- owl_individual:
+    iMN_LTVLQREntwurf:
+      types:
+      - MethodEntity
+- owl_individual:
+    iMN_ZeitdiskreterEKFEntwurf:
+      types:
+      - MethodEntity
+- owl_individual:
+    iMN_BaueTrajektorienfolgeregler:
+      types:
+      - MethodEntity

@@ -1,4 +1,5 @@
 import yaml
+import yamlpyowl as ypo
 
 # noinspection PyPackageRequirements
 from ipydex import IPS, activate_ips_on_exception
@@ -38,29 +39,32 @@ mn_types_methods_yaml_dict = load_yaml("../new_types.yml")
 types_dict = mn_types_methods_yaml_dict.get("types")
 methods_dict = mn_types_methods_yaml_dict.get("methods")
 
-# this dict will hold the final ontology
+# this list will hold the final ontology (2nd part)
 
-type_classes = []
-method_classes = []
 nl = "\n"
-separator = f"{nl*1}{'#'*5}{nl*1}"
+separator = {"annotation": f"{nl*1}{'#'*5}{nl*1}"}
 
-onto_list = [{"multiple_owl_classes": type_classes}, separator, {"multiple_owl_classes": method_classes}]
+onto_list = []
 
-MN_Type = "MN_Type"
-MN_Method = "MN_Method"
+MN_Type = "TypeEntity"
+MN_Method = "MethodEntity"
 
 for mn_type, inner_dict in types_dict.items():
-    type_classes.append({f"MN_{mn_type}": {"SubClassOf": MN_Type}})
+    onto_list.append({"owl_individual":
+                          {f"iMN_{mn_type}": {"types": [MN_Type]}}})
+
+onto_list.append(separator)
 
 for mn_method, inner_dict in methods_dict.items():
-    method_classes.append({f"MN_{mn_method}": {"SubClassOf": MN_Method}})
+    onto_list.append({"owl_individual":
+                          {f"iMN_{mn_method}": {"types": [MN_Method]}}})
 
 
 onto_src_part2 = yaml.dump(onto_list, allow_unicode=True)
 
+result_path = "mn-onto.owl.yml"
+write_txt(result_path, f"{onto_src_part1}{separator['annotation']}{onto_src_part2}")
 
-write_txt("mn-onto.owl.yml", f"{onto_src_part1}{separator}{onto_src_part2}")
-
+om = ypo.OntologyManager(result_path)
 
 IPS()
