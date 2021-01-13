@@ -266,3 +266,42 @@
     iMN_BaueTrajektorienfolgeregler:
       types:
       - MethodEntity
+- property_facts:
+    hasForInput:
+      Facts:
+      - iMN_Linearisieren: iMN_SSNichtlinear
+      - iMN_ZuRegelungsnormalform: iMN_SSLTI
+      - iMN_ZuBeobachtungsnormalform: iMN_SSLTI
+      - iMN_TesteSteuerbarkeitLTI: iMN_SSLTI
+      - iMN_TesteBeobachtbarkeitLTI: iMN_SSLTI
+      - iMN_TesteSteuerbarkeitLTV: iMN_SSLTV
+      - iMN_TesteBeobachtbarkeitLTV: iMN_SSLTV
+      - iMN_TesteSteuerbarkeitNichtlinear: iMN_SSNichtlinear
+      - iMN_TesteBeobachtbarkeitNichtlinear: iMN_SSNichtlinear
+      - iMN_ÜTFzuSS: iMN_ÜTF
+      - iMN_SSzuÜTF: iMN_SSLTI
+      - iMN_ÜTFistStabil: iMN_ÜTF
+      - iMN_ÜTFistProper: iMN_ÜTF
+      - iMN_ÜTFistTeilerfremd: iMN_ÜTF
+      - iMN_Polplatzierung: iMN_SSLTI
+      - iMN_Polplatzierung: iMN_ListeEigenwerte
+      - iMN_LuenbergerEntwurf: iMN_SSLTI
+      - iMN_LuenbergerEntwurf: iMN_ListeEigenwerte
+      - iMN_DGLzuSS: iMN_DGL
+      - iMN_Trajektorienplanung: iMN_SSNichtlinear
+      - iMN_Trajektorienplanung: iMN_Matrix
+      - iMN_Trajektorienplanung: iMN_Matrix
+      - iMN_Trajektorienplanung: iMN_Real
+      - iMN_LinearisierungAnTrajektorie: iMN_SSNichtlinear
+      - iMN_LinearisierungAnTrajektorie: iMN_Zeitfunktion
+      - iMN_LinearisierungAnTrajektorie: iMN_Zeitfunktion
+      - iMN_LTVLQREntwurf: iMN_SSLTV
+      - iMN_LTVLQREntwurf: iMN_Matrix
+      - iMN_LTVLQREntwurf: iMN_Matrix
+      - iMN_ZeitdiskreterEKFEntwurf: iMN_SSNichtlinear
+      - iMN_ZeitdiskreterEKFEntwurf: iMN_Matrix
+      - iMN_ZeitdiskreterEKFEntwurf: iMN_Matrix
+      - iMN_BaueTrajektorienfolgeregler: iMN_Zeitfunktion
+      - iMN_BaueTrajektorienfolgeregler: iMN_Zeitfunktion
+      - iMN_BaueTrajektorienfolgeregler: iMN_Zeitfunktion
+      - iMN_BaueTrajektorienfolgeregler: iMN_Beobachterfunktion
