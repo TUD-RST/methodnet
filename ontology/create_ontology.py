@@ -1,7 +1,7 @@
 import yaml
 import yamlpyowl as ypo
 
-# noinspection PyPackageRequirements
+# noinspection PyPackageRequirements, PyUnresolvedReferences
 from ipydex import IPS, activate_ips_on_exception
 activate_ips_on_exception()
 
@@ -39,6 +39,30 @@ def get_input_types(raw_dict: dict) -> list:
     return res
 
 
+# noinspection PyShadowingNames
+def get_output_types(raw_dict: dict) -> list:
+    res = []
+    # outputs are organized as follows:
+    """
+    outputs:
+      teilerfremd:          # output option
+        tf:                 # output name
+          type: ÜTF
+          # ...
+      nichtTeilerfremd:     # output option
+        tf:                 # output name
+          type: ÜTF
+          # ...
+    """
+    for outputoption, inner_dict1 in raw_dict.items():
+        for outputname, inner_dict2 in inner_dict1.items():
+            res.append(inner_dict2["type"])
+
+    # make output types unique
+    res = list(set(res))
+    return res
+
+
 onto_src_part1 = load_txt(base_ontology_path)
 
 mn_types_methods_yaml_dict = load_yaml("../new_types.yml")
@@ -64,14 +88,14 @@ MN_Method = "MethodEntity"
 # handle types
 for mn_type, inner_dict in types_dict.items():
     onto_list.append({"owl_individual":
-                          {f"iMN_{mn_type}": {"types": [MN_Type]}}})
+                          {f"i_{mn_type}": {"types": [MN_Type]}}})
 
 onto_list.append(separator)
 
 # handle methods
 for mn_method, inner_dict in methods_dict.items():
 
-    idv_name = f"iMN_{mn_method}"
+    idv_name = f"i_{mn_method}"
 
     onto_list.append({"owl_individual":
                           {idv_name: {"types": [MN_Method]}}})
@@ -81,9 +105,14 @@ for mn_method, inner_dict in methods_dict.items():
 
     input_types = get_input_types(input_dict)
     for it in input_types:
-        input_facts.append({idv_name: f"iMN_{it}"})
+        input_facts.append({idv_name: f"i_{it}"})
+
+    output_types = get_output_types(outputs_dict)
+    for ot in output_types:
+        output_facts.append({idv_name: f"i_{ot}"})
 
 onto_list.append({"property_facts": {"hasForInput": {"Facts": input_facts}}})
+onto_list.append({"property_facts": {"hasForOutput": {"Facts": output_facts}}})
 
 
 onto_src_part2 = yaml.dump(onto_list, allow_unicode=True)
@@ -92,4 +121,3 @@ result_path = "mn-onto.owl.yml"
 write_txt(result_path, f"{onto_src_part1}{separator['annotation']}{onto_src_part2}")
 
 om = ypo.OntologyManager(result_path)
-

@@ -130,47 +130,47 @@
 
 #####
 - owl_individual:
-    iMN_Real:
+    i_Real:
       types:
       - TypeEntity
 - owl_individual:
-    iMN_SSNichtlinear:
+    i_SSNichtlinear:
       types:
       - TypeEntity
 - owl_individual:
-    iMN_SSLTV:
+    i_SSLTV:
       types:
       - TypeEntity
 - owl_individual:
-    iMN_SSLTI:
+    i_SSLTI:
       types:
       - TypeEntity
 - owl_individual:
-    iMN_DGL:
+    i_DGL:
       types:
       - TypeEntity
 - owl_individual:
-    iMN_ÜTF:
+    i_ÜTF:
       types:
       - TypeEntity
 - owl_individual:
-    iMN_ListeEigenwerte:
+    i_ListeEigenwerte:
       types:
       - TypeEntity
 - owl_individual:
-    iMN_Matrix:
+    i_Matrix:
       types:
       - TypeEntity
 - owl_individual:
-    iMN_Zeitfunktion:
+    i_Zeitfunktion:
       types:
       - TypeEntity
 - owl_individual:
-    iMN_Beobachterfunktion:
+    i_Beobachterfunktion:
       types:
       - TypeEntity
 - owl_individual:
-    iMN_Trajektorienfolgeregler:
+    i_Trajektorienfolgeregler:
       types:
       - TypeEntity
 - annotation: '
@@ -179,129 +179,154 @@
 
     '
 - owl_individual:
-    iMN_Linearisieren:
+    i_Linearisieren:
       types:
       - MethodEntity
 - owl_individual:
-    iMN_ZuRegelungsnormalform:
+    i_ZuRegelungsnormalform:
       types:
       - MethodEntity
 - owl_individual:
-    iMN_ZuBeobachtungsnormalform:
+    i_ZuBeobachtungsnormalform:
       types:
       - MethodEntity
 - owl_individual:
-    iMN_TesteSteuerbarkeitLTI:
+    i_TesteSteuerbarkeitLTI:
       types:
       - MethodEntity
 - owl_individual:
-    iMN_TesteBeobachtbarkeitLTI:
+    i_TesteBeobachtbarkeitLTI:
       types:
       - MethodEntity
 - owl_individual:
-    iMN_TesteSteuerbarkeitLTV:
+    i_TesteSteuerbarkeitLTV:
       types:
       - MethodEntity
 - owl_individual:
-    iMN_TesteBeobachtbarkeitLTV:
+    i_TesteBeobachtbarkeitLTV:
       types:
       - MethodEntity
 - owl_individual:
-    iMN_TesteSteuerbarkeitNichtlinear:
+    i_TesteSteuerbarkeitNichtlinear:
       types:
       - MethodEntity
 - owl_individual:
-    iMN_TesteBeobachtbarkeitNichtlinear:
+    i_TesteBeobachtbarkeitNichtlinear:
       types:
       - MethodEntity
 - owl_individual:
-    iMN_ÜTFzuSS:
+    i_ÜTFzuSS:
       types:
       - MethodEntity
 - owl_individual:
-    iMN_SSzuÜTF:
+    i_SSzuÜTF:
       types:
       - MethodEntity
 - owl_individual:
-    iMN_ÜTFistStabil:
+    i_ÜTFistStabil:
       types:
       - MethodEntity
 - owl_individual:
-    iMN_ÜTFistProper:
+    i_ÜTFistProper:
       types:
       - MethodEntity
 - owl_individual:
-    iMN_ÜTFistTeilerfremd:
+    i_ÜTFistTeilerfremd:
       types:
       - MethodEntity
 - owl_individual:
-    iMN_Polplatzierung:
+    i_Polplatzierung:
       types:
       - MethodEntity
 - owl_individual:
-    iMN_LuenbergerEntwurf:
+    i_LuenbergerEntwurf:
       types:
       - MethodEntity
 - owl_individual:
-    iMN_DGLzuSS:
+    i_DGLzuSS:
       types:
       - MethodEntity
 - owl_individual:
-    iMN_Trajektorienplanung:
+    i_Trajektorienplanung:
       types:
       - MethodEntity
 - owl_individual:
-    iMN_LinearisierungAnTrajektorie:
+    i_LinearisierungAnTrajektorie:
       types:
       - MethodEntity
 - owl_individual:
-    iMN_LTVLQREntwurf:
+    i_LTVLQREntwurf:
       types:
       - MethodEntity
 - owl_individual:
-    iMN_ZeitdiskreterEKFEntwurf:
+    i_ZeitdiskreterEKFEntwurf:
       types:
       - MethodEntity
 - owl_individual:
-    iMN_BaueTrajektorienfolgeregler:
+    i_BaueTrajektorienfolgeregler:
       types:
       - MethodEntity
 - property_facts:
     hasForInput:
       Facts:
-      - iMN_Linearisieren: iMN_SSNichtlinear
-      - iMN_ZuRegelungsnormalform: iMN_SSLTI
-      - iMN_ZuBeobachtungsnormalform: iMN_SSLTI
-      - iMN_TesteSteuerbarkeitLTI: iMN_SSLTI
-      - iMN_TesteBeobachtbarkeitLTI: iMN_SSLTI
-      - iMN_TesteSteuerbarkeitLTV: iMN_SSLTV
-      - iMN_TesteBeobachtbarkeitLTV: iMN_SSLTV
-      - iMN_TesteSteuerbarkeitNichtlinear: iMN_SSNichtlinear
-      - iMN_TesteBeobachtbarkeitNichtlinear: iMN_SSNichtlinear
-      - iMN_ÜTFzuSS: iMN_ÜTF
-      - iMN_SSzuÜTF: iMN_SSLTI
-      - iMN_ÜTFistStabil: iMN_ÜTF
-      - iMN_ÜTFistProper: iMN_ÜTF
-      - iMN_ÜTFistTeilerfremd: iMN_ÜTF
-      - iMN_Polplatzierung: iMN_SSLTI
-      - iMN_Polplatzierung: iMN_ListeEigenwerte
-      - iMN_LuenbergerEntwurf: iMN_SSLTI
-      - iMN_LuenbergerEntwurf: iMN_ListeEigenwerte
-      - iMN_DGLzuSS: iMN_DGL
-      - iMN_Trajektorienplanung: iMN_SSNichtlinear
-      - iMN_Trajektorienplanung: iMN_Matrix
-      - iMN_Trajektorienplanung: iMN_Matrix
-      - iMN_Trajektorienplanung: iMN_Real
-      - iMN_LinearisierungAnTrajektorie: iMN_SSNichtlinear
-      - iMN_LinearisierungAnTrajektorie: iMN_Zeitfunktion
-      - iMN_LinearisierungAnTrajektorie: iMN_Zeitfunktion
-      - iMN_LTVLQREntwurf: iMN_SSLTV
-      - iMN_LTVLQREntwurf: iMN_Matrix
-      - iMN_LTVLQREntwurf: iMN_Matrix
-      - iMN_ZeitdiskreterEKFEntwurf: iMN_SSNichtlinear
-      - iMN_ZeitdiskreterEKFEntwurf: iMN_Matrix
-      - iMN_ZeitdiskreterEKFEntwurf: iMN_Matrix
-      - iMN_BaueTrajektorienfolgeregler: iMN_Zeitfunktion
-      - iMN_BaueTrajektorienfolgeregler: iMN_Zeitfunktion
-      - iMN_BaueTrajektorienfolgeregler: iMN_Zeitfunktion
-      - iMN_BaueTrajektorienfolgeregler: iMN_Beobachterfunktion
+      - i_Linearisieren: i_SSNichtlinear
+      - i_ZuRegelungsnormalform: i_SSLTI
+      - i_ZuBeobachtungsnormalform: i_SSLTI
+      - i_TesteSteuerbarkeitLTI: i_SSLTI
+      - i_TesteBeobachtbarkeitLTI: i_SSLTI
+      - i_TesteSteuerbarkeitLTV: i_SSLTV
+      - i_TesteBeobachtbarkeitLTV: i_SSLTV
+      - i_TesteSteuerbarkeitNichtlinear: i_SSNichtlinear
+      - i_TesteBeobachtbarkeitNichtlinear: i_SSNichtlinear
+      - i_ÜTFzuSS: i_ÜTF
+      - i_SSzuÜTF: i_SSLTI
+      - i_ÜTFistStabil: i_ÜTF
+      - i_ÜTFistProper: i_ÜTF
+      - i_ÜTFistTeilerfremd: i_ÜTF
+      - i_Polplatzierung: i_SSLTI
+      - i_Polplatzierung: i_ListeEigenwerte
+      - i_LuenbergerEntwurf: i_SSLTI
+      - i_LuenbergerEntwurf: i_ListeEigenwerte
+      - i_DGLzuSS: i_DGL
+      - i_Trajektorienplanung: i_SSNichtlinear
+      - i_Trajektorienplanung: i_Matrix
+      - i_Trajektorienplanung: i_Matrix
+      - i_Trajektorienplanung: i_Real
+      - i_LinearisierungAnTrajektorie: i_SSNichtlinear
+      - i_LinearisierungAnTrajektorie: i_Zeitfunktion
+      - i_LinearisierungAnTrajektorie: i_Zeitfunktion
+      - i_LTVLQREntwurf: i_SSLTV
+      - i_LTVLQREntwurf: i_Matrix
+      - i_LTVLQREntwurf: i_Matrix
+      - i_ZeitdiskreterEKFEntwurf: i_SSNichtlinear
+      - i_ZeitdiskreterEKFEntwurf: i_Matrix
+      - i_ZeitdiskreterEKFEntwurf: i_Matrix
+      - i_BaueTrajektorienfolgeregler: i_Zeitfunktion
+      - i_BaueTrajektorienfolgeregler: i_Zeitfunktion
+      - i_BaueTrajektorienfolgeregler: i_Zeitfunktion
+      - i_BaueTrajektorienfolgeregler: i_Beobachterfunktion
+- property_facts:
+    hasForOutput:
+      Facts:
+      - i_Linearisieren: i_SSLTI
+      - i_ZuRegelungsnormalform: i_SSLTI
+      - i_ZuBeobachtungsnormalform: i_SSLTI
+      - i_TesteSteuerbarkeitLTI: i_SSLTI
+      - i_TesteBeobachtbarkeitLTI: i_SSLTI
+      - i_TesteSteuerbarkeitLTV: i_SSLTV
+      - i_TesteBeobachtbarkeitLTV: i_SSLTV
+      - i_TesteSteuerbarkeitNichtlinear: i_SSNichtlinear
+      - i_TesteBeobachtbarkeitNichtlinear: i_SSNichtlinear
+      - i_ÜTFzuSS: i_SSLTI
+      - i_SSzuÜTF: i_ÜTF
+      - i_ÜTFistStabil: i_ÜTF
+      - i_ÜTFistProper: i_ÜTF
+      - i_ÜTFistTeilerfremd: i_ÜTF
+      - i_Polplatzierung: i_Matrix
+      - i_LuenbergerEntwurf: i_Matrix
+      - i_DGLzuSS: i_SSNichtlinear
+      - i_Trajektorienplanung: i_Zeitfunktion
+      - i_LinearisierungAnTrajektorie: i_SSLTV
+      - i_LTVLQREntwurf: i_Zeitfunktion
+      - i_ZeitdiskreterEKFEntwurf: i_Beobachterfunktion
+      - i_BaueTrajektorienfolgeregler: i_Trajektorienfolgeregler
