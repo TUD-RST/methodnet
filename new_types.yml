@@ -9,6 +9,8 @@ enums:
   Teilerfremd: [Teilerfremd, NichtTeilerfremd]
   MatrixRolle: [A, B, C, D, Zustandsrückführung, LuenbergerVerstärkung]
   ZeitfunktionRolle: [Zustandstrajektorie, Eingangstrajektorie, Zustandsrückführung]
+  ÜTFRolle: [Regelstrecke, Regler]
+  Flachheit: [AusgangFlach, AusgangNichtFlach]
 
 types:
   Real: {}
@@ -22,6 +24,8 @@ types:
         type: Beobachtbarkeit
       Steuerbarkeit:
         type: Steuerbarkeit
+      Flachheit:
+        type: Flachheit
   SSLTV:
     params:
       Zustandsdimension:
@@ -64,10 +68,13 @@ types:
         type: Teilerfremd
       Ordnung:
         type: Int
+      Rolle:
+        type: ÜTFRolle
   ListeEigenwerte:
     params:
       Länge:
         type: Int
+  PIDParameter: {}
   Matrix:
     params:
       Zeilen:
@@ -90,12 +97,15 @@ types:
         type: Int
       Eingangsdimension:
         type: Int
+      Ausgangsdimension:
+        type: Int
   Trajektorienfolgeregler:
     params:
       Zustandsdimension:
         type: Int
       Eingangsdimension:
         type: Int
+  Sprungantwort: {}
 
 
 methods:
@@ -109,6 +119,30 @@ methods:
       o:
         linearisiertesSystem:
           type: SSLTI
+          params:
+            Zustandsdimension: n
+  SSLTIZuNichtlinear:
+    inputs:
+      linearesSystem:
+        type: SSLTI
+        params:
+          Zustandsdimension: n
+    outputs:
+      o:
+        allgemeinesSystem:
+          type: SSNichtlinear
+          params:
+            Zustandsdimension: n
+  SSLTVZuNichtlinear:
+    inputs:
+      linearesSystem:
+        type: SSLTV
+        params:
+          Zustandsdimension: n
+    outputs:
+      o:
+        allgemeinesSystem:
+          type: SSNichtlinear
           params:
             Zustandsdimension: n
   ZuRegelungsnormalform:
@@ -268,12 +302,14 @@ methods:
         type: SSLTI
         params:
           Zustandsdimension: n
+          Eingangsdimension: 1
     outputs:
       o:
         tf:
           type: ÜTF
           params:
             Ordnung: n
+            Rolle: Regelstrecke
   ÜTFistStabil:
     inputs:
       tf:
@@ -365,6 +401,21 @@ methods:
             Zeilen: n
             Spalten: 1
             Rolle: LuenbergerVerstärkung
+  BaueLuenbergerBeobachter:
+    inputs:
+      ltiss:
+        type: SSLTI
+        params:
+          Zustandsdimension: n
+          Beobachtbarkeit: Beobachtbar
+      k:
+        type: Matrix
+        params:
+          Rolle: LuenbergerVerstärkung
+    outputs:
+      o:
+        obs:
+          type: Beobachterfunktion
   DGLzuSS:
     inputs:
       dgl:
@@ -373,7 +424,7 @@ methods:
       o:
         ss:
           type: SSNichtlinear
-  Trajektorienplanung:
+  TrajektorienplanungMitOptimierung:
     inputs:
       ss:
         type: SSNichtlinear
@@ -392,6 +443,75 @@ methods:
         params:
           Zeilen: n
           Spalten: 1
+        tune: true
+      tend:
+        type: Real
+        tune: true
+    outputs:
+      o:
+        xtraj:
+          type: Zeitfunktion
+          params:
+            Zeilen: n
+            Spalten: 1
+            Rolle: Zustandstrajektorie
+        utraj:
+          type: Zeitfunktion
+          params:
+            Zeilen: m
+            Spalten: 1
+            Rolle: Eingangstrajektorie
+  TrajektorienplanungMitKollokation:
+    inputs:
+      ss:
+        type: SSNichtlinear
+        params:
+          Zustandsdimension: n
+          Eingangsdimension: m
+          Steuerbarkeit: Steuerbar
+      xstart:
+        type: Matrix
+        params:
+          Zeilen: n
+          Spalten: 1
+        tune: true
+      xend:
+        type: Matrix
+        params:
+          Zeilen: n
+          Spalten: 1
+        tune: true
+      tend:
+        type: Real
+        tune: true
+    outputs:
+      o:
+        xtraj:
+          type: Zeitfunktion
+          params:
+            Zeilen: n
+            Spalten: 1
+            Rolle: Zustandstrajektorie
+        utraj:
+          type: Zeitfunktion
+          params:
+            Zeilen: m
+            Spalten: 1
+            Rolle: Eingangstrajektorie
+  TrajektorienplanungMitFlachemAusgang:
+    inputs:
+      ss:
+        type: SSNichtlinear
+        params:
+          Zustandsdimension: n
+          Eingangsdimension: m
+          Steuerbarkeit: Steuerbar
+          Flachheit: AusgangFlach
+      ystart:
+        type: Real
+        tune: true
+      yend:
+        type: Real
         tune: true
       tend:
         type: Real
@@ -466,7 +586,35 @@ methods:
             Zeilen: m
             Spalten: n
             Rolle: Zustandsrückführung
-  ZeitdiskreterEKFEntwurf:
+  LTILQREntwurf:
+    inputs:
+      sslti:
+        type: SSLTI
+        params:
+          Zustandsdimension: n
+          Eingangsdimension: m
+          Steuerbarkeit: Steuerbar
+      q:
+        type: Matrix
+        params:
+          Zeilen: n
+          Spalten: n
+        tune: true
+      r:
+        type: Matrix
+        params:
+          Zeilen: m
+          Spalten: m
+        tune: true
+    outputs:
+      o:
+        k:
+          type: Matrix
+          params:
+            Zeilen: m
+            Spalten: n
+            Rolle: Zustandsrückführung
+  EKFEntwurf:
     inputs:
       ss:
         type: SSNichtlinear
@@ -525,3 +673,69 @@ methods:
           params:
             Zustandsdimension: n
             Eingangsdimension: m
+  BauePIDRegler:
+    inputs:
+      pidparams:
+        type: PIDParameter
+    outputs:
+      o:
+        pid:
+          type: ÜTF
+          params:
+            Rolle: Regler
+  ParametriereZieglerNichols:
+    inputs:
+      sprungantwort:
+        type: Sprungantwort
+    outputs:
+      o:
+        pidparams:
+          type: PIDParameter
+  ParametriereBetragsoptimum:
+    inputs:
+      tf:
+        type: ÜTF
+        params:
+          Rolle: Regelstrecke
+    outputs:
+      o:
+        pidparams:
+          type: PIDParameter
+  ParametriereSymmetrischesOptimum:
+    inputs:
+      tf:
+        type: ÜTF
+        params:
+          Rolle: Regelstrecke
+    outputs:
+      o:
+        pidparams:
+          type: PIDParameter
+  SimuliereSprungantwort:
+    inputs:
+      tf:
+        type: ÜTF
+        params:
+          Rolle:
+            Regelstrecke
+    outputs:
+      o:
+        sr:
+          type: Sprungantwort
+  TesteAusgangAufFlachheit:
+    inputs:
+      sys:
+        type: SSNichtlinear
+        params:
+          Flachheit: unset
+    outputs:
+      istFlach:
+        sys:
+          type: SSNichtlinear
+          params:
+            Flachheit: AusgangFlach
+      istNichtFlach:
+        sys:
+          type: SSNichtlinear
+          params:
+            Flachheit: AusgangNichtFlach
