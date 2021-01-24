@@ -105,9 +105,11 @@ function init() {
     let solutionGraphOptions: vis.Options = {
         physics: {
             barnesHut: {
-                avoidOverlap: 0.1, // default 0
-                springConstant: 0.2,  // default 0.04
-                springLength: 20 // default 95
+                avoidOverlap: 0.05, // default 0
+                springConstant: 0.05,  // default 0.04
+                springLength: 50, // default 95
+                centralGravity: 0.01, // default 0.3
+                gravitationalConstant: -150 // default -2000
             }
         },
         autoResize: true,
@@ -130,7 +132,34 @@ function init() {
         nodes: new vis.DataSet([]) as vis.DataSetNodes,
         edges: new vis.DataSet([]) as vis.DataSetEdges
     }
-    solutionGraphNetwork = new vis.Network(solutionGraphContainer, solutionGraphNetworkData, solutionGraphOptions)
+    solutionGraphNetwork = new vis.Network(solutionGraphContainer, solutionGraphNetworkData, solutionGraphOptions);
+    let solutionGraphCanvas = solutionGraphContainer.getElementsByClassName('vis-network')[0].getElementsByTagName('canvas')[0]
+    solutionGraphCanvas.setAttribute('tabindex','1')
+    solutionGraphCanvas.addEventListener('keydown', ev => {
+        if (ev.key == 'f') {
+            solutionGraphNetwork.getSelectedNodes().forEach((value) => {
+                solutionGraphNetworkData.nodes.update({
+                    id: value,
+                    fixed: {
+                        x: true,
+                        y: true
+                    }
+                })
+            })
+        } else if (ev.key == 'r') {
+            solutionGraphNetwork.getSelectedNodes().forEach((value) => {
+                solutionGraphNetworkData.nodes.update({
+                    id: value,
+                    fixed: {
+                        x: false,
+                        y: false
+                    }
+                })
+            })
+        }
+    });
+
+    (<any>window).solutionGraphNetwork = solutionGraphNetwork;
 
     let knowledgeGraphContainer = document.getElementById('knowledge-graph')
     knowledgeGraphNetworkData = {
@@ -178,7 +207,11 @@ async function loadKnowledgeGraph() {
         let newEdge: vis.Edge = {
             from: fromId,
             to: toId,
-            arrows: "to"
+            arrows: "to",
+            // @ts-ignore
+            smooth: {
+                enabled: false
+            }
         }
         let [id] = edges.add(newEdge)
         edgeIds.push([name1, name2, id as number])
@@ -223,8 +256,8 @@ function setNetworkData(graphData: SolutionGraphData) {
     let start_i = 0
     let end_i = 0
 
-    let H_SPACE = 1000
-    let V_SPACE = 350
+    let H_SPACE = 500
+    let V_SPACE = 250
 
     for (let ao of graphData.objects) {
         let newNode: vis.Node = {
@@ -304,7 +337,11 @@ function setNetworkData(graphData: SolutionGraphData) {
                 from: port.id,
                 to: method.id,
                 color: 'black',
-                arrows: 'to'
+                arrows: 'to',
+                // @ts-ignore
+                smooth: {
+                    enabled: false
+                }
             })
         }
 
@@ -328,7 +365,11 @@ function setNetworkData(graphData: SolutionGraphData) {
                     from: method.id,
                     to: demux.id,
                     color: 'black',
-                    arrows: 'to'
+                    arrows: 'to',
+                    // @ts-ignore
+                    smooth: {
+                        enabled: false
+                    }
                 })
 
                 demux_id = demux.id
@@ -355,7 +396,11 @@ function setNetworkData(graphData: SolutionGraphData) {
                     from: demux_id,
                     to: port.id,
                     color: 'black',
-                    arrows: 'to'
+                    arrows: 'to',
+                    // @ts-ignore
+                    smooth: {
+                        enabled: false
+                    }
                 })
             }
         }
@@ -368,7 +413,11 @@ function setNetworkData(graphData: SolutionGraphData) {
             from: con.fromId,
             to: con.toId,
             color: 'black',
-            arrows: 'to'
+            arrows: 'to',
+            // @ts-ignore
+            smooth: {
+                enabled: false
+            }
         }
         edges.add(newEdge)
     }
