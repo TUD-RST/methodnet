@@ -5,6 +5,7 @@
   "private": true,
   "scripts": {
     "build": "npx webpack",
+    "watch": "npx webpack --watch",
     "start:dev": "npx webpack-dev-server --open"
   },
   "repository": {
