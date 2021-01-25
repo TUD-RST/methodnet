@@ -119,8 +119,9 @@ function init() {
         physics: {
             barnesHut: {
                 avoidOverlap: 0.1, // default 0
-                springConstant: 0.01,  // default 0.04
-                springLength: 50 // default 95
+                springConstant: 0.005,  // default 0.04
+                springLength: 50, // default 95
+                centralGravity: 0.01,
             }
         },
         autoResize: true,
@@ -166,7 +167,9 @@ function init() {
         nodes: new vis.DataSet([]) as vis.DataSetNodes,
         edges: new vis.DataSet([]) as vis.DataSetEdges
     }
-    knowledgeGraphNetwork = new vis.Network(knowledgeGraphContainer, knowledgeGraphNetworkData, knowledgeGraphOptions)
+    knowledgeGraphNetwork = new vis.Network(knowledgeGraphContainer, knowledgeGraphNetworkData, knowledgeGraphOptions);
+
+    (<any>window).knowledgeGraphNetwork = knowledgeGraphNetwork;
 
     loadKnowledgeGraph()
 }
@@ -185,7 +188,11 @@ async function loadKnowledgeGraph() {
     for (let type of graphData.types) {
         let newNode: vis.Node = {
             label: type.name,
-            shape: "ellipse"
+            shape: "ellipse",
+            color: {
+                border: '#64b14b',
+                background: '#82e760'
+            }
         }
         let [id] = nodes.add(newNode)
         typeToId[type.name] = id as number
@@ -194,7 +201,10 @@ async function loadKnowledgeGraph() {
     for (let method of graphData.methods) {
         let newNode: vis.Node = {
             label: method.name,
-            shape: "box"
+            shape: "box",
+            color: {
+                background: '#e6f0ff'
+            }
         }
         let [id] = nodes.add(newNode)
         methodToId[method.name] = id as number
@@ -208,6 +218,7 @@ async function loadKnowledgeGraph() {
             from: fromId,
             to: toId,
             arrows: "to",
+            color: "black",
             // @ts-ignore
             smooth: {
                 enabled: false
@@ -259,6 +270,8 @@ function setNetworkData(graphData: SolutionGraphData) {
     let H_SPACE = 500
     let V_SPACE = 250
 
+    let maxDistanceToStart = graphData.objects.filter(value => value.is_end).map(value => value.distance_to_start).reduce((a, b) => Math.max(a,b))
+
     for (let ao of graphData.objects) {
         let newNode: vis.Node = {
             id: ao.id,
@@ -269,8 +282,8 @@ function setNetworkData(graphData: SolutionGraphData) {
 
         if (ao.is_start) {
             newNode.color = {
-                border: '#754fa7',
-                background: '#b37aff'
+                border: '#b04a9e',
+                background: '#de5dc8'
             }
             newNode.fixed = true
             newNode.x = (start_i - (nr_start_nodes - 1)/2)*H_SPACE
@@ -278,23 +291,23 @@ function setNetworkData(graphData: SolutionGraphData) {
             newNode.y = 0
         } else if (ao.is_end) {
             newNode.color = {
-                border: '#42cb52',
-                background: '#66db47'
+                border: '#64b14b',
+                background: '#82e760'
             }
             newNode.fixed = true
             newNode.x = (end_i - (nr_end_nodes - 1)/2)*H_SPACE
             end_i++
-            newNode.y = ao.distance_to_start*V_SPACE
+            newNode.y = maxDistanceToStart*V_SPACE
         } else {
             if (ao.on_solution_path) {
                 newNode.color = {
-                    border: '#8bdde3',
-                    background: '#9af9ff'
+                    border: '#4393a4',
+                    background: '#a0d5e5'
                 }
             } else {
                 newNode.color = {
-                    border: '#b7b1b1',
-                    background: '#e5d7d7'
+                    border: '#a56750',
+                    background: '#e29e87'
                 }
             }
         }
