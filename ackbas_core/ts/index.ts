@@ -121,7 +121,7 @@ function init() {
                 avoidOverlap: 0.1, // default 0
                 springConstant: 0.005,  // default 0.04
                 springLength: 50, // default 95
-                centralGravity: 0.01,
+                centralGravity: 0.1,
             }
         },
         autoResize: true,
@@ -283,8 +283,9 @@ function setNetworkData(graphData: SolutionGraphData) {
         if (ao.is_start) {
             newNode.color = {
                 border: '#b04a9e',
-                background: '#de5dc8'
+                background: '#a0d5e5'
             }
+            newNode.borderWidth = 4
             newNode.fixed = true
             newNode.x = (start_i - (nr_start_nodes - 1)/2)*H_SPACE
             start_i++
@@ -292,8 +293,9 @@ function setNetworkData(graphData: SolutionGraphData) {
         } else if (ao.is_end) {
             newNode.color = {
                 border: '#64b14b',
-                background: '#82e760'
+                background: '#a0d5e5'
             }
+            newNode.borderWidth = 4
             newNode.fixed = true
             newNode.x = (end_i - (nr_end_nodes - 1)/2)*H_SPACE
             end_i++
@@ -307,8 +309,9 @@ function setNetworkData(graphData: SolutionGraphData) {
             } else {
                 newNode.color = {
                     border: '#a56750',
-                    background: '#e29e87'
+                    background: '#a0d5e5'
                 }
+                newNode.borderWidth = 4
             }
         }
 
@@ -462,9 +465,28 @@ function startPhysics() {
     })
 }
 
+function getSolutionNodePositions() {
+    solutionGraphNetwork.storePositions()
+    return solutionGraphNetworkData.nodes.map((item) => {
+        return {
+            id: item.id,
+            x: item.x,
+            y: item.y
+        }
+    })
+}
+
+function setSolutionNodePositions(array) {
+    for (let entry of array) {
+        solutionGraphNetwork.moveNode(entry.id, entry.x, entry.y)
+    }
+}
+
 // make function globally available
 // https://stackoverflow.com/questions/12709074/how-do-you-explicitly-set-a-new-property-on-window-in-typescript
 (<any>window).init = init;
 (<any>window).update = update;
 (<any>window).stopPhysics = stopPhysics;
 (<any>window).startPhysics = startPhysics;
+(<any>window).getSolutionNodePositions = getSolutionNodePositions;
+(<any>window).setSolutionNodePositions = setSolutionNodePositions;
