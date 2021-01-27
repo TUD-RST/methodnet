@@ -1,4 +1,6 @@
-# Automatic Control Knowledge Based Assistance System (ACKBAS)
+# Methodnet – A Formalized Representation of Control Theoretic Methods
+
+Former name of the project: "Automatic Control Knowledge Based Assistance System (ACKBAS)"
 
 ## General Information
 
