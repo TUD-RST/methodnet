@@ -11,6 +11,9 @@ While code and interface are written in English, the contents of the method net 
 
 Disclaimer: This software is still in early stage of development and not yet officially released.
 
+## Screenshot
+![Screenshot showing web interface](screenshot.png)
+
 ## Development
 
 - uses NPM for management of Javascript libraries
