@@ -1,4 +1,6 @@
-# Automatic Control Knowledge Methodnet
+# Methodnet – A Formalized Representation of Control Theoretic Methods
+
+Former name of the project: "Automatic Control Knowledge Based Assistance System (ACKBAS)"
 
 ## General Information
 
@@ -16,7 +18,13 @@ Disclaimer: This software is still in early stage of development and not yet off
 
 ## Development
 
-- uses NPM for management of Javascript libraries
-- Webpack builds bundle that is finally served as `/static/ackbas_core/main.js`
-- Run `npm run build` after changing `ackbas_core/js/index.js`
-- Alternatively, run `npm run watch` to start Webpack in watch mode. The typescript source will then automatically be recompiled when it changes.
+- We use *NPM* for management of Javascript libraries.
+- Install all dependencies (specified in `package.json`): `npm install` (in the main directory)
+  - → This creates a directory `node_modules` which is comparable to the virtual env directory in python
+- We use *esbuild* to build a bundle (single file with own code and all dependencies) that is finally served as `/static/ackbas_core/main.js`.
+- Own code lives in `ackbas_core/ts/index.ts` (typescript which will be compiled to JS during build).
+- Build : run `npm run build` after changing `ackbas_core/ts/index.ts`.
+
+## Further relevant docs
+
+- https://json-schema.org/understanding-json-schema/
