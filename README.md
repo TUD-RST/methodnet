@@ -1,4 +1,4 @@
-# Automatic Control Knowledge Method Net
+# Automatic Control Knowledge Methodnet
 
 ## General Information
 
