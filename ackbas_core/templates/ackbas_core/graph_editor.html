@@ -11,17 +11,17 @@
     #page-grid {
         height: 100%;
         display: grid;
-        grid-template-rows: 1fr 1fr 80px;
+        grid-template-rows: 50px 1fr 1fr 80px;
         grid-template-columns: 340px 1fr 1.5fr;
     }
 
     #start-editor {
-        grid-row: 1;
+        grid-row: 1/3;
         grid-column: 1;
     }
 
     #target-editor {
-        grid-row: 2/4;
+        grid-row: 3/5;
         grid-column: 1;
     }
 
@@ -29,13 +29,30 @@
         height: 100%;
     }
 
-    #solution-graph {
-        grid-row: 1/3;
+    .graph-title {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-size: large;
+    }
+
+    #solution-title {
+        grid-row: 1;
         grid-column: 3;
     }
 
+    #solution-graph {
+        grid-row: 2/4;
+        grid-column: 3;
+    }
+
+    #methodnet-title {
+        grid-row: 1;
+        grid-column: 2;
+    }
+
     #knowledge-graph {
-        grid-row: 1/3;
+        grid-row: 2/4;
         grid-column: 2;
     }
 
@@ -44,7 +61,7 @@
     }
 
     #button-row {
-        grid-row: 3;
+        grid-row: 4;
         grid-column: 2/4;
     }
 
@@ -82,7 +99,9 @@
     <div id="start-editor" class="editor-container nice-border"></div>
     <div id="target-editor" class="editor-container nice-border"></div>
 
+    <div id="solution-title" class="graph-title">Solution Procedure</div>
     <div id="solution-graph" class="graph-container nice-border">Graph could not be loaded</div>
+    <div id="methodnet-title" class="graph-title">Methodnet</div>
     <div id="knowledge-graph" class="graph-container nice-border">Graph could not be loaded</div>
 
     <div id="button-row" class="nice-border">
