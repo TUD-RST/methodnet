@@ -24,6 +24,7 @@ Disclaimer: This software is still in early stage of development and not yet off
 - We use *esbuild* to build a bundle (single file with own code and all dependencies) that is finally served as `/static/ackbas_core/main.js`.
 - Own code lives in `ackbas_core/ts/index.ts` (typescript which will be compiled to JS during build).
 - Build : run `npm run build` after changing `ackbas_core/ts/index.ts`.
+- Watch mode : run `npm run watch` to start *esbuild* in watch mode, which recompiles the typescript code automatically when it changes.
 
 ## Further relevant docs
 
