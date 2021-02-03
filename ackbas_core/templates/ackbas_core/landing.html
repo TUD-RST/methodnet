@@ -1,11 +1,38 @@
 {% extends "ackbas_core/base.html" %}
 
+{% block styles %}
+<style type="text/css">
+    h1 {
+        margin: 40px 0 20px 0;
+    }
+</style>
+{% endblock %}
+
 {% block content %}
 
 <div class="container">
-    <h1>Automatic Control Knowledge Graph</h1>
+    <h1>Methodnet demo instance</h1>
 
-    Go <a href="{% url 'graph-editor' 'new_types' %}">here</a> for an example graph.
+    <p>
+        <a href="{% url 'graph-editor' 'new_types' %}">Click here to launch the interactive Methodnet viewer.</a>
+    </p>
+    <p>
+        The graph viewer UI mainly consists of three panels:
+    </p>
+    <ol>
+        <li>Left: An upper and lower text editor, for entering the solution procedures start and target spec respectively.</li>
+        <li>Center: The Methodnet graph, an overview of all existing types and methods.</li>
+        <li>Right: The solution procedure graph, a sequence of method calls linking the entered start specification to the desired target specification.</li>
+    </ol>
+    <p>If you want to try out generating your own solution procedure, start by looking up the types and methods you’re
+        interested in in <a href="https://github.com/TUD-RST/methodnet/blob/main/new_types.yml">this file</a>.
+        Then enter start and target specification similar to the provided example.
+        Multiple start specs are also possible.
+        Once you’re done, click “Update” and inspect the result in the right panel.
+    </p>
+    <p>
+        All source code is available on <a href="https://github.com/TUD-RST/methodnet">GitHub</a>.
+    </p>
 </div>
 
 {% endblock  %}
