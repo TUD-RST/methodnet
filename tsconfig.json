@@ -2,7 +2,10 @@
     "compilerOptions": {
       "outDir": "./built",
       "allowJs": true,
-      "target": "es5"
+      "target": "es5",
+      "isolatedModules": true,
+      "esModuleInterop": true,
+      "lib": ["ES2017", "dom"]
     },
-    "include": ["./ackbas_core/js/**/*"]
+    "include": ["./ackbas_core/ts/**/*"]
   }
