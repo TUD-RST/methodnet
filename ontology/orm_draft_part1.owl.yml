@@ -1,8 +1,9 @@
 ---
 
 # This yml-file models (part of) the knowledge which is represented by method network
+# orm means "Ontologie Regelungstechnischer Methoden" (Ontolgy of Methods in Control Engineering)
 
-- iri: "https://w3id.org/yet/undefined/control-systems-knowledge_draft#"
+- iri: "https://w3id.org/yet/undefined/orm_draft#"
 
 - import:
     iri: http://purl.obolibrary.org/obo/bfo.owl#

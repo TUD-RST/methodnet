@@ -6,7 +6,7 @@ from ipydex import IPS, activate_ips_on_exception
 activate_ips_on_exception()
 
 
-base_ontology_path = "control-systems-knowledge_draft_part1.owl.yml"
+base_ontology_path = "orm_draft_part1.owl.yml"
 
 
 def load_yaml(path):
@@ -117,7 +117,7 @@ onto_list.append({"property_facts": {"hasForOutput": {"Facts": output_facts}}})
 
 onto_src_part2 = yaml.dump(onto_list, allow_unicode=True)
 
-result_path = "mn-onto.owl.yml"
+result_path = "orm_draft.owl.yml"
 write_txt(result_path, f"{onto_src_part1}{separator['annotation']}{onto_src_part2}")
 
 om = ypo.OntologyManager(result_path)
