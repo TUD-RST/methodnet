@@ -1,13 +1,20 @@
 ---
 
 # This yml-file models (part of) the knowledge which is represented by method network
-# The classes which are SubClassOf owl:Thing will probably become subclasses of BFO or some other Upper Ontology in the future
 
 - iri: "https://w3id.org/yet/undefined/control-systems-knowledge_draft#"
 
+- import:
+    iri: http://purl.obolibrary.org/obo/bfo.owl#
+    annotations:
+        download_link: http://purl.obolibrary.org/obo/bfo/2.0/bfo.owl#
+    localpath: external_data/bfo.owl
+    ns: bfo
+
+
 - multiple_owl_classes:
     - MathematicalConcept:
-        SubClassOf: "owl:Thing"
+        SubClassOf: "bfo:BFO_0000001"
     - BooleanValue:
         SubClassOf: MathematicalConcept
     - MathematicalMapping:
@@ -18,7 +25,7 @@
         SubClassOf: MathematicalMapping
     # --
     - DynamicalSystemRepresentation:
-        SubClassOf: "owl:Thing"
+        SubClassOf: "bfo:BFO_0000001"
     - DiffenrentialEquationSystemIO:
         SubClassOf: DynamicalSystemRepresentation
         # IO means including information what is the input and output (mapping)
@@ -31,7 +38,7 @@
         SubClassOf: LinearStateSpaceSystem
     # --
     - SystemProperty:
-        SubClassOf: "owl:Thing"
+        SubClassOf: "bfo:BFO_0000001"
     - ControllabilityProperty:
         SubClassOf: SystemProperty
     - ObservabilityProperty:
@@ -44,7 +51,7 @@
         SubClassOf: SystemProperty
     # ----
     - MethodNetworkEntity:
-        SubClassOf: "owl:Thing"
+        SubClassOf: "bfo:BFO_0000001"
     - TypeEntity:
         SubClassOf: MethodNetworkEntity
     - MethodEntity:
@@ -59,7 +66,7 @@
     - X_RelationConcept:
         # magic base class for all RelationConcepts
         # !! this should be a hardcoded concept provided by yamlpyowl
-        SubClassOf: "owl:Thing"
+        SubClassOf: "bfo:BFO_0000001"
 
     - X_MethodRelations_RC:
         # !! drop required `X_` in the parser
@@ -158,6 +165,10 @@
       types:
       - TypeEntity
 - owl_individual:
+    i_PIDParameter:
+      types:
+      - TypeEntity
+- owl_individual:
     i_Matrix:
       types:
       - TypeEntity
@@ -173,6 +184,10 @@
     i_Trajektorienfolgeregler:
       types:
       - TypeEntity
+- owl_individual:
+    i_Sprungantwort:
+      types:
+      - TypeEntity
 - annotation: '
 
     #####
@@ -180,6 +195,14 @@
     '
 - owl_individual:
     i_Linearisieren:
+      types:
+      - MethodEntity
+- owl_individual:
+    i_SSLTIZuNichtlinear:
+      types:
+      - MethodEntity
+- owl_individual:
+    i_SSLTVZuNichtlinear:
       types:
       - MethodEntity
 - owl_individual:
@@ -243,11 +266,23 @@
       types:
       - MethodEntity
 - owl_individual:
+    i_BaueLuenbergerBeobachter:
+      types:
+      - MethodEntity
+- owl_individual:
     i_DGLzuSS:
       types:
       - MethodEntity
 - owl_individual:
-    i_Trajektorienplanung:
+    i_TrajektorienplanungMitOptimierung:
+      types:
+      - MethodEntity
+- owl_individual:
+    i_TrajektorienplanungMitKollokation:
+      types:
+      - MethodEntity
+- owl_individual:
+    i_TrajektorienplanungMitFlachemAusgang:
       types:
       - MethodEntity
 - owl_individual:
@@ -259,17 +294,47 @@
       types:
       - MethodEntity
 - owl_individual:
-    i_ZeitdiskreterEKFEntwurf:
+    i_LTILQREntwurf:
+      types:
+      - MethodEntity
+- owl_individual:
+    i_EKFEntwurf:
       types:
       - MethodEntity
 - owl_individual:
     i_BaueTrajektorienfolgeregler:
       types:
       - MethodEntity
+- owl_individual:
+    i_BauePIDRegler:
+      types:
+      - MethodEntity
+- owl_individual:
+    i_ParametriereZieglerNichols:
+      types:
+      - MethodEntity
+- owl_individual:
+    i_ParametriereBetragsoptimum:
+      types:
+      - MethodEntity
+- owl_individual:
+    i_ParametriereSymmetrischesOptimum:
+      types:
+      - MethodEntity
+- owl_individual:
+    i_SimuliereSprungantwort:
+      types:
+      - MethodEntity
+- owl_individual:
+    i_TesteAusgangAufFlachheit:
+      types:
+      - MethodEntity
 - property_facts:
     hasForInput:
       Facts:
       - i_Linearisieren: i_SSNichtlinear
+      - i_SSLTIZuNichtlinear: i_SSLTI
+      - i_SSLTVZuNichtlinear: i_SSLTV
       - i_ZuRegelungsnormalform: i_SSLTI
       - i_ZuBeobachtungsnormalform: i_SSLTI
       - i_TesteSteuerbarkeitLTI: i_SSLTI
@@ -287,28 +352,49 @@
       - i_Polplatzierung: i_ListeEigenwerte
       - i_LuenbergerEntwurf: i_SSLTI
       - i_LuenbergerEntwurf: i_ListeEigenwerte
+      - i_BaueLuenbergerBeobachter: i_SSLTI
+      - i_BaueLuenbergerBeobachter: i_Matrix
       - i_DGLzuSS: i_DGL
-      - i_Trajektorienplanung: i_SSNichtlinear
-      - i_Trajektorienplanung: i_Matrix
-      - i_Trajektorienplanung: i_Matrix
-      - i_Trajektorienplanung: i_Real
+      - i_TrajektorienplanungMitOptimierung: i_SSNichtlinear
+      - i_TrajektorienplanungMitOptimierung: i_Matrix
+      - i_TrajektorienplanungMitOptimierung: i_Matrix
+      - i_TrajektorienplanungMitOptimierung: i_Real
+      - i_TrajektorienplanungMitKollokation: i_SSNichtlinear
+      - i_TrajektorienplanungMitKollokation: i_Matrix
+      - i_TrajektorienplanungMitKollokation: i_Matrix
+      - i_TrajektorienplanungMitKollokation: i_Real
+      - i_TrajektorienplanungMitFlachemAusgang: i_SSNichtlinear
+      - i_TrajektorienplanungMitFlachemAusgang: i_Real
+      - i_TrajektorienplanungMitFlachemAusgang: i_Real
+      - i_TrajektorienplanungMitFlachemAusgang: i_Real
       - i_LinearisierungAnTrajektorie: i_SSNichtlinear
       - i_LinearisierungAnTrajektorie: i_Zeitfunktion
       - i_LinearisierungAnTrajektorie: i_Zeitfunktion
       - i_LTVLQREntwurf: i_SSLTV
       - i_LTVLQREntwurf: i_Matrix
       - i_LTVLQREntwurf: i_Matrix
-      - i_ZeitdiskreterEKFEntwurf: i_SSNichtlinear
-      - i_ZeitdiskreterEKFEntwurf: i_Matrix
-      - i_ZeitdiskreterEKFEntwurf: i_Matrix
+      - i_LTILQREntwurf: i_SSLTI
+      - i_LTILQREntwurf: i_Matrix
+      - i_LTILQREntwurf: i_Matrix
+      - i_EKFEntwurf: i_SSNichtlinear
+      - i_EKFEntwurf: i_Matrix
+      - i_EKFEntwurf: i_Matrix
       - i_BaueTrajektorienfolgeregler: i_Zeitfunktion
       - i_BaueTrajektorienfolgeregler: i_Zeitfunktion
       - i_BaueTrajektorienfolgeregler: i_Zeitfunktion
       - i_BaueTrajektorienfolgeregler: i_Beobachterfunktion
+      - i_BauePIDRegler: i_PIDParameter
+      - i_ParametriereZieglerNichols: i_Sprungantwort
+      - i_ParametriereBetragsoptimum: i_ÜTF
+      - i_ParametriereSymmetrischesOptimum: i_ÜTF
+      - i_SimuliereSprungantwort: i_ÜTF
+      - i_TesteAusgangAufFlachheit: i_SSNichtlinear
 - property_facts:
     hasForOutput:
       Facts:
       - i_Linearisieren: i_SSLTI
+      - i_SSLTIZuNichtlinear: i_SSNichtlinear
+      - i_SSLTVZuNichtlinear: i_SSNichtlinear
       - i_ZuRegelungsnormalform: i_SSLTI
       - i_ZuBeobachtungsnormalform: i_SSLTI
       - i_TesteSteuerbarkeitLTI: i_SSLTI
@@ -324,9 +410,19 @@
       - i_ÜTFistTeilerfremd: i_ÜTF
       - i_Polplatzierung: i_Matrix
       - i_LuenbergerEntwurf: i_Matrix
+      - i_BaueLuenbergerBeobachter: i_Beobachterfunktion
       - i_DGLzuSS: i_SSNichtlinear
-      - i_Trajektorienplanung: i_Zeitfunktion
+      - i_TrajektorienplanungMitOptimierung: i_Zeitfunktion
+      - i_TrajektorienplanungMitKollokation: i_Zeitfunktion
+      - i_TrajektorienplanungMitFlachemAusgang: i_Zeitfunktion
       - i_LinearisierungAnTrajektorie: i_SSLTV
       - i_LTVLQREntwurf: i_Zeitfunktion
-      - i_ZeitdiskreterEKFEntwurf: i_Beobachterfunktion
+      - i_LTILQREntwurf: i_Matrix
+      - i_EKFEntwurf: i_Beobachterfunktion
       - i_BaueTrajektorienfolgeregler: i_Trajektorienfolgeregler
+      - i_BauePIDRegler: i_ÜTF
+      - i_ParametriereZieglerNichols: i_PIDParameter
+      - i_ParametriereBetragsoptimum: i_PIDParameter
+      - i_ParametriereSymmetrischesOptimum: i_PIDParameter
+      - i_SimuliereSprungantwort: i_Sprungantwort
+      - i_TesteAusgangAufFlachheit: i_SSNichtlinear
