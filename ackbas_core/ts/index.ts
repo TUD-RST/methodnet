@@ -177,8 +177,7 @@ function init() {
 async function loadKnowledgeGraph() {
     let path_components = window.location.pathname.split('/')
     let graphName = path_components[2]
-    let url = new URL('http://127.0.0.1:8000/kg/' + graphName)
-    let response = await fetch(url as any)
+    let response = await fetch('/kg/' + graphName)
 
     let graphData = await response.json() as KnowledgeGraphData
 
@@ -235,9 +234,7 @@ async function update() {
     let startYML = startEditor.getValue()
     let targetYML = targetEditor.getValue()
 
-    // TODO: Make URL relative
-    let url = new URL('http://127.0.0.1:8000/s')
-    let response = await fetch(url as any, {
+    let response = await fetch('/s', {
         method: "POST",
         headers: {
             'Content-Type': 'application/json'
