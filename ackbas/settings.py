@@ -11,21 +11,44 @@ https://docs.djangoproject.com/en/3.0/ref/settings/
 """
 
 import os
-
-# Build paths inside the project like this: os.path.join(BASE_DIR, ...)
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+import sys
 
 
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/3.0/howto/deployment/checklist/
+import deploymentutils as du
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'l755m-hm+_7-$q8w(77!*7$!nuhm-j5k)f$$k)a60%10&tx#fj'
+
+# DEVMODE should be False by default.
+# Exceptions: 'runserver' command or explicitly set by ENV-Variable
+# for  some management commands (on the production server) we want to explicitly switch off DEVMODE
+
+# export DJANGO_DEVMODE=True; py3 manage.py <some_command>
+env_devmode = os.getenv("DJANGO_DEVMODE")
+if env_devmode is None:
+    DEVMODE = "runserver" in sys.argv
+else:
+    DEVMODE = env_devmode.lower() == "true"
+
+
+
+config = du.get_nearest_config("config.ini", devmode=DEVMODE)
+
+# Build paths inside the project like this: os.path.join(BASEDIR, ...)
+# this is where `manage.py` lives
+BASEDIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+
+SECRET_KEY = config("SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = True#  config("DEBUG", cast=bool)
 
-ALLOWED_HOSTS = []
+# prevent accidentally using DEBUG == "False" (which evaluates to `True`)
+assert DEBUG in (True, False)
+assert DEVMODE in (True, False)
+
+BASEURL = config("BASEURL")
+
+ALLOWED_HOSTS = config("ALLOWED_HOSTS", cast=config.Csv())
 
 
 # Application definition
@@ -77,7 +100,7 @@ WSGI_APPLICATION = 'ackbas.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        'NAME': os.path.join(BASEDIR, 'db.sqlite3'),
     }
 }
 
@@ -101,6 +124,48 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format': '{asctime} {levelname} {module} {process:d} {thread:d} {message}',
+            'style': '{',
+        },
+        'simple': {
+            'format': '{asctime} {levelname} {message}',
+            'style': '{',
+        },
+    },
+    'handlers': {
+        'file1': {
+            'level': 'WARNING',
+            'class': 'logging.FileHandler',
+            'filename': config("DJANGO_LOGFILE").replace("__BASEDIR__", BASEDIR),
+            'formatter': 'verbose',
+        },
+        'file2': {
+            'level': 'DEBUG',
+            'class': 'logging.FileHandler',
+            'filename': config("MYAPP_LOGFILE").replace("__BASEDIR__", BASEDIR),
+            'formatter': 'simple',
+        },
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['file1'],
+            'level': 'WARNING',
+            'propagate': True,
+        },
+        'myapp': {
+            'handlers': ['file2'],
+            'level': 'DEBUG',
+            'propagate': True,
+        },
+    },
+}
+
+
 # Internationalization
 # https://docs.djangoproject.com/en/3.0/topics/i18n/
 
@@ -119,3 +184,5 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/3.0/howto/static-files/
 
 STATIC_URL = '/static/'
+
+STATIC_ROOT = config("STATIC_ROOT").replace("__BASEDIR__", BASEDIR)
