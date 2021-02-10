@@ -5,6 +5,8 @@ import yaml
 from django.http import JsonResponse, HttpResponseServerError
 from django.template.response import TemplateResponse
 from django.views import View
+from django.utils.html import escape
+from yaml.parser import ParserError
 
 import ackbas_core.knowledge_graph as kg
 from ackbas_core.solution_sketch import RTObjectInstance, RTSolutionGraph, flood_fill
@@ -39,7 +41,7 @@ class GetSolutionGraphView(View):
 
             return JsonResponse(response_dict)
         except Exception as e:
-            return HttpResponseServerError(repr(e))
+            return HttpResponseServerError(str(e))
 
     @staticmethod
     def get_solution(graph_name: str, start_dict: Dict, target_dict: Dict) -> Dict:
@@ -54,9 +56,11 @@ class GetSolutionGraphView(View):
 
         start_objects = []
         for obj_name, obj_dict in start_dict.items():
+            assert 'type' in obj_dict, "Start object spec must contain 'type'"
             obj_type = rtgraph.types[obj_dict['type']]
             obj_params = {}
             for param_name, param_val in obj_dict.get('params', {}).items():
+                assert param_name in obj_type.params, f"{obj_type.name} has no param {param_name}"
                 param_type = obj_type.params[param_name].type
                 param_instance = rtgraph.instantiate_param(param_type, param_val)
                 obj_params[param_name] = param_instance
@@ -64,10 +68,14 @@ class GetSolutionGraphView(View):
             obj = RTObjectInstance(obj_name, obj_type, {}, obj_params, None)
             start_objects.append(obj)
 
+        assert "target" in target_dict, "Target spec must contain 'target'"
         target_dict = target_dict['target']
+        assert "type" in target_dict, "Target spec must contain 'type'"
+        assert target_dict['type'] in rtgraph.types, f"Type {target_dict['type']} does not exist"
         target_type = rtgraph.types[target_dict['type']]
         target_params = {}
         for param_name, param_val in target_dict.get('params', {}).items():
+            assert param_name in target_type.params, f"{target_type.name} has no param {param_name}"
             param_type = target_type.params[param_name].type
             param_instance = rtgraph.instantiate_param(param_type, param_val)
             target_params[param_name] = param_instance

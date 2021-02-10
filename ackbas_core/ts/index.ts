@@ -254,11 +254,14 @@ async function update() {
         let graphData = response_json as SolutionGraphData
         setNetworkData(graphData)
     } catch (e) {
-        let error_text = await e.text()
+        let error_text: string = await e.text()
         $('#alert-zone').append(`
             <div class="alert alert-warning alert-dismissible">
                 <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
-                <strong>Server Error:</strong> ${error_text}
+                <strong>Server Error:</strong>
+<pre><code>
+${error_text}
+</code></pre>
             </div>
         `)
     }
