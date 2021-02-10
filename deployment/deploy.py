@@ -214,6 +214,8 @@ filters = \
     f"--exclude='__pycache__/' " \
     f"--exclude='deployment_utils/' " \
     f"--exclude='db.sqlite3' " \
+    f"--exclude='venv/' " \
+    f"--exclude='node_modules/' " \
     ""
 
 c.rsync_upload(project_src_path + "/", target_deployment_path, filters=filters, target_spec="both")
