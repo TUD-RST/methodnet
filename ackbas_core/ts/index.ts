@@ -2,6 +2,7 @@ import * as vis from "vis-network/standalone";
 import "bootstrap";
 import "bootstrap/dist/css/bootstrap.min.css";
 import * as monaco from "monaco-editor"
+import $ from "jquery";
 
 interface Port {
     id: number
@@ -246,9 +247,21 @@ async function update() {
         })
     })
 
-    let graphData = await response.json() as SolutionGraphData
-
-    setNetworkData(graphData)
+    try {
+        if (!response.ok)
+            throw response;
+        let response_json = await response.json();
+        let graphData = response_json as SolutionGraphData
+        setNetworkData(graphData)
+    } catch (e) {
+        let error_text = await e.text()
+        $('#alert-zone').append(`
+            <div class="alert alert-warning alert-dismissible">
+                <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
+                <strong>Server Error:</strong> ${error_text}
+            </div>
+        `)
+    }
 }
 
 function setNetworkData(graphData: SolutionGraphData) {

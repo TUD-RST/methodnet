@@ -2,7 +2,7 @@ import json
 from typing import Dict
 
 import yaml
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponseServerError
 from django.template.response import TemplateResponse
 from django.views import View
 
@@ -29,14 +29,17 @@ class GraphEditorView(View):
 class GetSolutionGraphView(View):
     @staticmethod
     def post(request):
-        request_json = json.loads(request.body)
-        graph_name = request_json['graph_name']
-        start_dict = yaml.safe_load(request_json['start'])
-        target_dict = yaml.safe_load(request_json['target'])
+        try:
+            request_json = json.loads(request.body)
+            graph_name = request_json['graph_name']
+            start_dict = yaml.safe_load(request_json['start'])
+            target_dict = yaml.safe_load(request_json['target'])
 
-        response_dict = GetSolutionGraphView.get_solution(graph_name, start_dict, target_dict)
+            response_dict = GetSolutionGraphView.get_solution(graph_name, start_dict, target_dict)
 
-        return JsonResponse(response_dict)
+            return JsonResponse(response_dict)
+        except Exception as e:
+            return HttpResponseServerError(repr(e))
 
     @staticmethod
     def get_solution(graph_name: str, start_dict: Dict, target_dict: Dict) -> Dict:
