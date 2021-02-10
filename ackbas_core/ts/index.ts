@@ -38,11 +38,13 @@ interface SolutionGraphData {
 
 interface KnowledgeGraphData {
     types: {
-        name: string
+        name: string,
+        yaml: string
     }[]
     methods: {
         name: string
-        description: string | null
+        description: string | null,
+        yaml: string
     }[]
     connections: [string, string][]
 }
@@ -188,6 +190,7 @@ async function loadKnowledgeGraph() {
     for (let type of graphData.types) {
         let newNode: vis.Node = {
             label: type.name,
+            title: `<pre><code>${type.yaml}</code></pre>`,
             shape: "ellipse",
             color: {
                 border: '#64b14b',
@@ -201,6 +204,7 @@ async function loadKnowledgeGraph() {
     for (let method of graphData.methods) {
         let newNode: vis.Node = {
             label: method.name,
+            title: `<pre><code>${method.yaml}</code></pre>`,
             shape: "box",
             color: {
                 background: '#e6f0ff'

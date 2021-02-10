@@ -174,12 +174,14 @@ class GetKnowledgeGraphView(View):
         rtgraph = kg.RTGraph(graph_name + '.yml')
 
         types = [{
-            'name': type_def.name
+            'name': type_def.name,
+            'yaml': type_def.yaml
         } for type_def in rtgraph.types.values()]
 
         methods = [{
             'name': method_def.name,
-            'description': method_def.description
+            'description': method_def.description,
+            'yaml': method_def.yaml
         } for method_def in rtgraph.methods.values()]
 
         connections = []
