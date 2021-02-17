@@ -108,11 +108,11 @@ function init() {
     let solutionGraphOptions: vis.Options = {
         physics: {
             barnesHut: {
-                avoidOverlap: 0.05, // default 0
-                springConstant: 0.05,  // default 0.04
+                avoidOverlap: 0.1, // default 0
+                springConstant: 0.01,  // default 0.04
                 springLength: 50, // default 95
                 centralGravity: 0.01, // default 0.3
-                gravitationalConstant: -150 // default -2000
+                gravitationalConstant: -300 // default -2000
             }
         },
         autoResize: true,
@@ -232,6 +232,9 @@ async function loadKnowledgeGraph() {
         let [id] = edges.add(newEdge)
         edgeIds.push([name1, name2, id as number])
     }
+
+    startPhysics()
+    knowledgeGraphNetwork.startSimulation()
 }
 
 async function update() {
