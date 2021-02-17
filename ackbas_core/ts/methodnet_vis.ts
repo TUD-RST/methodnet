@@ -158,36 +158,36 @@ export function setSolutionGraphData(graphData: SolutionGraphData) {
 
     let maxDistanceToStart = graphData.objects.filter(value => value.is_end).map(value => value.distance_to_start).reduce((a, b) => Math.max(a,b))
 
-    for (let ao of graphData.objects) {
+    function makeObjectNode(objectData) {
         let newNode: vis.Node = {
-            id: ao.id,
-            label: "     " + ao.name + "     ",
-            title: '<b>' + ao.type + '</b><br>' + dictToTooltip(ao.params),
+            id: objectData.id,
+            label: "     " + objectData.name + "     ",
+            title: '<b>' + objectData.type + '</b><br>' + dictToTooltip(objectData.params),
             shape: "ellipse"
         }
 
-        if (ao.is_start) {
+        if (objectData.is_start) {
             newNode.color = {
                 border: '#b04a9e',
                 background: '#a0d5e5'
             }
             newNode.borderWidth = 4
             newNode.fixed = true
-            newNode.x = (start_i - (nr_start_nodes - 1)/2)*H_SPACE
+            newNode.x = (start_i - (nr_start_nodes - 1) / 2) * H_SPACE
             start_i++
             newNode.y = 0
-        } else if (ao.is_end) {
+        } else if (objectData.is_end) {
             newNode.color = {
                 border: '#64b14b',
                 background: '#a0d5e5'
             }
             newNode.borderWidth = 4
             newNode.fixed = true
-            newNode.x = (end_i - (nr_end_nodes - 1)/2)*H_SPACE
+            newNode.x = (end_i - (nr_end_nodes - 1) / 2) * H_SPACE
             end_i++
-            newNode.y = maxDistanceToStart*V_SPACE
+            newNode.y = maxDistanceToStart * V_SPACE
         } else {
-            if (ao.on_solution_path) {
+            if (objectData.on_solution_path) {
                 newNode.color = {
                     border: '#4393a4',
                     background: '#a0d5e5'
@@ -200,79 +200,106 @@ export function setSolutionGraphData(graphData: SolutionGraphData) {
                 newNode.borderWidth = 4
             }
         }
-
-        nodes.add(newNode)
+        return newNode;
     }
 
-    for (let method of graphData.methods) {
+    function makeMethodNode(methodData) {
         let methodNode: vis.Node = {
-            id: method.id,
-            label: method.name,
+            id: methodData.id,
+            label: methodData.name,
             shape: "box",
             color: {
                 background: '#e6f0ff'
             },
-            title: method.description ?? undefined
+            title: methodData.description ?? undefined
         }
+        return methodNode;
+    }
 
+    function makeInputPortNode(port) {
+        let portNode: vis.Node = {
+            id: port.id,
+            label: port.name,
+            title: dictToTooltip(port.constraints),
+            shape: "dot",
+            size: 4,
+            color: (port.tune ?? false) ? {
+                border: '#a770b3',
+                background: '#ed9eff'
+            } : {
+                border: '#b6be77',
+                background: '#f4ff9e'
+            }
+        }
+        return portNode;
+    }
+
+    function makeOutputPortNode(port) {
+        let portNode: vis.Node = {
+            id: port.id,
+            label: port.name,
+            title: dictToTooltip(port.constraints),
+            shape: "dot",
+            size: 4,
+            color: {
+                border: '#42cb52',
+                background: '#bef7c5'
+            }
+        }
+        return portNode;
+    }
+
+    function makeDemuxNode() {
+        let demux: vis.Node = {
+            id: graphData.nextId,
+            shape: "square",
+            color: {
+                background: "black",
+                border: "black"
+            },
+            size: 10
+        }
+        graphData.nextId++
+        return demux;
+    }
+
+    function makeArrow(fromId, toId) {
+        let arrow: vis.Edge = {
+            from: fromId,
+            to: toId,
+            color: 'black',
+            arrows: 'to',
+            // @ts-ignore
+            smooth: {
+                enabled: false
+            }
+        };
+        return arrow
+    }
+
+    for (let ao of graphData.objects) {
+        let newNode = makeObjectNode(ao);
+        nodes.add(newNode)
+    }
+
+    for (let method of graphData.methods) {
+        let methodNode = makeMethodNode(method);
         nodes.add(methodNode)
 
         for (let port of method.inputs) {
-            let portNode: vis.Node = {
-                id: port.id,
-                label: port.name,
-                title: dictToTooltip(port.constraints),
-                shape: "dot",
-                size: 4,
-                color: (port.tune ?? false) ? {
-                    border: '#a770b3',
-                    background: '#ed9eff'
-                } : {
-                    border: '#b6be77',
-                    background: '#f4ff9e'
-                }
-            }
-
+            let portNode = makeInputPortNode(port);
             nodes.add(portNode)
 
-            edges.add({
-                from: port.id,
-                to: method.id,
-                color: 'black',
-                arrows: 'to',
-                // @ts-ignore
-                smooth: {
-                    enabled: false
-                }
-            })
+            edges.add(makeArrow(port.id, method.id))
         }
 
         for (let output_option of method.outputs) {
             let demux_id
 
             if (method.outputs.length > 1) {
-                let demux: vis.Node = {
-                    id: graphData.nextId,
-                    shape: "square",
-                    color: {
-                        background: "black",
-                        border: "black"
-                    },
-                    size: 10
-                }
+                let demux = makeDemuxNode();
                 nodes.add(demux)
-                graphData.nextId++
-
-                edges.add({
-                    from: method.id,
-                    to: demux.id,
-                    color: 'black',
-                    arrows: 'to',
-                    // @ts-ignore
-                    smooth: {
-                        enabled: false
-                    }
-                })
+                edges.add(makeArrow(method.id, demux.id))
 
                 demux_id = demux.id
             } else {
@@ -280,48 +307,15 @@ export function setSolutionGraphData(graphData: SolutionGraphData) {
             }
 
             for (let port of output_option) {
-                let portNode: vis.Node = {
-                    id: port.id,
-                    label: port.name,
-                    title: dictToTooltip(port.constraints),
-                    shape: "dot",
-                    size: 4,
-                    color: {
-                        border: '#42cb52',
-                        background: '#bef7c5'
-                    }
-                }
-
+                let portNode = makeOutputPortNode(port);
                 nodes.add(portNode)
-
-                edges.add({
-                    from: demux_id,
-                    to: port.id,
-                    color: 'black',
-                    arrows: 'to',
-                    // @ts-ignore
-                    smooth: {
-                        enabled: false
-                    }
-                })
+                edges.add(makeArrow(demux_id, port.id))
             }
         }
     }
 
-
     for (let con of graphData.connections) {
-        let newEdge: vis.Edge = {
-            //id: edge.id,
-            from: con.fromId,
-            to: con.toId,
-            color: 'black',
-            arrows: 'to',
-            // @ts-ignore
-            smooth: {
-                enabled: false
-            }
-        }
-        edges.add(newEdge)
+        edges.add(makeArrow(con.fromId, con.toId))
     }
 
     solutionGraphNetwork.stabilize()
