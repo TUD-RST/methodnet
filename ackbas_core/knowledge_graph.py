@@ -114,7 +114,7 @@ class RTGraph:
                     param_type = self.param_types[param_type_name]
                     type_params[param_name] = RTParamDefinition(param_name, param_type)
 
-            self.types[type_name] = RTTypeDefinition(type_name, type_params, yaml.dump(type_yaml))
+            self.types[type_name] = RTTypeDefinition(type_name, type_params, yaml.dump(type_yaml, allow_unicode=True))
 
         self.methods: Dict[str, RTMethod] = {}
         for method_name, method_yaml in yaml_content['methods'].items():
@@ -144,7 +144,7 @@ class RTGraph:
 
             description = method_yaml.get('description', None)
 
-            self.methods[method_name] = RTMethod(method_name, inputs, outputs, yaml.dump(method_yaml), description=description)
+            self.methods[method_name] = RTMethod(method_name, inputs, outputs, yaml.dump(method_yaml, allow_unicode=True), description=description)
 
     def next_id(self):
         self.node_id += 1
