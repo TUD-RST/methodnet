@@ -90,10 +90,10 @@
     }
 
     #help-popup {
-        width: 60%;
+        width: 50%;
         position: fixed;
         left: 50%;
-        margin-left: -30%;
+        margin-left: -25%;
         z-index: 1000;
         background: lightgoldenrodyellow;
         padding: 20px;
@@ -117,6 +117,10 @@
         font-size: 24pt;
     }
 
+    .legend {
+        margin: 10px auto 10px;
+        display: block;
+    }
 
     .dummy {
         border: 2px solid aqua;
@@ -153,11 +157,28 @@
         <button id="close-help" type="button" class="btn btn-close shadow-none" aria-label="Close" onclick=closeHelp();>
             &times;
         </button>
-        <h1>
-            How to use the Methodnet
-        </h1>
 
-        Explanation pending...
+        <h3>Help</h3>
+        <p>
+            The graph viewer UI mainly consists of three panels:
+        </p>
+        <ol>
+            <li>Left: An upper and lower text editor, for entering the solution procedures start and target spec respectively.</li>
+            <li>Center: The Methodnet graph, an overview of all existing types and methods.</li>
+            <li>Right: The solution procedure graph, a sequence of method calls linking the entered start specification to the desired target specification.</li>
+        </ol>
+        <p>If you want to try out generating your own solution procedure, start by looking up the types and methods you’re
+            interested in in <a href="https://github.com/TUD-RST/methodnet/blob/main/demo_content.yml">this file</a>.
+            Then enter start and target specification similar to the provided example.
+            Multiple start specs are also possible.
+            Once you’re done, click “Update” and inspect the result in the right panel.
+        </p>
+
+        <h3>Methodnet Elements</h3>
+        <img class="legend" src="{% static 'ackbas_core/legend_knowledge.svg' %}" />
+
+        <h3>Solution Procedure Elements</h3>
+        <img class="legend" src="{% static 'ackbas_core/legend_solution.svg' %}" />
     </div>
 
     <div id="alert-zone">
