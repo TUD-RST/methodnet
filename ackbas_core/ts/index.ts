@@ -122,7 +122,7 @@ function init() {
         physics: {
             barnesHut: {
                 avoidOverlap: 0.1, // default 0
-                springConstant: 0.001,  // default 0.04
+                springConstant: 0.002,  // default 0.04
                 springLength: 50, // default 95
                 centralGravity: 0.1,
                 gravitationalConstant: -3000
@@ -233,8 +233,7 @@ async function loadKnowledgeGraph() {
         edgeIds.push([name1, name2, id as number])
     }
 
-    startPhysics()
-    knowledgeGraphNetwork.startSimulation()
+    knowledgeGraphNetwork.stabilize()
 }
 
 async function update() {
