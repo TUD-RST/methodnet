@@ -89,6 +89,35 @@
         z-index: 999;
     }
 
+    #help-popup {
+        width: 60%;
+        position: fixed;
+        left: 50%;
+        margin-left: -30%;
+        z-index: 1000;
+        background: lightgoldenrodyellow;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 3px 3px 25px 0px rgba(0,0,0,0.2);
+
+        transition: opacity 0.5s, top 0.5s ease-out;
+    }
+
+    #help-popup:not(.help-hidden) {
+        top: 50px;
+    }
+
+    .help-hidden {
+        opacity: 0;
+        top: -400px;
+    }
+
+    #close-help {
+        float: right;
+        font-size: 24pt;
+    }
+
+
     .dummy {
         border: 2px solid aqua;
     }
@@ -117,6 +146,18 @@
         <button type="button" class="btn btn-outline-primary" onclick="update()">Update</button>
         <button type="button" class="btn btn-outline-success" onclick="startPhysics()">Dynamic Layout</button>
         <button type="button" class="btn btn-outline-danger" onclick="stopPhysics()">Freeze Layout</button>
+        <button type="button" class="btn btn-light" onclick="openHelp()">Help</button>
+    </div>
+
+    <div id="help-popup" class="help-hidden">
+        <button id="close-help" type="button" class="btn btn-close shadow-none" aria-label="Close" onclick=closeHelp();>
+            &times;
+        </button>
+        <h1>
+            How to use the Methodnet
+        </h1>
+
+        Explanation pending...
     </div>
 
     <div id="alert-zone">

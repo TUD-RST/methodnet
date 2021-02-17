@@ -499,6 +499,14 @@ function setSolutionNodePositions(array) {
     }
 }
 
+function openHelp() {
+    document.getElementById("help-popup").classList.remove('help-hidden')
+}
+
+function closeHelp() {
+    document.getElementById("help-popup").classList.add('help-hidden')
+}
+
 // make function globally available
 // https://stackoverflow.com/questions/12709074/how-do-you-explicitly-set-a-new-property-on-window-in-typescript
 (<any>window).init = init;
@@ -507,3 +515,5 @@ function setSolutionNodePositions(array) {
 (<any>window).startPhysics = startPhysics;
 (<any>window).getSolutionNodePositions = getSolutionNodePositions;
 (<any>window).setSolutionNodePositions = setSolutionNodePositions;
+(<any>window).openHelp = openHelp;
+(<any>window).closeHelp = closeHelp;
