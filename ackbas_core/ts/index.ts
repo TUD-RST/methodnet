@@ -261,6 +261,7 @@ async function update() {
         let response_json = await response.json();
         let graphData = response_json as SolutionGraphData
         setNetworkData(graphData)
+        solutionGraphNetwork.stabilize()
     } catch (e) {
         let error_text: string = await e.text()
         $('#alert-zone').append(`
