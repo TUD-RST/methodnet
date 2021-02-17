@@ -1,0 +1,655 @@
+enums:
+  Steuerbarkeit: [Steuerbar, NichtSteuerbar]
+  Beobachtbarkeit: [Beobachtbar, NichtBeobachtbar]
+  Stabilität: [Stabil, Instabil]
+  Normalform: [Regelungsnormalform, Beobachtungsnormalform]
+  Linear: [Linear, NichtLinear]
+  Proper: [NichtProper, Proper, StrengProper]
+  Minimalphasig: [Minimalphasig, NichtMinimalphasig]
+  Teilerfremd: [Teilerfremd, NichtTeilerfremd]
+  MatrixRolle: [A, B, C, D, Zustandsrückführung, LuenbergerVerstärkung]
+  ZeitfunktionRolle: [Zustandstrajektorie, Eingangstrajektorie, Zustandsrückführung]
+  ÜTFRolle: [Regelstrecke, Regler]
+  Flachheit: [AusgangFlach, AusgangNichtFlach]
+
+types:
+  Real: {}
+  SSNichtlinear:
+    params:
+      Zustandsdimension:
+        type: Int
+      Eingangsdimension:
+        type: Int
+      Beobachtbarkeit:
+        type: Beobachtbarkeit
+      Steuerbarkeit:
+        type: Steuerbarkeit
+      Flachheit:
+        type: Flachheit
+  SSLTV:
+    params:
+      Zustandsdimension:
+        type: Int
+      Eingangsdimension:
+        type: Int
+      Beobachtbarkeit:
+        type: Beobachtbarkeit
+      Steuerbarkeit:
+        type: Steuerbarkeit
+  SSLTI:
+    params:
+      Zustandsdimension:
+        type: Int
+      Eingangsdimension:
+        type: Int
+      Stabilität:
+        type: Stabilität
+      Normalform:
+        type: Normalform
+      Beobachtbarkeit:
+        type: Beobachtbarkeit
+      Steuerbarkeit:
+        type: Steuerbarkeit
+  DGL:
+    params:
+      Ordnung:
+        type: Int
+      Linear:
+        type: Linear
+  ÜTF:
+    params:
+      Stabilität:
+        type: Stabilität
+      Proper:
+        type: Proper
+      Minimalphasig:
+        type: Minimalphasig
+      Teilerfremd:
+        type: Teilerfremd
+      Ordnung:
+        type: Int
+      Rolle:
+        type: ÜTFRolle
+  ListeEigenwerte:
+    params:
+      Länge:
+        type: Int
+  PIDParameter: {}
+  Matrix:
+    params:
+      Zeilen:
+        type: Int
+      Spalten:
+        type: Int
+      Rolle:
+        type: MatrixRolle
+  Zeitfunktion:
+    params:
+      Zeilen:
+        type: Int
+      Spalten:
+        type: Int
+      Rolle:
+        type: ZeitfunktionRolle
+  Beobachterfunktion:
+    params:
+      Zustandsdimension:
+        type: Int
+      Eingangsdimension:
+        type: Int
+      Ausgangsdimension:
+        type: Int
+  Trajektorienfolgeregler:
+    params:
+      Zustandsdimension:
+        type: Int
+      Eingangsdimension:
+        type: Int
+  Sprungantwort: {}
+
+
+methods:
+  Linearisieren:
+    inputs:
+      nichtlinearesSystem:
+        type: SSNichtlinear
+        params:
+          Zustandsdimension: n
+    outputs:
+      o:
+        linearisiertesSystem:
+          type: SSLTI
+          params:
+            Zustandsdimension: n
+  SSLTIZuNichtlinear:
+    inputs:
+      linearesSystem:
+        type: SSLTI
+        params:
+          Zustandsdimension: n
+    outputs:
+      o:
+        allgemeinesSystem:
+          type: SSNichtlinear
+          params:
+            Zustandsdimension: n
+  SSLTVZuNichtlinear:
+    inputs:
+      linearesSystem:
+        type: SSLTV
+        params:
+          Zustandsdimension: n
+    outputs:
+      o:
+        allgemeinesSystem:
+          type: SSNichtlinear
+          params:
+            Zustandsdimension: n
+  ZuRegelungsnormalform:
+    inputs:
+      ltiss:
+        type: SSLTI
+        params:
+          Steuerbarkeit: Steuerbar
+    outputs:
+      o:
+        ltiss:
+          type: SSLTI
+          params:
+            Normalform: Regelungsnormalform
+  ZuBeobachtungsnormalform:
+    inputs:
+      ltiss:
+        type: SSLTI
+        params:
+          Beobachtbarkeit: Beobachtbar
+    outputs:
+      o:
+        ltiss:
+          type: SSLTI
+          params:
+            Normalform: Beobachtungsnormalform
+  TesteSteuerbarkeitLTI:
+    inputs:
+      ltiss:
+        type: SSLTI
+        params:
+          Steuerbarkeit: unset
+    outputs:
+      steuerbar:
+        ltiss:
+          type: SSLTI
+          params:
+            Steuerbarkeit: Steuerbar
+      nichtSteuerbar:
+        ltiss:
+          type: SSLTI
+          params:
+            Steuerbarkeit: NichtSteuerbar
+  TesteBeobachtbarkeitLTI:
+    inputs:
+      ltiss:
+        type: SSLTI
+        params:
+          Beobachtbarkeit: unset
+    outputs:
+      beobachtbar:
+        ltiss:
+          type: SSLTI
+          params:
+            Beobachtbarkeit: Beobachtbar
+      nichtBeobachtbar:
+        ltiss:
+          type: SSLTI
+          params:
+            Beobachtbarkeit: NichtBeobachtbar
+  TesteSteuerbarkeitLTV:
+    inputs:
+      ssltv:
+        type: SSLTV
+        params:
+          Steuerbarkeit: unset
+    outputs:
+      steuerbar:
+        ssltv:
+          type: SSLTV
+          params:
+            Steuerbarkeit: Steuerbar
+      nichtSteuerbar:
+        ssltv:
+          type: SSLTV
+          params:
+            Steuerbarkeit: NichtSteuerbar
+  TesteBeobachtbarkeitLTV:
+    inputs:
+      ssltv:
+        type: SSLTV
+        params:
+          Beobachtbarkeit: unset
+    outputs:
+      beobachtbar:
+        ssltv:
+          type: SSLTV
+          params:
+            Beobachtbarkeit: Beobachtbar
+      nichtBeobachtbar:
+        ssltv:
+          type: SSLTV
+          params:
+            Beobachtbarkeit: NichtBeobachtbar
+  TesteSteuerbarkeitNichtlinear:
+    inputs:
+      ss:
+        type: SSNichtlinear
+        params:
+          Steuerbarkeit: unset
+    outputs:
+      steuerbar:
+        ss:
+          type: SSNichtlinear
+          params:
+            Steuerbarkeit: Steuerbar
+      nichtSteuerbar:
+        ss:
+          type: SSNichtlinear
+          params:
+            Steuerbarkeit: NichtSteuerbar
+      keineAussage:
+        ss:  # keine Aussage möglich
+          type: SSNichtlinear
+          params:
+            Steuerbarkeit: unset
+  TesteBeobachtbarkeitNichtlinear:
+    inputs:
+      ss:
+        type: SSNichtlinear
+        params:
+          Beobachtbarkeit: unset
+    outputs:
+      beobachtbar:
+        ss:
+          type: SSNichtlinear
+          params:
+            Beobachtbarkeit: Beobachtbar
+      nichtBeobachtbar:
+        ss:
+          type: SSNichtlinear
+          params:
+            Beobachtbarkeit: NichtBeobachtbar
+      keineAussage:
+        ss:  # keine Aussage möglich
+          type: SSNichtlinear
+          params:
+            Beobachtbarkeit: unset
+  ÜTFzuSS:
+    inputs:
+      tf:
+        type: ÜTF
+        params:
+          Proper: Proper
+          Ordnung: n
+    outputs:
+      o:
+        ltiss:
+          type: SSLTI
+          params:
+            Steuerbarkeit: Steuerbar
+            Normalform: Regelungsnormalform
+            Zustandsdimension: n
+  SSzuÜTF:
+    inputs:
+      ltiss:
+        type: SSLTI
+        params:
+          Zustandsdimension: n
+          Eingangsdimension: 1
+    outputs:
+      o:
+        tf:
+          type: ÜTF
+          params:
+            Ordnung: n
+            Rolle: Regelstrecke
+  ÜTFistStabil:
+    inputs:
+      tf:
+        type: ÜTF
+        params:
+          Stabilität: unset
+    outputs:
+      stabil:
+        tf:
+          type: ÜTF
+          params:
+            Stabilität: Stabil
+      instabil:
+        tf:
+          type: ÜTF
+          params:
+            Stabilität: Instabil
+  ÜTFistProper:
+    inputs:
+      tf:
+        type: ÜTF
+        params:
+          Proper: unset
+    outputs:
+      proper:
+        tf:
+          type: ÜTF
+          params:
+            Proper: Proper
+      improper:
+        tf:
+          type: ÜTF
+          params:
+            Proper: NichtProper
+  ÜTFistTeilerfremd:
+    inputs:
+      tf:
+        type: ÜTF
+        params:
+          Teilerfremd: unset
+    outputs:
+      teilerfremd:
+        tf:
+          type: ÜTF
+          params:
+            Teilerfremd: Teilerfremd
+      nichtTeilerfremd:
+        tf:
+          type: ÜTF
+          params:
+            Teilerfremd: NichtTeilerfremd
+  Polplatzierung:
+    inputs:
+      ltiss:
+        type: SSLTI
+        params:
+          Zustandsdimension: n
+          Steuerbarkeit: Steuerbar
+      poles:
+        type: ListeEigenwerte
+        params:
+          Länge: n
+        tune: true
+    outputs:
+      o:
+        k:
+          type: Matrix
+          params:
+            Zeilen: 1
+            Spalten: n
+            Rolle: Zustandsrückführung
+  LuenbergerEntwurf:
+    inputs:
+      ltiss:
+        type: SSLTI
+        params:
+          Zustandsdimension: n
+          Beobachtbarkeit: Beobachtbar
+      poles:
+        type: ListeEigenwerte
+        params:
+          Länge: n
+        tune: true
+    outputs:
+      o:
+        k:
+          type: Matrix
+          params:
+            Zeilen: n
+            Spalten: 1
+            Rolle: LuenbergerVerstärkung
+  BaueLuenbergerBeobachter:
+    inputs:
+      ltiss:
+        type: SSLTI
+        params:
+          Zustandsdimension: n
+          Beobachtbarkeit: Beobachtbar
+      k:
+        type: Matrix
+        params:
+          Rolle: LuenbergerVerstärkung
+    outputs:
+      o:
+        obs:
+          type: Beobachterfunktion
+  DGLzuSS:
+    inputs:
+      dgl:
+        type: DGL
+    outputs:
+      o:
+        ss:
+          type: SSNichtlinear
+  TrajektorienplanungMitOptimierung:
+    inputs:
+      ss:
+        type: SSNichtlinear
+        params:
+          Zustandsdimension: n
+          Eingangsdimension: m
+          Steuerbarkeit: Steuerbar
+      xstart:
+        type: Matrix
+        params:
+          Zeilen: n
+          Spalten: 1
+        tune: true
+      xend:
+        type: Matrix
+        params:
+          Zeilen: n
+          Spalten: 1
+        tune: true
+      tend:
+        type: Real
+        tune: true
+    outputs:
+      o:
+        xtraj:
+          type: Zeitfunktion
+          params:
+            Zeilen: n
+            Spalten: 1
+            Rolle: Zustandstrajektorie
+        utraj:
+          type: Zeitfunktion
+          params:
+            Zeilen: m
+            Spalten: 1
+            Rolle: Eingangstrajektorie
+  LinearisierungAnTrajektorie:
+    inputs:
+      ss:
+        type: SSNichtlinear
+        params:
+          Zustandsdimension: n
+          Eingangsdimension: m
+          Steuerbarkeit: s
+      xtraj:
+        type: Zeitfunktion
+        params:
+          Zeilen: n
+          Spalten: 1
+          Rolle: Zustandstrajektorie
+      utraj:
+        type: Zeitfunktion
+        params:
+          Zeilen: m
+          Spalten: 1
+          Rolle: Eingangstrajektorie
+    outputs:
+      o:
+        ssltv:
+          type: SSLTV
+          params:
+            Zustandsdimension: n
+            Eingangsdimension: m
+            Steuerbarkeit: s
+  LTVLQREntwurf:
+    inputs:
+      ssltv:
+        type: SSLTV
+        params:
+          Zustandsdimension: n
+          Eingangsdimension: m
+          Steuerbarkeit: Steuerbar
+      q:
+        type: Matrix
+        params:
+          Zeilen: n
+          Spalten: n
+        tune: true
+      r:
+        type: Matrix
+        params:
+          Zeilen: m
+          Spalten: m
+        tune: true
+    outputs:
+      o:
+        k:
+          type: Zeitfunktion
+          params:
+            Zeilen: m
+            Spalten: n
+            Rolle: Zustandsrückführung
+  LTILQREntwurf:
+    inputs:
+      sslti:
+        type: SSLTI
+        params:
+          Zustandsdimension: n
+          Eingangsdimension: m
+          Steuerbarkeit: Steuerbar
+      q:
+        type: Matrix
+        params:
+          Zeilen: n
+          Spalten: n
+        tune: true
+      r:
+        type: Matrix
+        params:
+          Zeilen: m
+          Spalten: m
+        tune: true
+    outputs:
+      o:
+        k:
+          type: Matrix
+          params:
+            Zeilen: m
+            Spalten: n
+            Rolle: Zustandsrückführung
+  EKFEntwurf:
+    inputs:
+      ss:
+        type: SSNichtlinear
+        params:
+          Beobachtbarkeit: Beobachtbar
+          Zustandsdimension: n
+          Eingangsdimension: m
+      q:
+        type: Matrix
+        params:
+          Zeilen: n
+          Spalten: n
+        tune: true
+      r:
+        type: Matrix
+        params:
+          Zeilen: m
+          Spalten: m
+        tune: true
+    outputs:
+      o:
+        obs:
+          type: Beobachterfunktion
+          params:
+            Zustandsdimension: n
+            Eingangsdimension: m
+  BaueTrajektorienfolgeregler:
+    inputs:
+      xtraj:
+        type: Zeitfunktion
+        params:
+          Rolle: Zustandstrajektorie
+          Zeilen: n
+          Spalten: 1
+      utraj:
+        type: Zeitfunktion
+        params:
+          Rolle: Eingangstrajektorie
+          Zeilen: m
+          Spalten: 1
+      k:
+        type: Zeitfunktion
+        params:
+          Rolle: Zustandsrückführung
+          Zeilen: m
+          Spalten: n
+      obs:
+        type: Beobachterfunktion
+        params:
+          Eingangsdimension: m
+          Zustandsdimension: n
+    outputs:
+      o:
+        controller:
+          type: Trajektorienfolgeregler
+          params:
+            Zustandsdimension: n
+            Eingangsdimension: m
+  BauePIDRegler:
+    inputs:
+      pidparams:
+        type: PIDParameter
+    outputs:
+      o:
+        pid:
+          type: ÜTF
+          params:
+            Rolle: Regler
+  ParametriereZieglerNichols:
+    inputs:
+      sprungantwort:
+        type: Sprungantwort
+    outputs:
+      o:
+        pidparams:
+          type: PIDParameter
+  ParametriereBetragsoptimum:
+    inputs:
+      tf:
+        type: ÜTF
+        params:
+          Rolle: Regelstrecke
+    outputs:
+      o:
+        pidparams:
+          type: PIDParameter
+  ParametriereSymmetrischesOptimum:
+    inputs:
+      tf:
+        type: ÜTF
+        params:
+          Rolle: Regelstrecke
+    outputs:
+      o:
+        pidparams:
+          type: PIDParameter
+  SimuliereSprungantwort:
+    inputs:
+      tf:
+        type: ÜTF
+        params:
+          Rolle:
+            Regelstrecke
+    outputs:
+      o:
+        sr:
+          type: Sprungantwort
