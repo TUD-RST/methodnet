@@ -161,8 +161,8 @@ export function setSolutionGraphData(graphData: SolutionGraphData) {
     function makeObjectNode(objectData) {
         let newNode: vis.Node = {
             id: objectData.id,
-            label: "     " + objectData.name + "     ",
-            title: '<b>' + objectData.type + '</b><br>' + dictToTooltip(objectData.params),
+            label: `     ${objectData.name}     `,
+            title: `<i>object of type</i> <b>${objectData.type}</b><br>${dictToTooltip(objectData.params)}`,
             shape: "ellipse"
         }
 
@@ -203,7 +203,7 @@ export function setSolutionGraphData(graphData: SolutionGraphData) {
         return newNode;
     }
 
-    function makeMethodNode(methodData) {
+    function makeMethodCallNode(methodData) {
         let methodNode: vis.Node = {
             id: methodData.id,
             label: methodData.name,
@@ -211,7 +211,7 @@ export function setSolutionGraphData(graphData: SolutionGraphData) {
             color: {
                 background: '#e6f0ff'
             },
-            title: methodData.description ?? undefined
+            title: "<i>method call</i>"
         }
         return methodNode;
     }
@@ -220,7 +220,7 @@ export function setSolutionGraphData(graphData: SolutionGraphData) {
         let portNode: vis.Node = {
             id: port.id,
             label: port.name,
-            title: dictToTooltip(port.constraints),
+            title: `<i>${port.tune ? 'tunable input port' : 'input port'}</i><br>${dictToTooltip(port.constraints)}`,
             shape: "dot",
             size: 4,
             color: (port.tune ?? false) ? {
@@ -238,7 +238,7 @@ export function setSolutionGraphData(graphData: SolutionGraphData) {
         let portNode: vis.Node = {
             id: port.id,
             label: port.name,
-            title: dictToTooltip(port.constraints),
+            title: `<i>output port</i><br>${dictToTooltip(port.constraints)}`,
             shape: "dot",
             size: 4,
             color: {
@@ -283,7 +283,7 @@ export function setSolutionGraphData(graphData: SolutionGraphData) {
     }
 
     for (let method of graphData.methods) {
-        let methodNode = makeMethodNode(method);
+        let methodNode = makeMethodCallNode(method);
         nodes.add(methodNode)
 
         for (let port of method.inputs) {
