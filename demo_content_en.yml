@@ -1,0 +1,655 @@
+enums:
+  Controllability: [ Controllable, NotControllable]
+  Observability: [Observable, NotObservable]
+  Stability: [Stable, Unstable]
+  CanonicalForm: [ControllerCanonicalForm, ObserverCanonicalForm]
+  Linear: [Linear, NonLinear]
+  Proper: [NotProper, Proper, StrictlyProper]
+  MinimumPhase: [MinimumPhase, NotMinimumPhase]
+  Coprime: [Coprime, NonCoprime]
+  MatrixRole: [A, B, C, D, StateFeedback, LuenbergerGain]
+  TimeFunctionRole: [StateTrajectory, InputTrajectory, StateFeedback]
+  TFRole: [Plant, Controller]
+  Flatness: [OutputFlat, OutputNotFlat]
+
+types:
+  Real: {}
+  SSNonLinear:
+    params:
+      StateDimension:
+        type: Int
+      InputDimension:
+        type: Int
+      Observability:
+        type: Observability
+      Controllability:
+        type: Controllability
+      Flatness:
+        type: Flatness
+  SSLTV:
+    params:
+      StateDimension:
+        type: Int
+      InputDimension:
+        type: Int
+      Observability:
+        type: Observability
+      Controllability:
+        type: Controllability
+  SSLTI:
+    params:
+      StateDimension:
+        type: Int
+      InputDimension:
+        type: Int
+      Stability:
+        type: Stability
+      CanonicalForm:
+        type: CanonicalForm
+      Observability:
+        type: Observability
+      Controllability:
+        type: Controllability
+  ODE:
+    params:
+      Order:
+        type: Int
+      Linear:
+        type: Linear
+  TF:
+    params:
+      Stability:
+        type: Stability
+      Proper:
+        type: Proper
+      MinimumPhase:
+        type: MinimumPhase
+      Coprime:
+        type: Coprime
+      Order:
+        type: Int
+      Role:
+        type: TFRole
+  ListEigenvalues:
+    params:
+      Length:
+        type: Int
+  PIDParameters: {}
+  Matrix:
+    params:
+      Rows:
+        type: Int
+      Columns:
+        type: Int
+      Role:
+        type: MatrixRole
+  TimeFunction:
+    params:
+      Rows:
+        type: Int
+      Columns:
+        type: Int
+      Role:
+        type: TimeFunctionRole
+  ObserverFunction:
+    params:
+      StateDimension:
+        type: Int
+      InputDimension:
+        type: Int
+      OutputDimension:
+        type: Int
+  TrajectoryTrackingController:
+    params:
+      StateDimension:
+        type: Int
+      InputDimension:
+        type: Int
+  StepResponse: {}
+
+
+methods:
+  Linearization:
+    inputs:
+      nonLinearSystem:
+        type: SSNonLinear
+        params:
+          StateDimension: n
+    outputs:
+      o:
+        linearizedSystem:
+          type: SSLTI
+          params:
+            StateDimension: n
+  SSLTIToNonLinear:
+    inputs:
+      linearSystem:
+        type: SSLTI
+        params:
+          StateDimension: n
+    outputs:
+      o:
+        generalSystem:
+          type: SSNonLinear
+          params:
+            StateDimension: n
+  SSLTVToNonLinear:
+    inputs:
+      linearSystem:
+        type: SSLTV
+        params:
+          StateDimension: n
+    outputs:
+      o:
+        generalSystem:
+          type: SSNonLinear
+          params:
+            StateDimension: n
+  ToControllerCanonicalForm:
+    inputs:
+      ltiss:
+        type: SSLTI
+        params:
+          Controllability: Controllable
+    outputs:
+      o:
+        ltiss:
+          type: SSLTI
+          params:
+            CanonicalForm: ControllerCanonicalForm
+  ToObserverCanonicalForm:
+    inputs:
+      ltiss:
+        type: SSLTI
+        params:
+          Observability: Observable
+    outputs:
+      o:
+        ltiss:
+          type: SSLTI
+          params:
+            CanonicalForm: ObserverCanonicalForm
+  TestControllabilityLTI:
+    inputs:
+      ltiss:
+        type: SSLTI
+        params:
+          Controllability: unset
+    outputs:
+      controllable:
+        ltiss:
+          type: SSLTI
+          params:
+            Controllability: Controllable
+      notControllable:
+        ltiss:
+          type: SSLTI
+          params:
+            Controllability: NotControllable
+  TestObservabilityLTI:
+    inputs:
+      ltiss:
+        type: SSLTI
+        params:
+          Observability: unset
+    outputs:
+      observable:
+        ltiss:
+          type: SSLTI
+          params:
+            Observability: Observable
+      notObservable:
+        ltiss:
+          type: SSLTI
+          params:
+            Observability: NotObservable
+  TestControllabilityLTV:
+    inputs:
+      ssltv:
+        type: SSLTV
+        params:
+          Controllability: unset
+    outputs:
+      controllable:
+        ssltv:
+          type: SSLTV
+          params:
+            Controllability: Controllable
+      notControllable:
+        ssltv:
+          type: SSLTV
+          params:
+            Controllability: NotControllable
+  TestObservabilityLTV:
+    inputs:
+      ssltv:
+        type: SSLTV
+        params:
+          Observability: unset
+    outputs:
+      observable:
+        ssltv:
+          type: SSLTV
+          params:
+            Observability: Observable
+      notObservable:
+        ssltv:
+          type: SSLTV
+          params:
+            Observability: NotObservable
+  TestControllabilityNonLinear:
+    inputs:
+      ss:
+        type: SSNonLinear
+        params:
+          Controllability: unset
+    outputs:
+      controllable:
+        ss:
+          type: SSNonLinear
+          params:
+            Controllability: Controllable
+      notControllable:
+        ss:
+          type: SSNonLinear
+          params:
+            Controllability: NotControllable
+      undetermined:
+        ss:  # can't be determined
+          type: SSNonLinear
+          params:
+            Controllability: unset
+  TestObservabilityNonLinear:
+    inputs:
+      ss:
+        type: SSNonLinear
+        params:
+          Observability: unset
+    outputs:
+      observable:
+        ss:
+          type: SSNonLinear
+          params:
+            Observability: Observable
+      notObservable:
+        ss:
+          type: SSNonLinear
+          params:
+            Observability: NotObservable
+      undetermined:
+        ss:  # can't be determined
+          type: SSNonLinear
+          params:
+            Observability: unset
+  TFtoSS:
+    inputs:
+      tf:
+        type: TF
+        params:
+          Proper: Proper
+          Order: n
+    outputs:
+      o:
+        ltiss:
+          type: SSLTI
+          params:
+            Controllability: Controllable
+            CanonicalForm: ControllerCanonicalForm
+            StateDimension: n
+  SStoTF:
+    inputs:
+      ltiss:
+        type: SSLTI
+        params:
+          StateDimension: n
+          InputDimension: 1
+    outputs:
+      o:
+        tf:
+          type: TF
+          params:
+            Order: n
+            Role: Plant
+  TestTFStability:
+    inputs:
+      tf:
+        type: TF
+        params:
+          Stability: unset
+    outputs:
+      stable:
+        tf:
+          type: TF
+          params:
+            Stability: Stable
+      unstable:
+        tf:
+          type: TF
+          params:
+            Stability: Unstable
+  TestTFProperness:
+    inputs:
+      tf:
+        type: TF
+        params:
+          Proper: unset
+    outputs:
+      proper:
+        tf:
+          type: TF
+          params:
+            Proper: Proper
+      improper:
+        tf:
+          type: TF
+          params:
+            Proper: NotProper
+  TestTFCoprime:
+    inputs:
+      tf:
+        type: TF
+        params:
+          Coprime: unset
+    outputs:
+      coprime:
+        tf:
+          type: TF
+          params:
+            Coprime: Coprime
+      nonCoprime:
+        tf:
+          type: TF
+          params:
+            Coprime: NonCoprime
+  PolePlacement:
+    inputs:
+      ltiss:
+        type: SSLTI
+        params:
+          StateDimension: n
+          Controllability: Controllable
+      poles:
+        type: ListEigenvalues
+        params:
+          Length: n
+        tune: true
+    outputs:
+      o:
+        k:
+          type: Matrix
+          params:
+            Rows: 1
+            Columns: n
+            Role: StateFeedback
+  LuenbergerDesign:
+    inputs:
+      ltiss:
+        type: SSLTI
+        params:
+          StateDimension: n
+          Observability: Observable
+      poles:
+        type: ListEigenvalues
+        params:
+          Length: n
+        tune: true
+    outputs:
+      o:
+        k:
+          type: Matrix
+          params:
+            Rows: n
+            Columns: 1
+            Role: LuenbergerGain
+  AssembleLuenbergerObserver:
+    inputs:
+      ltiss:
+        type: SSLTI
+        params:
+          StateDimension: n
+          Observability: Observable
+      k:
+        type: Matrix
+        params:
+          Role: LuenbergerGain
+    outputs:
+      o:
+        obs:
+          type: ObserverFunction
+  ODEtoSS:
+    inputs:
+      ode:
+        type: ODE
+    outputs:
+      o:
+        ss:
+          type: SSNonLinear
+  TrajectoryPlanningWithOptimization:
+    inputs:
+      ss:
+        type: SSNonLinear
+        params:
+          StateDimension: n
+          InputDimension: m
+          Controllability: Controllable
+      xstart:
+        type: Matrix
+        params:
+          Rows: n
+          Columns: 1
+        tune: true
+      xend:
+        type: Matrix
+        params:
+          Rows: n
+          Columns: 1
+        tune: true
+      tend:
+        type: Real
+        tune: true
+    outputs:
+      o:
+        xtraj:
+          type: TimeFunction
+          params:
+            Rows: n
+            Columns: 1
+            Role: StateTrajectory
+        utraj:
+          type: TimeFunction
+          params:
+            Rows: m
+            Columns: 1
+            Role: InputTrajectory
+  LinearizationOnTrajectory:
+    inputs:
+      ss:
+        type: SSNonLinear
+        params:
+          StateDimension: n
+          InputDimension: m
+          Controllability: s
+      xtraj:
+        type: TimeFunction
+        params:
+          Rows: n
+          Columns: 1
+          Role: StateTrajectory
+      utraj:
+        type: TimeFunction
+        params:
+          Rows: m
+          Columns: 1
+          Role: InputTrajectory
+    outputs:
+      o:
+        ssltv:
+          type: SSLTV
+          params:
+            StateDimension: n
+            InputDimension: m
+            Controllability: s
+  LTVLQRDesign:
+    inputs:
+      ssltv:
+        type: SSLTV
+        params:
+          StateDimension: n
+          InputDimension: m
+          Controllability: Controllable
+      q:
+        type: Matrix
+        params:
+          Rows: n
+          Columns: n
+        tune: true
+      r:
+        type: Matrix
+        params:
+          Rows: m
+          Columns: m
+        tune: true
+    outputs:
+      o:
+        k:
+          type: TimeFunction
+          params:
+            Rows: m
+            Columns: n
+            Role: StateFeedback
+  LTILQRDesign:
+    inputs:
+      sslti:
+        type: SSLTI
+        params:
+          StateDimension: n
+          InputDimension: m
+          Controllability: Controllable
+      q:
+        type: Matrix
+        params:
+          Rows: n
+          Columns: n
+        tune: true
+      r:
+        type: Matrix
+        params:
+          Rows: m
+          Columns: m
+        tune: true
+    outputs:
+      o:
+        k:
+          type: Matrix
+          params:
+            Rows: m
+            Columns: n
+            Role: StateFeedback
+  EKFDesign:
+    inputs:
+      ss:
+        type: SSNonLinear
+        params:
+          Observability: Observable
+          StateDimension: n
+          InputDimension: m
+      q:
+        type: Matrix
+        params:
+          Rows: n
+          Columns: n
+        tune: true
+      r:
+        type: Matrix
+        params:
+          Rows: m
+          Columns: m
+        tune: true
+    outputs:
+      o:
+        obs:
+          type: ObserverFunction
+          params:
+            StateDimension: n
+            InputDimension: m
+  AssembleTrajectoryTrackingController:
+    inputs:
+      xtraj:
+        type: TimeFunction
+        params:
+          Role: StateTrajectory
+          Rows: n
+          Columns: 1
+      utraj:
+        type: TimeFunction
+        params:
+          Role: InputTrajectory
+          Rows: m
+          Columns: 1
+      k:
+        type: TimeFunction
+        params:
+          Role: StateFeedback
+          Rows: m
+          Columns: n
+      obs:
+        type: ObserverFunction
+        params:
+          InputDimension: m
+          StateDimension: n
+    outputs:
+      o:
+        controller:
+          type: TrajectoryTrackingController
+          params:
+            StateDimension: n
+            InputDimension: m
+  AssemblePIDController:
+    inputs:
+      pidParams:
+        type: PIDParameters
+    outputs:
+      o:
+        pid:
+          type: TF
+          params:
+            Role: Controller
+  TuneZieglerNichols:
+    inputs:
+      stepResponse:
+        type: StepResponse
+    outputs:
+      o:
+        pidParams:
+          type: PIDParameters
+  TuneAbsoluteValueOptimum:
+    inputs:
+      tf:
+        type: TF
+        params:
+          Role: Plant
+    outputs:
+      o:
+        pidParams:
+          type: PIDParameters
+  TuneSymmetricalOptimum:
+    inputs:
+      tf:
+        type: TF
+        params:
+          Role: Plant
+    outputs:
+      o:
+        pidParams:
+          type: PIDParameters
+  SimulateStepResponse:
+    inputs:
+      tf:
+        type: TF
+        params:
+          Role:
+            Plant
+    outputs:
+      o:
+        sr:
+          type: StepResponse
