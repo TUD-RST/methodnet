@@ -27,9 +27,9 @@ function init() {
         language: "yaml",
         value:
 `start:
-  type: DGL
+  type: ODE
   params:
-    Linear: NichtLinear
+    Linear: NonLinear
 `
     })
 
@@ -41,7 +41,7 @@ function init() {
         language: "yaml",
         value:
 `target:
-  type: Trajektorienfolgeregler
+  type: TrajectoryTrackingController
 `
     })
 
