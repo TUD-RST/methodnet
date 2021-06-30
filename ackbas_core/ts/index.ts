@@ -5,10 +5,11 @@ import * as monaco from "monaco-editor"
 import $ from "jquery";
 import {Port, KnowledgeGraphData, SolutionGraphData, fetchKnowledgeGraph, fetchSolutionGraph} from "./methodnet_data";
 import {
+    getKnowledgeNodePositions,
     getSolutionNodePositions,
     initKnowledgeGraph,
     initSolutionGraph,
-    setKnowledgeGraphData,
+    setKnowledgeGraphData, setKnowledgeNodePositions,
     setSolutionGraphData, setSolutionNodePositions, startPhysics,
     stopPhysics
 } from "./methodnet_vis";
@@ -102,5 +103,7 @@ function closeHelp() {
 (<any>window).startPhysics = startPhysics;
 (<any>window).getSolutionNodePositions = getSolutionNodePositions;
 (<any>window).setSolutionNodePositions = setSolutionNodePositions;
+(<any>window).getKnowledgeNodePositions = getKnowledgeNodePositions;
+(<any>window).setKnowledgeNodePositions = setKnowledgeNodePositions;
 (<any>window).openHelp = openHelp;
 (<any>window).closeHelp = closeHelp;

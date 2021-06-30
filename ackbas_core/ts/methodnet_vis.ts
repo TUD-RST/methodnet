@@ -372,3 +372,20 @@ export function setSolutionNodePositions(array) {
         solutionGraphNetwork.moveNode(entry.id, entry.x, entry.y)
     }
 }
+
+export function getKnowledgeNodePositions() {
+    knowledgeGraphNetwork.storePositions()
+    return knowledgeGraphNetworkData.nodes.map((item) => {
+        return {
+            id: item.id,
+            x: item.x,
+            y: item.y
+        }
+    })
+}
+
+export function setKnowledgeNodePositions(array) {
+    for (let entry of array) {
+        knowledgeGraphNetwork.moveNode(entry.id, entry.x, entry.y)
+    }
+}
