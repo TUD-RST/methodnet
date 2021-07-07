@@ -28,6 +28,6 @@ The field of automatic control theory consist of a wealth of mathematical method
 
 ![Screenshot of the web interface. Left: overview of available methods and types, right: generated solution procedure for triple pendulum swingup.\label{fig:screenshot}](screenshot.png)
 
-In @HeedtKnoll2021Methodnet we used the *method net* to find a suitable combination of methods to ==make a triple pendulum perform a swing up trajectory==. By openly publishing the software and code, we encourage other students and researchers to try modeling their domain knowledge using the provided structure, in order to explore potential uses and limits, while improving it for future applications.
+In @HeedtKnoll2021Methodnet we used the *method net* to find a suitable combination of methods to make a triple pendulum perform a swing up trajectory. By openly publishing the software and code, we encourage other students and researchers to try modeling their domain knowledge using the provided structure, in order to explore potential uses and limits, while improving it for future applications.
 
 # References
