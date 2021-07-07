@@ -13,10 +13,11 @@ let solutionGraphNetworkData: {
     edges: vis.DataSetEdges
 }
 
-let typeToId: Record<string, number> = {}
-let methodToId: Record<string, number> = {}
-let edgeIds: [string, string, number][] = []
+let typeToId: Record<string, number> = {}  // Map from type name to knowledge graph node id
+let methodToId: Record<string, number> = {}  // Map from method name to knowledge graph node id
+let edgeIds: [string, string, number][] = []  // Map from knowledge graph connection (t -> m or m -> t) to edge id
 
+/** Set up VisJS for knowledge graph */
 export function initKnowledgeGraph(div: HTMLElement) {
     let knowledgeGraphOptions: vis.Options = {
         physics: {
@@ -40,6 +41,7 @@ export function initKnowledgeGraph(div: HTMLElement) {
     knowledgeGraphNetwork = new vis.Network(knowledgeGraphContainer, knowledgeGraphNetworkData, knowledgeGraphOptions);
 }
 
+/** Set up VisJS for solution graph */
 export function initSolutionGraph(div: HTMLElement) {
     let solutionGraphOptions: vis.Options = {
         physics: {
@@ -88,6 +90,7 @@ export function initSolutionGraph(div: HTMLElement) {
     });
 }
 
+/** Create and connect VisJS nodes for knowledge graph based on response from server */
 export function setKnowledgeGraphData(graphData: KnowledgeGraphData) {
     let nodes = knowledgeGraphNetworkData.nodes
     let edges = knowledgeGraphNetworkData.edges
@@ -140,21 +143,23 @@ export function setKnowledgeGraphData(graphData: KnowledgeGraphData) {
     knowledgeGraphNetwork.stabilize()
 }
 
+/** Create and connect VisJS nodes for solution graph based on response from server */
 export function setSolutionGraphData(graphData: SolutionGraphData) {
     let nodes = solutionGraphNetworkData.nodes
     let edges = solutionGraphNetworkData.edges
 
+    // Remove the old graph
     edges.clear()
     nodes.clear()
 
     let nr_start_nodes = graphData.objects.filter(it => it.is_start).length
     let nr_end_nodes = graphData.objects.filter(it => !it.is_start && it.is_end).length
 
-    let start_i = 0
-    let end_i = 0
+    let start_i = 0  // horizontal index for start nodes
+    let end_i = 0  // horizontal index for end nodes
 
-    let H_SPACE = 500
-    let V_SPACE = 250
+    let H_SPACE = 500  // Horizontal space between fixed nodes
+    let V_SPACE = 250  // Mean vertical space between nodes on longest path from start to end
 
     let maxDistanceToStart = graphData.objects.filter(value => value.is_end).map(value => value.distance_to_start).reduce((a, b) => Math.max(a,b))
 
@@ -321,6 +326,7 @@ export function setSolutionGraphData(graphData: SolutionGraphData) {
     solutionGraphNetwork.stabilize()
 }
 
+/** Convert a param dict to a formatted tooltip */
 function dictToTooltip(dict: object): string {
     let tooltip = ""
     for (let [param_name, param_val] of Object.entries(dict)) {
@@ -356,6 +362,7 @@ export function startPhysics() {
     })
 }
 
+// ----- utility functions for restoring specific layouts using the browser console
 export function getSolutionNodePositions() {
     solutionGraphNetwork.storePositions()
     return solutionGraphNetworkData.nodes.map((item) => {
