@@ -10,6 +10,10 @@ RTChoiceSpace = Dict[str, str]
 
 
 class RTSolutionGraph:
+    """
+    Solution graph contains sequence of methods and generated objects that result in an object which fits
+    the target specification.
+    """
     def __init__(self, start_objects: List[RTObjectInstance], target_spec: RTMethodInput):
         self.target_spec = target_spec
         self.method_instances: Dict[str, RTMethodInstance] = {}

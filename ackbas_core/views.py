@@ -5,8 +5,6 @@ import yaml
 from django.http import JsonResponse, HttpResponseServerError
 from django.template.response import TemplateResponse
 from django.views import View
-from django.utils.html import escape
-from yaml.parser import ParserError
 
 import ackbas_core.knowledge_graph as kg
 from ackbas_core.solution_sketch import RTObjectInstance, RTSolutionGraph, flood_fill
@@ -31,6 +29,9 @@ class GraphEditorView(View):
 class GetSolutionGraphView(View):
     @staticmethod
     def post(request):
+        """
+        Return solution graph for knowledge graph and query specified in json
+        """
         try:
             request_json = json.loads(request.body)
             graph_name = request_json['graph_name']
@@ -45,6 +46,7 @@ class GetSolutionGraphView(View):
 
     @staticmethod
     def get_solution(graph_name: str, start_dict: Dict, target_dict: Dict) -> Dict:
+
         graph_data = {
             'methods': [],
             'objects': [],
@@ -52,8 +54,9 @@ class GetSolutionGraphView(View):
             'nextId': 0
         }
 
-        rtgraph = kg.RTGraph(graph_name + '.yml')
+        rtgraph = kg.RTGraph(graph_name + '.yml')  # load knowledge graph from disk
 
+        # instantiate and validate start objects from yaml
         start_objects = []
         for obj_name, obj_dict in start_dict.items():
             assert 'type' in obj_dict, "Start object spec must contain 'type'"
@@ -68,6 +71,7 @@ class GetSolutionGraphView(View):
             obj = RTObjectInstance(obj_name, obj_type, {}, obj_params, None)
             start_objects.append(obj)
 
+        # instantiate and validate target objects
         assert "target" in target_dict, "Target spec must contain 'target'"
         target_dict = target_dict['target']
         assert "type" in target_dict, "Target spec must contain 'type'"
@@ -82,17 +86,21 @@ class GetSolutionGraphView(View):
 
         end_spec = kg.RTMethodInput(target_type, target_params)
 
+        # instantiate solution graph
         solution_graph = RTSolutionGraph(start_objects, end_spec)
+        # run search to find target object
         flood_fill(solution_graph, rtgraph, {}, start_objects)
+        # prune all incomplete paths
         solution_graph.prune()
 
+        # --- generate data structures for frontend ---
         object_instances = solution_graph.object_instances
         method_instances = solution_graph.method_instances
 
-        id = 1
-        ao_name_to_id: Dict[str, int] = {}
+        id = 1  # running counter for next unique id
+        ao_name_to_id: Dict[str, int] = {}  # map object names to unique id's
 
-        for ao in object_instances.values():
+        for ao in object_instances.values():  # build object instances
             graph_data['objects'].append({
                 "id": id,
                 "type": ao.type.name,
@@ -108,7 +116,7 @@ class GetSolutionGraphView(View):
             ao_name_to_id[ao.name] = id
             id += 1
 
-        for mc in method_instances.values():
+        for mc in method_instances.values():  # build method instances
             inputs = []
             for port_name, port in mc.method.inputs.items():
                 port_dict = {
@@ -171,19 +179,25 @@ class GetSolutionGraphView(View):
 class GetKnowledgeGraphView(View):
     @staticmethod
     def get(request, graph_name):
+        """
+        Return knowledge graph data for specified file name
+        """
         rtgraph = kg.RTGraph(graph_name + '.yml')
 
+        # build type instances
         types = [{
             'name': type_def.name,
             'yaml': type_def.yaml
         } for type_def in rtgraph.types.values()]
 
+        # build method instances
         methods = [{
             'name': method_def.name,
             'description': method_def.description,
             'yaml': method_def.yaml
         } for method_def in rtgraph.methods.values()]
 
+        # create connections between methods and types that use eachother
         connections = []
         for type_name, type_def in rtgraph.types.items():
             for method_name, method_def in rtgraph.methods.items():

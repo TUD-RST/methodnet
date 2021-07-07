@@ -3,7 +3,7 @@ from __future__ import annotations
 import yaml
 from typing import List, Dict, Union, Optional
 import os
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 import jsonschema
 import json
 
@@ -83,7 +83,13 @@ class RTMethod:
 
 
 class RTGraph:
+    """
+    Core knowledge graph type
+    """
     def __init__(self, yml_path):
+        """
+        Load knowledge graph from YML file
+        """
         self.node_id = 1
 
         with open(yml_path, 'r', encoding='utf8') as f:
@@ -94,8 +100,10 @@ class RTGraph:
         with open(schema_path, 'r', encoding='utf8') as f:
             schema = json.load(f)
 
+        # Validate YML based on JSON schema
         jsonschema.validate(yaml_content, schema)
 
+        # Instantiate objects to build graph in memory
         self.param_types: Dict[str, RTParamType] = {
             'Int': RTParamType('Int')
         }
