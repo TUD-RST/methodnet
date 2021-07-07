@@ -1,95 +1,95 @@
 enums:
-  MeinEnum: [Eins, Zwei]
+  MyEnum: [One, Two]
 
 types:
-  TypOhneParameter: {}
-  TypEins:
+  TypeWithoutParams: {}
+  TypeOne:
     params:
-      WertEins:
+      ValueOne:
         type: Int
-  TypZwei:
+  TypeTwo:
     params:
-      WertZwei:
+      ValueTwo:
         type: Int
-      WertEnum:
-        type: MeinEnum
-  TypDrei:
+      ValueEnum:
+        type: MyEnum
+  TypeThree:
     params:
-      WertDrei:
+      ValueThree:
         type: Int
 
 
 methods:
-  Konvertiere:
-    description: "Konvertiert einen Typ in einen anderen"
+  Convert:
+    description: "Converts one type into another"
     inputs:
       in:
-        type: TypEins
+        type: TypeOne
         params:
-          WertEins: n
+          ValueOne: n
     outputs:
-      optionEins:
+      optionOne:
         out:
-          type: TypZwei
+          type: TypeTwo
           params:
-            WertZwei: n
-  Teste:
-    description: "Testet ein Objekt auf eine Eigenschaft"
+            ValueTwo: n
+  TestProperty:
+    description: "Tests an object for a property"
     inputs:
-      objektZwei:
-        type: TypZwei
+      objectTwo:
+        type: TypeTwo
         params:
-          WertEnum: unset
+          ValueEnum: unset
     outputs:
-      optionGut:
-        objektZwei:
-          type: TypZwei
+      optionGood:
+        objectTwo:
+          type: TypeTwo
           params:
-            WertEnum: Eins
-      optionSchlecht:
-        objektZwei:
-          type: TypZwei
+            ValueEnum: One
+      optionBad:
+        objectTwo:
+          type: TypeTwo
           params:
-            WertEnum: Zwei
-  Korrigiere:
-    description: "Korrigiert eine Eigenschaft, wenn sie nicht den Anforderungen entspricht"
+            ValueEnum: Two
+  Correct:
+    description: "Correct a property if it doesn't match the requirements"
     inputs:
-      objektZwei:
-        type: TypZwei
+      objectTwo:
+        type: TypeTwo
         params:
-          WertEnum: Zwei
+          ValueEnum: Two
       designParameter:
-        type: TypOhneParameter
+        type: TypeWithoutParams
         tune: true
     outputs:
-      optionEins:
-        objektZwei:
-          type: TypZwei
+      optionOne:
+        objectTwo:
+          type: TypeTwo
           params:
-            WertEnum: Eins
-  Kombiniere:
-    description: "Kombiniert zwei Objekte zu einem"
+            ValueEnum: One
+  Combine:
+    description: "Combines two objects into one"
     inputs:
-      objektEins:
-        type: TypEins
-      objektZwei:
-        type: TypZwei
+      objectOne:
+        type: TypeOne
+      objectTwo:
+        type: TypeTwo
         params:
-          WertZwei: x
-          WertEnum: Eins
+          ValueTwo: x
+          ValueEnum: One
     outputs:
-      optionEins:
-        objektDrei:
-          type: TypDrei
+      optionOne:
+        objectThree:
+          type: TypeThree
           params:
-            WertDrei: x
-  Nutzlos:
+            ValueThree: x
+  Useless:
     inputs:
-      objektEins:
-        type: TypEins
+      objectOne:
+        type: TypeOne
     outputs:
-      optionEins:
-        objektEins:
-          type: TypEins
+      optionOne:
+        objectOne:
+          type: TypeOne
           params:
-            WertEins: 1337
+            ValueOne: 1337
