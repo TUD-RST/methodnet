@@ -31,15 +31,22 @@ tracking control for a triple pendulum is used to demonstrate how the proposed m
 
 ## Development
 
+### Frontend
 - We use *NPM* for management of Javascript libraries.
 - Install all dependencies (specified in `package.json`): `npm install` (in the main directory)
   - → This creates a directory `node_modules` which is comparable to the virtual env directory in python
-- We use *esbuild* to build a bundle (single file with own code and all dependencies) that is finally served as `/static/ackbas_core/main.js`.
-- Own code lives in `ackbas_core/ts/index.ts` (typescript which will be compiled to JS during build).
-- Build : run `npm run build` after changing `ackbas_core/ts/index.ts`.
-- Watch mode : run `npm run watch` to start *esbuild* in watch mode, which recompiles the typescript code automatically when it changes.
+- We use *esbuild* to build a bundle (single file with project code and all dependencies) that is then served from
+  `ackbas_core/static/ackbas_core/main.js`.
+- Frontend code lives in `ackbas_core/ts` (Typescript which will be compiled to JS during build).
+- Build : run `npm run build`.
+- Watch mode : run `npm run watch` to start *esbuild* in watch mode, which recompiles the Typescript code automatically
+  when it changes.
 
-
+### Backend
+- The backend is written in Python using the *Django* framework
+- Dependencies are listed in `requirements.txt` and installed with `pip install -r requirements.txt`
+- Run the Django server locally with `python manage.py runserver`
+- The start page is then served on `http://localhost:8000/`
 
 ## Further relevant docs
 

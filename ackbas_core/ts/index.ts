@@ -18,6 +18,7 @@ import {
 let startEditor: monaco.editor.IStandaloneCodeEditor
 let targetEditor: monaco.editor.IStandaloneCodeEditor
 
+/** Initialize text boxes and graphs */
 function init() {
     startEditor = monaco.editor.create(document.getElementById("start-editor"), {
         automaticLayout: true,
@@ -48,10 +49,13 @@ function init() {
     initKnowledgeGraph(document.getElementById('knowledge-graph'))
     initSolutionGraph(document.getElementById('solution-graph'))
 
+    // Load knowledge graph from server
     loadKnowledgeGraph()
+    // Load matching solution graph from server
     update()
 }
 
+/** Load knowledge graph from server, based on the URL path. Then update the displayed graph. */
 async function loadKnowledgeGraph() {
     let path_components = window.location.pathname.split('/')
     let graphName = path_components[2]
@@ -60,6 +64,8 @@ async function loadKnowledgeGraph() {
     setKnowledgeGraphData(graphData)
 }
 
+/** Request solution graph from server based on the URL path and the search input in the text boxes. Then update
+ * the displayed solution graph. */
 async function update() {
     let path_components = window.location.pathname.split('/')
     let graphName = path_components[2]
@@ -70,11 +76,13 @@ async function update() {
         let graphData = await fetchSolutionGraph(graphName, startYML, targetYML)
         setSolutionGraphData(graphData)
     } catch (e) {
+        // Display errors returned by server in error popup
         let error_text: string = await e.text()
         showError(error_text)
     }
 }
 
+/** Add an error popup to the DOM containing the specified string. */
 function showError(error: string) {
     $('#alert-zone').append(`
             <div class="alert alert-warning alert-dismissible">
@@ -87,10 +95,12 @@ ${error}
         `)
 }
 
+/** Open the help popup menu */
 function openHelp() {
     document.getElementById("help-popup").classList.remove('help-hidden')
 }
 
+/** Close the help popup menu */
 function closeHelp() {
     document.getElementById("help-popup").classList.add('help-hidden')
 }
