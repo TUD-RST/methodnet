@@ -92,9 +92,15 @@ export function initSolutionGraph(div: HTMLElement) {
 
 /** Create and connect VisJS nodes for knowledge graph based on response from server */
 export function setKnowledgeGraphData(graphData: KnowledgeGraphData) {
-    let nodes = knowledgeGraphNetworkData.nodes
-    let edges = knowledgeGraphNetworkData.edges
+    knowledgeGraphNetworkData.nodes.clear()
+    knowledgeGraphNetworkData.edges.clear()
 
+    writeKnowledgeGraphToVisJS(graphData, knowledgeGraphNetworkData.nodes, knowledgeGraphNetworkData.edges)
+
+    knowledgeGraphNetwork.stabilize()
+}
+
+export function writeKnowledgeGraphToVisJS(graphData: KnowledgeGraphData, nodes: vis.DataSetNodes, edges: vis.DataSetEdges) {
     for (let type of graphData.types) {
         let newNode: vis.Node = {
             label: type.name,
@@ -139,19 +145,19 @@ export function setKnowledgeGraphData(graphData: KnowledgeGraphData) {
         let [id] = edges.add(newEdge)
         edgeIds.push([name1, name2, id as number])
     }
-
-    knowledgeGraphNetwork.stabilize()
 }
 
 /** Create and connect VisJS nodes for solution graph based on response from server */
 export function setSolutionGraphData(graphData: SolutionGraphData) {
-    let nodes = solutionGraphNetworkData.nodes
-    let edges = solutionGraphNetworkData.edges
+    solutionGraphNetworkData.nodes.clear()
+    solutionGraphNetworkData.edges.clear()
 
-    // Remove the old graph
-    edges.clear()
-    nodes.clear()
+    writeSolutionGraphToVisJS(graphData, solutionGraphNetworkData.nodes, solutionGraphNetworkData.edges)
 
+    solutionGraphNetwork.stabilize()
+}
+
+export function writeSolutionGraphToVisJS(graphData: SolutionGraphData, nodes: vis.DataSetNodes, edges: vis.DataSetEdges) {
     let nr_start_nodes = graphData.objects.filter(it => it.is_start).length
     let nr_end_nodes = graphData.objects.filter(it => !it.is_start && it.is_end).length
 
@@ -322,8 +328,6 @@ export function setSolutionGraphData(graphData: SolutionGraphData) {
     for (let con of graphData.connections) {
         edges.add(makeArrow(con.fromId, con.toId))
     }
-
-    solutionGraphNetwork.stabilize()
 }
 
 /** Convert a param dict to a formatted tooltip */
