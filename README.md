@@ -47,6 +47,7 @@ tracking control for a triple pendulum is used to demonstrate how the proposed m
 - Dependencies are listed in `requirements.txt` and installed with `pip install -r requirements.txt`
 - Run the Django server locally with `python manage.py runserver`
 - The start page is then served on `http://localhost:8000/`
+- Run the provided unit tests with `python manage.py test`
 
 ## Further relevant docs
 
