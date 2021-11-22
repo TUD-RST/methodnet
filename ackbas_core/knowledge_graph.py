@@ -1,18 +1,30 @@
 from __future__ import annotations
 
 import yaml
-from typing import List, Dict, Union, Optional
+from typing import List, Dict, Union, Optional, Tuple, cast
 import os
 from dataclasses import dataclass
 import jsonschema
 import json
 
 
+class HashableDict(dict):
+    """
+    Convenience class that makes it possible to use dicts in hashable dataclasses.
+    """
+    def __hash__(self):
+        return hash(frozenset(self.items()))
+
+    # make dictionary access immutable
+    def __setitem__(self, key, value):
+        raise TypeError("HashableDict is immutable")
+
+
 class RTLoadError(Exception):
     pass
 
 
-@dataclass
+@dataclass(eq=True, frozen=True)
 class RTParamType:  # e.g. Int, Steuerbarkeit, MatrixRolle
     name: str
 
@@ -30,12 +42,12 @@ class RTParamUnset:
     pass
 
 
-@dataclass
+@dataclass(eq=True, frozen=True)
 class RTEnumType(RTParamType):
-    values: List[str]
+    values: Tuple[str]
 
 
-@dataclass
+@dataclass(eq=True, frozen=True)
 class RTEnumValue:
     type: RTEnumType
     val: int
@@ -44,40 +56,50 @@ class RTEnumValue:
         return self.type.name + "." + self.type.values[self.val]
 
 
-@dataclass
+@dataclass(eq=True, frozen=True)
 class RTParamDefinition:
     name: str
     type: RTParamType
 
 
-@dataclass
+@dataclass(eq=True, frozen=True)
 class RTTypeDefinition:
     name: str
-    params: Dict[str, RTParamDefinition]
+    params: HashableDict[str, RTParamDefinition]
     yaml: str
 
 
+# Values that can be used in method input or output parameter definitions.
+# int and RTEnumValues are literals, RTParamPlaceholders are copied from input to output
+# and RTParamUnset is used to indicate that the parameter is not set (constraint for input).
 RTParamValue = Union[int, RTEnumValue, RTParamPlaceholder, RTParamUnset]
 
 
-@dataclass
+@dataclass(eq=True, frozen=True)
 class RTMethodInput:
+    """
+    A description of a single method input, containing the input type and constraints that must be met.
+    """
     type: RTTypeDefinition
-    param_constraints: Dict[str, RTParamValue]
+    param_constraints: HashableDict[str, RTParamValue]
     tune: bool = False
 
 
-@dataclass
+@dataclass(eq=True, frozen=True)
 class RTMethodOutput:
+    """
+    A description of a single method output, containing the output type and a description of how
+    the output type parameter values follow from the input types.
+    """
     type: RTTypeDefinition
-    param_statements: Dict[str, RTParamValue]  # does not support integer expressions
+    param_statements: HashableDict[str, RTParamValue]  # keys are output parameter names
 
 
-@dataclass
+@dataclass(eq=True, frozen=True)
 class RTMethod:
     name: str
-    inputs: Dict[str, RTMethodInput]
-    outputs: Dict[str, Dict[str, RTMethodOutput]]
+    inputs: HashableDict[str, RTMethodInput]
+    outputs: HashableDict[str, RTMethodOutput]
     yaml: str
     description: Optional[str] = None
 
@@ -108,7 +130,7 @@ class RTGraph:
             'Int': RTParamType('Int')
         }
         for enum_name, enum_items in yaml_content['enums'].items():
-            self.param_types[enum_name] = RTEnumType(enum_name, enum_items)
+            self.param_types[enum_name] = RTEnumType(enum_name, tuple(enum_items))
 
         self.types: Dict[str, RTTypeDefinition] = {}
         for type_name, type_yaml in yaml_content['types'].items():
@@ -122,7 +144,7 @@ class RTGraph:
                     param_type = self.param_types[param_type_name]
                     type_params[param_name] = RTParamDefinition(param_name, param_type)
 
-            self.types[type_name] = RTTypeDefinition(type_name, type_params, yaml.dump(type_yaml, allow_unicode=True))
+            self.types[type_name] = RTTypeDefinition(type_name, HashableDict(type_params), yaml.dump(type_yaml, allow_unicode=True))
 
         self.methods: Dict[str, RTMethod] = {}
         for method_name, method_yaml in yaml_content['methods'].items():
@@ -135,24 +157,21 @@ class RTGraph:
                         param_constraints[param_name] = self.instantiate_param(type_def.params[param_name].type, param_val)
                 tune = input_yaml.get('tune', False)
 
-                inputs[input_name] = RTMethodInput(type_def, param_constraints, tune=tune)
+                inputs[input_name] = RTMethodInput(type_def, HashableDict(param_constraints), tune=tune)
 
-            outputs: Dict[str, Dict[str, RTMethodOutput]] = {}
-            for output_option, option_yaml in method_yaml['outputs'].items():
-                option_dict = {}
-                for output_name, output_yaml in option_yaml.items():
-                    type_def = self.types[output_yaml['type']]
-                    param_statements = {}
-                    if 'params' in output_yaml:
-                        for param_name, param_val in output_yaml['params'].items():
-                            param_statements[param_name] = self.instantiate_param(type_def.params[param_name].type, param_val)
+            outputs: Dict[str, RTMethodOutput] = {}
+            for output_name, output_yaml in method_yaml['outputs'].items():
+                type_def = self.types[output_yaml['type']]
+                param_statements = {}
+                if 'params' in output_yaml:
+                    for param_name, param_val in output_yaml['params'].items():
+                        param_statements[param_name] = self.instantiate_param(type_def.params[param_name].type, param_val)
 
-                    option_dict[output_name] = RTMethodOutput(type_def, param_statements)
-                outputs[output_option] = option_dict
+                outputs[output_name] = RTMethodOutput(type_def, HashableDict(param_statements))
 
             description = method_yaml.get('description', None)
 
-            self.methods[method_name] = RTMethod(method_name, inputs, outputs, yaml.dump(method_yaml, allow_unicode=True), description=description)
+            self.methods[method_name] = RTMethod(method_name, HashableDict(inputs), HashableDict(outputs), yaml.dump(method_yaml, allow_unicode=True), description=description)
 
     def next_id(self):
         self.node_id += 1
@@ -167,7 +186,7 @@ class RTGraph:
             if literal_val == 'unset':
                 return RTParamUnset()
             elif literal_val[0].isupper():  # Enum literal
-                enum_type: RTEnumType = param_type
+                enum_type: RTEnumType = cast(RTEnumType, param_type)
                 for i, enum_val in enumerate(enum_type.values):
                     if literal_val == enum_val:
                         return RTEnumValue(enum_type, i)

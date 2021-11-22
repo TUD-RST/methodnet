@@ -28,11 +28,10 @@ methods:
         params:
           ValueOne: n
     outputs:
-      optionOne:
-        out:
-          type: TypeTwo
-          params:
-            ValueTwo: n
+      out:
+        type: TypeTwo
+        params:
+          ValueTwo: n
   TestProperty:
     description: "Tests an object for a property"
     inputs:
@@ -41,16 +40,10 @@ methods:
         params:
           ValueEnum: unset
     outputs:
-      optionGood:
-        objectTwo:
-          type: TypeTwo
-          params:
-            ValueEnum: One
-      optionBad:
-        objectTwo:
-          type: TypeTwo
-          params:
-            ValueEnum: Two
+      objectTwo:
+        type: TypeTwo
+        params:
+          ValueEnum: One
   Correct:
     description: "Correct a property if it doesn't match the requirements"
     inputs:
@@ -62,11 +55,10 @@ methods:
         type: TypeWithoutParams
         tune: true
     outputs:
-      optionOne:
-        objectTwo:
-          type: TypeTwo
-          params:
-            ValueEnum: One
+      objectTwo:
+        type: TypeTwo
+        params:
+          ValueEnum: One
   Combine:
     description: "Combines two objects into one"
     inputs:
@@ -78,18 +70,16 @@ methods:
           ValueTwo: x
           ValueEnum: One
     outputs:
-      optionOne:
-        objectThree:
-          type: TypeThree
-          params:
-            ValueThree: x
+      objectThree:
+        type: TypeThree
+        params:
+          ValueThree: x
   Useless:
     inputs:
       objectOne:
         type: TypeOne
     outputs:
-      optionOne:
-        objectOne:
-          type: TypeOne
-          params:
-            ValueOne: 1337
+      objectOne:
+        type: TypeOne
+        params:
+          ValueOne: 1337

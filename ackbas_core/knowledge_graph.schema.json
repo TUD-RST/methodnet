@@ -59,10 +59,7 @@
             "$ref": "#/definitions/portDefinitions"
           },
           "outputs": {
-            "type": "object",
-            "additionalProperties": {
-              "$ref": "#/definitions/portDefinitions"
-            }
+            "$ref": "#/definitions/portDefinitions"
           }
         },
         "required": ["inputs", "outputs"],
