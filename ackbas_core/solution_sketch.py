@@ -16,7 +16,7 @@ represent adding a single method call with specific types used as input (RTMetho
 @dataclass(eq=True, frozen=True)
 class RTMethodApplication:
     """
-    TODO: Docstring
+    A method and a mapping of its inputs (by name) to specific type instances. Used on edges in the candidate graph.
     """
     method: RTMethod
     inputs: HashableDict[str, Optional[RTTypeInstance]]
@@ -79,7 +79,8 @@ class RTTypeInstance:
         params:
           ValueOne:
             type: Int
-    The type instance then fills some or all of these parameters with values. In this case:
+    The type *instance* then fills some or all of these parameters with values. In this case (there isn't actually
+    a YAML representation of this):
     TypeOne:
         params:
           ValueOne: 3
@@ -107,6 +108,24 @@ class RTTypeInstance:
                     return False
 
         return True
+
+
+@dataclass
+class SolutionProcedureTypeNode:
+    """
+    A type node in the solution procedure graph.
+    """
+    resulting_from: Optional[SolutionProcedureMethodNode]
+    type_instance: RTTypeInstance
+
+
+@dataclass
+class SolutionProcedureMethodNode:
+    """
+    A method node in the solution procedure graph.
+    """
+    method: RTMethod
+    input_type_nodes: HashableDict[str, SolutionProcedureTypeNode]  # mapping from input name to type node
 
 
 @dataclass
@@ -140,7 +159,12 @@ class CandidateNode:
         return set(self.available_types) == set(other.available_types)
 
 
-def dijkstra(knowledge_graph: RTGraph, start_types: Tuple[RTTypeInstance], target_definition: RTMethodInput):
+def dijkstra(knowledge_graph: RTGraph, start_types: Tuple[RTTypeInstance], target_definition: RTMethodInput) -> Optional[Tuple[List[SolutionProcedureTypeNode], List[SolutionProcedureMethodNode]]]:
+    """
+    Constructs a solution procedure graph from the knowledge graph given a set of start types and a target definition.
+    Returns None if no solution is found. Otherwise, returns a list of type nodes and a list of method nodes that make
+    up the solution procedure.
+    """
     start_node = CandidateNode()
     start_node.available_types = start_types
 
@@ -212,10 +236,51 @@ def dijkstra(knowledge_graph: RTGraph, start_types: Tuple[RTTypeInstance], targe
         unvisited_candidates.sort(key=lambda x: x.cum_dist())
         current_node = unvisited_candidates.pop(0)
 
-    if any(ti.fits_input_description(target_definition) for ti in current_node.available_types):
-        return current_node
-    else:
+    if not any(ti.fits_input_description(target_definition) for ti in current_node.available_types):
+        # No path found, abort and return None
         return None
+
+    # Walk backwards from the target candidate node to the start node and construct the resulting solution procedure
+    # Specifically, we need to remember all encountered edges (each one corresponds to a method application), then
+    # we reverse the list and construct by successively adding the methods in the list
+
+    method_applications = []
+    while current_node != start_node:
+        method_applications.append(current_node.resulting_from.via_method)
+        current_node = current_node.resulting_from.from_node
+
+    method_applications.reverse()
+
+    # Used to find type nodes when instantiating method nodes
+    type_nodes_by_instance: Dict[RTTypeInstance, SolutionProcedureTypeNode] = {}
+    type_nodes = []  # List of all type nodes
+    method_nodes = []  # List of all method nodes
+
+    # Construct type nodes from initially available types
+    for ti in start_node.available_types:
+        type_node = SolutionProcedureTypeNode(None, ti)
+        type_nodes.append(type_node)
+        type_nodes_by_instance[ti] = type_node
+
+    # Apply methods step by step, always adding the resulting types to the solution procedure
+    for method_application in method_applications:
+        input_type_nodes: Dict[str, SolutionProcedureTypeNode] = {}
+
+        for input_name, input_ti in method_application.inputs.items():
+            # Find the type node for the input type instance
+            input_type_node = type_nodes_by_instance[input_ti]
+            input_type_nodes[input_name] = input_type_node
+
+        method_node = SolutionProcedureMethodNode(method_application.method, HashableDict(input_type_nodes))
+        method_nodes.append(method_node)
+
+        # Instantiate a new type node for each resulting type instance
+        for result_ti in method_application.resulting_types():
+            type_node = SolutionProcedureTypeNode(method_node, result_ti)
+            type_nodes.append(type_node)
+            type_nodes_by_instance[result_ti] = type_node
+
+    return type_nodes, method_nodes
 
 
 def get_feasible_edges(knowledge_graph: RTGraph, from_node: CandidateNode) -> List[CandidateEdge]:
@@ -255,15 +320,6 @@ def dict_cartesian(dict_of_lists: Dict[str, List]):
             for i_key, key in enumerate(dict_of_lists.keys())
         } for combination_tuple in itertools.product(*dict_of_lists.values())
     ]
-
-
-def dict_diff(a, b):
-    result = {}
-    for key in a:
-        if key not in b:
-            result[key] = a[key]
-
-    return result
 
 
 if __name__ == '__main__':
