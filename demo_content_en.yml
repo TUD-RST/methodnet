@@ -116,11 +116,10 @@ methods:
         params:
           StateDimension: n
     outputs:
-      o:
-        linearizedSystem:
-          type: SSLTI
-          params:
-            StateDimension: n
+      linearizedSystem:
+        type: SSLTI
+        params:
+          StateDimension: n
   SSLTIToNonLinear:
     inputs:
       linearSystem:
@@ -128,11 +127,10 @@ methods:
         params:
           StateDimension: n
     outputs:
-      o:
-        generalSystem:
-          type: SSNonLinear
-          params:
-            StateDimension: n
+      generalSystem:
+        type: SSNonLinear
+        params:
+          StateDimension: n
   SSLTVToNonLinear:
     inputs:
       linearSystem:
@@ -140,11 +138,10 @@ methods:
         params:
           StateDimension: n
     outputs:
-      o:
-        generalSystem:
-          type: SSNonLinear
-          params:
-            StateDimension: n
+      generalSystem:
+        type: SSNonLinear
+        params:
+          StateDimension: n
   ToControllerCanonicalForm:
     inputs:
       ltiss:
@@ -152,11 +149,10 @@ methods:
         params:
           Controllability: Controllable
     outputs:
-      o:
-        ltiss:
-          type: SSLTI
-          params:
-            CanonicalForm: ControllerCanonicalForm
+      ltiss:
+        type: SSLTI
+        params:
+          CanonicalForm: ControllerCanonicalForm
   ToObserverCanonicalForm:
     inputs:
       ltiss:
@@ -164,11 +160,10 @@ methods:
         params:
           Observability: Observable
     outputs:
-      o:
-        ltiss:
-          type: SSLTI
-          params:
-            CanonicalForm: ObserverCanonicalForm
+      ltiss:
+        type: SSLTI
+        params:
+          CanonicalForm: ObserverCanonicalForm
   TestControllabilityLTI:
     inputs:
       ltiss:
@@ -176,16 +171,10 @@ methods:
         params:
           Controllability: unset
     outputs:
-      controllable:
-        ltiss:
-          type: SSLTI
-          params:
-            Controllability: Controllable
-      notControllable:
-        ltiss:
-          type: SSLTI
-          params:
-            Controllability: NotControllable
+      ltiss:
+        type: SSLTI
+        params:
+          Controllability: Controllable
   TestObservabilityLTI:
     inputs:
       ltiss:
@@ -193,16 +182,10 @@ methods:
         params:
           Observability: unset
     outputs:
-      observable:
-        ltiss:
-          type: SSLTI
-          params:
-            Observability: Observable
-      notObservable:
-        ltiss:
-          type: SSLTI
-          params:
-            Observability: NotObservable
+      ltiss:
+        type: SSLTI
+        params:
+          Observability: Observable
   TestControllabilityLTV:
     inputs:
       ssltv:
@@ -210,16 +193,10 @@ methods:
         params:
           Controllability: unset
     outputs:
-      controllable:
-        ssltv:
-          type: SSLTV
-          params:
-            Controllability: Controllable
-      notControllable:
-        ssltv:
-          type: SSLTV
-          params:
-            Controllability: NotControllable
+      ssltv:
+        type: SSLTV
+        params:
+          Controllability: Controllable
   TestObservabilityLTV:
     inputs:
       ssltv:
@@ -227,16 +204,10 @@ methods:
         params:
           Observability: unset
     outputs:
-      observable:
-        ssltv:
-          type: SSLTV
-          params:
-            Observability: Observable
-      notObservable:
-        ssltv:
-          type: SSLTV
-          params:
-            Observability: NotObservable
+      ssltv:
+        type: SSLTV
+        params:
+          Observability: Observable
   TestControllabilityNonLinear:
     inputs:
       ss:
@@ -244,21 +215,10 @@ methods:
         params:
           Controllability: unset
     outputs:
-      controllable:
-        ss:
-          type: SSNonLinear
-          params:
-            Controllability: Controllable
-      notControllable:
-        ss:
-          type: SSNonLinear
-          params:
-            Controllability: NotControllable
-      undetermined:
-        ss:  # can't be determined
-          type: SSNonLinear
-          params:
-            Controllability: unset
+      ss:
+        type: SSNonLinear
+        params:
+          Controllability: Controllable
   TestObservabilityNonLinear:
     inputs:
       ss:
@@ -266,21 +226,10 @@ methods:
         params:
           Observability: unset
     outputs:
-      observable:
-        ss:
-          type: SSNonLinear
-          params:
-            Observability: Observable
-      notObservable:
-        ss:
-          type: SSNonLinear
-          params:
-            Observability: NotObservable
-      undetermined:
-        ss:  # can't be determined
-          type: SSNonLinear
-          params:
-            Observability: unset
+      ss:
+        type: SSNonLinear
+        params:
+          Observability: Observable
   TFtoSS:
     inputs:
       tf:
@@ -289,13 +238,12 @@ methods:
           Proper: Proper
           Order: n
     outputs:
-      o:
-        ltiss:
-          type: SSLTI
-          params:
-            Controllability: Controllable
-            CanonicalForm: ControllerCanonicalForm
-            StateDimension: n
+      ltiss:
+        type: SSLTI
+        params:
+          Controllability: Controllable
+          CanonicalForm: ControllerCanonicalForm
+          StateDimension: n
   SStoTF:
     inputs:
       ltiss:
@@ -305,11 +253,10 @@ methods:
           InputDimension: 1
     outputs:
       o:
-        tf:
-          type: TF
-          params:
-            Order: n
-            Role: Plant
+        type: TF
+        params:
+          Order: n
+          Role: Plant
   TestTFStability:
     inputs:
       tf:
@@ -317,16 +264,10 @@ methods:
         params:
           Stability: unset
     outputs:
-      stable:
-        tf:
-          type: TF
-          params:
-            Stability: Stable
-      unstable:
-        tf:
-          type: TF
-          params:
-            Stability: Unstable
+      tf:
+        type: TF
+        params:
+          Stability: Stable
   TestTFProperness:
     inputs:
       tf:
@@ -334,16 +275,10 @@ methods:
         params:
           Proper: unset
     outputs:
-      proper:
-        tf:
-          type: TF
-          params:
-            Proper: Proper
-      improper:
-        tf:
-          type: TF
-          params:
-            Proper: NotProper
+      tf:
+        type: TF
+        params:
+          Proper: Proper
   TestTFCoprime:
     inputs:
       tf:
@@ -351,16 +286,10 @@ methods:
         params:
           Coprime: unset
     outputs:
-      coprime:
-        tf:
-          type: TF
-          params:
-            Coprime: Coprime
-      nonCoprime:
-        tf:
-          type: TF
-          params:
-            Coprime: NonCoprime
+      tf:
+        type: TF
+        params:
+          Coprime: Coprime
   PolePlacement:
     inputs:
       ltiss:
@@ -374,13 +303,12 @@ methods:
           Length: n
         tune: true
     outputs:
-      o:
-        k:
-          type: Matrix
-          params:
-            Rows: 1
-            Columns: n
-            Role: StateFeedback
+      k:
+        type: Matrix
+        params:
+          Rows: 1
+          Columns: n
+          Role: StateFeedback
   LuenbergerDesign:
     inputs:
       ltiss:
@@ -394,13 +322,12 @@ methods:
           Length: n
         tune: true
     outputs:
-      o:
-        k:
-          type: Matrix
-          params:
-            Rows: n
-            Columns: 1
-            Role: LuenbergerGain
+      k:
+        type: Matrix
+        params:
+          Rows: n
+          Columns: 1
+          Role: LuenbergerGain
   AssembleLuenbergerObserver:
     inputs:
       ltiss:
@@ -413,17 +340,15 @@ methods:
         params:
           Role: LuenbergerGain
     outputs:
-      o:
-        obs:
-          type: ObserverFunction
+      obs:
+        type: ObserverFunction
   ODEtoSS:
     inputs:
       ode:
         type: ODE
     outputs:
-      o:
-        ss:
-          type: SSNonLinear
+      ss:
+        type: SSNonLinear
   TrajectoryPlanningWithOptimization:
     inputs:
       ss:
@@ -448,19 +373,18 @@ methods:
         type: Real
         tune: true
     outputs:
-      o:
-        xtraj:
-          type: TimeFunction
-          params:
-            Rows: n
-            Columns: 1
-            Role: StateTrajectory
-        utraj:
-          type: TimeFunction
-          params:
-            Rows: m
-            Columns: 1
-            Role: InputTrajectory
+      xtraj:
+        type: TimeFunction
+        params:
+          Rows: n
+          Columns: 1
+          Role: StateTrajectory
+      utraj:
+        type: TimeFunction
+        params:
+          Rows: m
+          Columns: 1
+          Role: InputTrajectory
   LinearizationOnTrajectory:
     inputs:
       ss:
@@ -482,13 +406,12 @@ methods:
           Columns: 1
           Role: InputTrajectory
     outputs:
-      o:
-        ssltv:
-          type: SSLTV
-          params:
-            StateDimension: n
-            InputDimension: m
-            Controllability: s
+      ssltv:
+        type: SSLTV
+        params:
+          StateDimension: n
+          InputDimension: m
+          Controllability: s
   LTVLQRDesign:
     inputs:
       ssltv:
@@ -510,13 +433,12 @@ methods:
           Columns: m
         tune: true
     outputs:
-      o:
-        k:
-          type: TimeFunction
-          params:
-            Rows: m
-            Columns: n
-            Role: StateFeedback
+      k:
+        type: TimeFunction
+        params:
+          Rows: m
+          Columns: n
+          Role: StateFeedback
   LTILQRDesign:
     inputs:
       sslti:
@@ -538,13 +460,12 @@ methods:
           Columns: m
         tune: true
     outputs:
-      o:
-        k:
-          type: Matrix
-          params:
-            Rows: m
-            Columns: n
-            Role: StateFeedback
+      k:
+        type: Matrix
+        params:
+          Rows: m
+          Columns: n
+          Role: StateFeedback
   EKFDesign:
     inputs:
       ss:
@@ -566,12 +487,11 @@ methods:
           Columns: m
         tune: true
     outputs:
-      o:
-        obs:
-          type: ObserverFunction
-          params:
-            StateDimension: n
-            InputDimension: m
+      obs:
+        type: ObserverFunction
+        params:
+          StateDimension: n
+          InputDimension: m
   AssembleTrajectoryTrackingController:
     inputs:
       xtraj:
@@ -598,30 +518,27 @@ methods:
           InputDimension: m
           StateDimension: n
     outputs:
-      o:
-        controller:
-          type: TrajectoryTrackingController
-          params:
-            StateDimension: n
-            InputDimension: m
+      controller:
+        type: TrajectoryTrackingController
+        params:
+          StateDimension: n
+          InputDimension: m
   AssemblePIDController:
     inputs:
       pidParams:
         type: PIDParameters
     outputs:
-      o:
-        pid:
-          type: TF
-          params:
-            Role: Controller
+      pid:
+        type: TF
+        params:
+          Role: Controller
   TuneZieglerNichols:
     inputs:
       stepResponse:
         type: StepResponse
     outputs:
-      o:
-        pidParams:
-          type: PIDParameters
+      pidParams:
+        type: PIDParameters
   TuneAbsoluteValueOptimum:
     inputs:
       tf:
@@ -629,9 +546,8 @@ methods:
         params:
           Role: Plant
     outputs:
-      o:
-        pidParams:
-          type: PIDParameters
+      pidParams:
+        type: PIDParameters
   TuneSymmetricalOptimum:
     inputs:
       tf:
@@ -639,9 +555,8 @@ methods:
         params:
           Role: Plant
     outputs:
-      o:
-        pidParams:
-          type: PIDParameters
+      pidParams:
+        type: PIDParameters
   SimulateStepResponse:
     inputs:
       tf:
@@ -650,6 +565,5 @@ methods:
           Role:
             Plant
     outputs:
-      o:
-        sr:
-          type: StepResponse
+      sr:
+        type: StepResponse
