@@ -303,6 +303,9 @@ def dijkstra(knowledge_graph: RTGraph, start_types: Tuple[RTTypeInstance], targe
 
 
 def get_feasible_edges(knowledge_graph: RTGraph, from_node: CandidateNode) -> List[CandidateEdge]:
+    """
+    Get all possible candidate edges (method applications) from the given candidate node, that yield new available types
+    """
     candidate_edges = []
 
     for method_name, method in knowledge_graph.methods.items():
