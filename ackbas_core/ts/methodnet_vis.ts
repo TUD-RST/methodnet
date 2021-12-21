@@ -192,18 +192,11 @@ export function setSolutionGraphData(graphData: SolutionGraphData) {
             end_i++
             newNode.y = maxDistanceToStart * V_SPACE
         } else {
-            if (objectData.on_solution_path) {
-                newNode.color = {
-                    border: '#4393a4',
-                    background: '#a0d5e5'
-                }
-            } else {
-                newNode.color = {
-                    border: '#a56750',
-                    background: '#a0d5e5'
-                }
-                newNode.borderWidth = 4
+            newNode.color = {
+                border: '#a56750',
+                background: '#a0d5e5'
             }
+            newNode.borderWidth = 4
         }
         return newNode;
     }
@@ -254,20 +247,6 @@ export function setSolutionGraphData(graphData: SolutionGraphData) {
         return portNode;
     }
 
-    function makeDemuxNode() {
-        let demux: vis.Node = {
-            id: graphData.nextId,
-            shape: "square",
-            color: {
-                background: "black",
-                border: "black"
-            },
-            size: 10
-        }
-        graphData.nextId++
-        return demux;
-    }
-
     function makeArrow(fromId, toId) {
         let arrow: vis.Edge = {
             from: fromId,
@@ -298,24 +277,10 @@ export function setSolutionGraphData(graphData: SolutionGraphData) {
             edges.add(makeArrow(port.id, method.id))
         }
 
-        for (let output_option of method.outputs) {
-            let demux_id
-
-            if (method.outputs.length > 1) {
-                let demux = makeDemuxNode();
-                nodes.add(demux)
-                edges.add(makeArrow(method.id, demux.id))
-
-                demux_id = demux.id
-            } else {
-                demux_id = method.id
-            }
-
-            for (let port of output_option) {
-                let portNode = makeOutputPortNode(port);
-                nodes.add(portNode)
-                edges.add(makeArrow(demux_id, port.id))
-            }
+        for (let port of method.outputs) {
+            let portNode = makeOutputPortNode(port);
+            nodes.add(portNode)
+            edges.add(makeArrow(method.id, port.id))
         }
     }
 

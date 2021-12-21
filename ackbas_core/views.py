@@ -7,7 +7,7 @@ from django.template.response import TemplateResponse
 from django.views import View
 
 import ackbas_core.knowledge_graph as kg
-from ackbas_core.solution_sketch import RTObjectInstance, RTSolutionGraph, flood_fill
+from ackbas_core.solution_sketch import dijkstra, RTTypeInstance
 
 
 class LandingPageView(View):
@@ -56,8 +56,9 @@ class GetSolutionGraphView(View):
 
         rtgraph = kg.RTGraph(graph_name + '.yml')  # load knowledge graph from disk
 
-        # instantiate and validate start objects from yaml
-        start_objects = []
+        # create start type instances
+        start_types = []
+
         for obj_name, obj_dict in start_dict.items():
             assert 'type' in obj_dict, "Start object spec must contain 'type'"
             obj_type = rtgraph.types[obj_dict['type']]
@@ -68,10 +69,11 @@ class GetSolutionGraphView(View):
                 param_instance = rtgraph.instantiate_param(param_type, param_val)
                 obj_params[param_name] = param_instance
 
-            obj = RTObjectInstance(obj_name, obj_type, {}, obj_params, None)
-            start_objects.append(obj)
+            ti = RTTypeInstance(obj_type, kg.HashableDict(obj_params))
 
-        # instantiate and validate target objects
+            start_types.append(ti)
+
+        # instantiate and validate target spec
         assert "target" in target_dict, "Target spec must contain 'target'"
         target_dict = target_dict['target']
         assert "type" in target_dict, "Target spec must contain 'type'"
@@ -84,39 +86,32 @@ class GetSolutionGraphView(View):
             param_instance = rtgraph.instantiate_param(param_type, param_val)
             target_params[param_name] = param_instance
 
-        end_spec = kg.RTMethodInput(target_type, target_params)
+        target_definition = kg.RTMethodInput(target_type, kg.HashableDict(target_params))
 
-        # instantiate solution graph
-        solution_graph = RTSolutionGraph(start_objects, end_spec)
-        # run search to find target object
-        flood_fill(solution_graph, rtgraph, {}, start_objects)
-        # prune all incomplete paths
-        solution_graph.prune()
+        path_finding_result = dijkstra(rtgraph, tuple(start_types), target_definition)
+        assert path_finding_result is not None, "No path found"
+        type_nodes, method_nodes = path_finding_result
 
         # --- generate data structures for frontend ---
-        object_instances = solution_graph.object_instances
-        method_instances = solution_graph.method_instances
-
         id = 1  # running counter for next unique id
         ao_name_to_id: Dict[str, int] = {}  # map object names to unique id's
 
-        for ao in object_instances.values():  # build object instances
+        for ao in type_nodes:  # build object instances
             graph_data['objects'].append({
                 "id": id,
-                "type": ao.type.name,
+                "type": ao.type_instance.type_def.name,
                 "name": ao.name,
                 "is_start": ao.is_start,
                 "is_end": ao.is_end,
                 "distance_to_start": ao.distance_to_start,
-                "on_solution_path": ao.on_solution_path,
                 "params": {
-                    param_name: str(param_val) for param_name, param_val in ao.param_values.items()
+                    param_name: str(param_val) for param_name, param_val in ao.type_instance.param_values.items()
                 }
             })
             ao_name_to_id[ao.name] = id
             id += 1
 
-        for mc in method_instances.values():  # build method instances
+        for mc in method_nodes:  # build method instances
             inputs = []
             for port_name, port in mc.method.inputs.items():
                 port_dict = {
@@ -127,8 +122,8 @@ class GetSolutionGraphView(View):
                     },
                     'tune': port.tune
                 }
-                if port_name in mc.inputs:
-                    ao = mc.inputs[port_name]
+                if port_name in mc.input_type_nodes:
+                    ao = mc.input_type_nodes[port_name]
                     if ao is not None:
                         graph_data['connections'].append({
                             'fromId': ao_name_to_id[ao.name],
@@ -139,28 +134,28 @@ class GetSolutionGraphView(View):
                 inputs.append(port_dict)
 
             outputs = []
-            for option_name, out_option in mc.method.outputs.items():
-                out_option_ports = []
-                for port_name, port in out_option.items():
-                    port_dict = {
-                        'id': id,
-                        'name': port_name,
-                        'constraints': {
-                            param_name: str(param_val) for param_name, param_val in port.param_statements.items()
-                        }
+
+            for port_name, port in mc.method.outputs.items():
+                port_dict = {
+                    'id': id,
+                    'name': port_name,
+                    'constraints': {
+                        param_name: str(param_val) for param_name, param_val in port.param_statements.items()
                     }
-                    if port_name in mc.outputs[option_name]:
-                        ao = mc.outputs[option_name][port_name]
+                }
 
-                        if ao is not None:
-                            graph_data['connections'].append({
-                                'fromId': id,
-                                'toId': ao_name_to_id[ao.name]
-                            })
+                # find the type node that corresponds to this output port
+                if port_name in mc.output_type_nodes:
+                    ao = mc.output_type_nodes[port_name]
 
-                    id += 1
-                    out_option_ports.append(port_dict)
-                outputs.append(out_option_ports)
+                    if ao is not None:
+                        graph_data['connections'].append({
+                            'fromId': id,
+                            'toId': ao_name_to_id[ao.name]
+                        })
+
+                id += 1
+                outputs.append(port_dict)
 
             graph_data['methods'].append({
                 'id': id,
@@ -208,11 +203,10 @@ class GetKnowledgeGraphView(View):
                         break
 
                 # check connections method -> type
-                for outputs in method_def.outputs.values():
-                    for output_def in outputs.values():
-                        if output_def.type == type_def:
-                            connections.append((method_name, type_name))
-                            break
+                for output_def in method_def.outputs.values():
+                    if output_def.type == type_def:
+                        connections.append((method_name, type_name))
+                        break
                     else:
                         continue
                     break

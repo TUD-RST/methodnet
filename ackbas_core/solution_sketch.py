@@ -21,12 +21,12 @@ class RTMethodApplication:
     method: RTMethod
     inputs: HashableDict[str, Optional[RTTypeInstance]]
 
-    def resulting_types(self) -> List[RTTypeInstance]:
+    def resulting_types(self) -> Dict[str, RTTypeInstance]:
         """
-        Returns a list of all types that are the result of applying this method with the input types
-        as specified in `inputs`.
+        Returns a dict of all types that are the result of applying this method with the input types
+        as specified in `inputs`. Keys are the names of the output ports.
         """
-        output_type_instances = []
+        output_type_instances = {}
 
         for output_name, output_def in self.method.outputs.items():
             output_def = self.method.outputs[output_name]
@@ -66,7 +66,7 @@ class RTMethodApplication:
                             continue
                         break
 
-            output_type_instances.append(RTTypeInstance(output_type, HashableDict(output_type_params)))
+            output_type_instances[output_name] = RTTypeInstance(output_type, HashableDict(output_type_params))
 
         return output_type_instances
 
@@ -117,6 +117,19 @@ class SolutionProcedureTypeNode:
     """
     resulting_from: Optional[SolutionProcedureMethodNode]
     type_instance: RTTypeInstance
+    name: str
+    is_end: bool
+
+    @property
+    def is_start(self):
+        return self.resulting_from is None
+
+    @property
+    def distance_to_start(self):
+        if self.is_start:
+            return 0
+        else:
+            return max(tn.distance_to_start for tn in self.resulting_from.input_type_nodes.values()) + 1
 
 
 @dataclass
@@ -126,6 +139,7 @@ class SolutionProcedureMethodNode:
     """
     method: RTMethod
     input_type_nodes: HashableDict[str, SolutionProcedureTypeNode]  # mapping from input name to type node
+    output_type_nodes: HashableDict[str, SolutionProcedureTypeNode]  # mapping from output name to type node
 
 
 @dataclass
@@ -183,7 +197,7 @@ def dijkstra(knowledge_graph: RTGraph, start_types: Tuple[RTTypeInstance], targe
 
         for edge in feasible_edges:
             new_node = CandidateNode()
-            resulting_types = edge.via_method.resulting_types()
+            resulting_types = edge.via_method.resulting_types().values()
             new_available_types = list(current_node.available_types)
 
             # check that we get at least one new type from this method application
@@ -258,7 +272,7 @@ def dijkstra(knowledge_graph: RTGraph, start_types: Tuple[RTTypeInstance], targe
 
     # Construct type nodes from initially available types
     for ti in start_node.available_types:
-        type_node = SolutionProcedureTypeNode(None, ti)
+        type_node = SolutionProcedureTypeNode(None, ti, f"O{len(type_nodes)+1}", False)
         type_nodes.append(type_node)
         type_nodes_by_instance[ti] = type_node
 
@@ -271,14 +285,19 @@ def dijkstra(knowledge_graph: RTGraph, start_types: Tuple[RTTypeInstance], targe
             input_type_node = type_nodes_by_instance[input_ti]
             input_type_nodes[input_name] = input_type_node
 
-        method_node = SolutionProcedureMethodNode(method_application.method, HashableDict(input_type_nodes))
+        method_node = SolutionProcedureMethodNode(method_application.method, HashableDict(input_type_nodes), None)
+        # we can't set store the output type nodes yet, because to instantiate those, we need to have the method node
         method_nodes.append(method_node)
 
         # Instantiate a new type node for each resulting type instance
-        for result_ti in method_application.resulting_types():
-            type_node = SolutionProcedureTypeNode(method_node, result_ti)
+        output_type_nodes: Dict[str, SolutionProcedureTypeNode] = {}
+        for output_name, result_ti in method_application.resulting_types().items():
+            type_node = SolutionProcedureTypeNode(method_node, result_ti, f"O{len(type_nodes)+1}", result_ti.fits_input_description(target_definition))
             type_nodes.append(type_node)
             type_nodes_by_instance[result_ti] = type_node
+            output_type_nodes[output_name] = type_node
+
+        method_node.output_type_nodes = HashableDict(output_type_nodes)  # Now we can set the output type nodes
 
     return type_nodes, method_nodes
 
